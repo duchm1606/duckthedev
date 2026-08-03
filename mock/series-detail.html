@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>System Design, from first principles — duckthedev</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,700;0,9..144,800;1,9..144,400;1,9..144,500;1,9..144,700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+<header class="masthead">
+  <div class="wrap">
+    <div class="masthead-row">
+      <a class="brand" href="index.html">
+        <span class="brand-mark">D.</span>
+        <span class="brand-name">duckthedev</span>
+        <span class="brand-tag">notes &amp; essays of a working engineer</span>
+      </a>
+      <nav class="primary-nav">
+        <a class="nav-link" href="index.html">Home</a>
+        <a class="nav-link active" href="series.html">Series</a>
+        <a class="nav-link" href="blog.html">Blog</a>
+        <a class="nav-link" href="topics.html">Topics</a>
+        <a class="nav-link" href="about.html">About</a>
+        <button class="theme-toggle" aria-label="Toggle theme"><span data-theme-label>dim</span></button>
+      </nav>
+    </div>
+  </div>
+  <div class="progress-line" id="progress-line"></div>
+</header>
+
+<div class="wrap">
+  <div class="breadcrumb">
+    <a href="index.html">Home</a><span class="sep">/</span>
+    <a href="series.html">Series</a><span class="sep">/</span>
+    <span>System Design</span>
+  </div>
+</div>
+
+<section class="wrap">
+  <div class="page-head">
+    <div class="page-eyebrow">Series № 1 · publishing weekly</div>
+    <h1 class="page-title">System Design,<br>from <em>first principles.</em></h1>
+    <p class="page-deck">
+      Most system design material is a vocabulary list: here is a load balancer, here is a cache,
+      here is a queue. This series does the opposite — we start with one server and a laptop, break
+      it on purpose, and derive each component from the failure that demands it.
+    </p>
+    <div class="ser-tags" style="margin-top:18px;">
+      <a class="chip solid" href="topics.html">Architecture</a>
+      <a class="chip" href="topics.html">Postgres</a>
+      <a class="chip" href="topics.html">Observability</a>
+      <a class="chip" href="topics.html">Kafka</a>
+      <a class="chip" href="topics.html">Interviews</a>
+    </div>
+    <div class="page-stats">
+      <span><strong>12</strong> chapters</span>
+      <span><strong>3</strong> parts</span>
+      <span><strong>9</strong> published</span>
+      <span><strong>≈ 5 h</strong> total</span>
+      <span>Level <strong>intermediate</strong></span>
+      <span>Next out <strong>07 Aug</strong></span>
+    </div>
+  </div>
+</section>
+
+<section class="section" style="border-bottom:none;">
+  <div class="wrap">
+    <div class="series-map">
+
+      <!-- Chapter map -->
+      <div>
+        <div class="part-block">
+          <div class="part-head">
+            <div>
+              <div class="part-kicker">Part I</div>
+              <div class="part-name">One box, and what breaks it</div>
+            </div>
+            <div class="part-meta">4 chapters · 1 h 20</div>
+          </div>
+
+          <a class="chap-row" href="chapter.html">
+            <div class="chap-no">01</div>
+            <div>
+              <div class="chap-title">The whole system on one machine</div>
+              <div class="chap-sub">A Go binary, Postgres, and 40,000 users. Where the first ceiling actually is — and it isn't CPU.</div>
+            </div>
+            <div class="chap-stat">18 min · 12 Mar</div>
+          </a>
+
+          <a class="chap-row" href="chapter.html">
+            <div class="chap-no">02</div>
+            <div>
+              <div class="chap-title">Measuring before deciding</div>
+              <div class="chap-sub">Latency percentiles, saturation, and the four numbers that justify every later chapter.</div>
+            </div>
+            <div class="chap-stat">21 min · 26 Mar</div>
+          </a>
+
+          <a class="chap-row" href="chapter.html">
+            <div class="chap-no">03</div>
+            <div>
+              <div class="chap-title">Vertical scaling is underrated</div>
+              <div class="chap-sub">What a $400/month machine buys you in 2026, and the point at which it stops being the answer.</div>
+            </div>
+            <div class="chap-stat">14 min · 09 Apr</div>
+          </a>
+
+          <a class="chap-row" href="chapter.html">
+            <div class="chap-no">04</div>
+            <div>
+              <div class="chap-title">Statelessness, and the lie of the session</div>
+              <div class="chap-sub">Why the second box is hard, and what you have to move out of process before it works.</div>
+            </div>
+            <div class="chap-stat">17 min · 23 Apr</div>
+          </a>
+        </div>
+
+        <div class="part-block">
+          <div class="part-head">
+            <div>
+              <div class="part-kicker">Part II</div>
+              <div class="part-name">Spreading the load</div>
+            </div>
+            <div class="part-meta">4 chapters · 1 h 45</div>
+          </div>
+
+          <a class="chap-row" href="chapter.html">
+            <div class="chap-no">05</div>
+            <div>
+              <div class="chap-title">Consistent hashing, and why your cache ring rotates</div>
+              <div class="chap-sub">Deriving the ring from a modulo that betrayed us, with the rebalance cost measured on real data.</div>
+            </div>
+            <div class="chap-stat">24 min · 14 May</div>
+          </a>
+
+          <a class="chap-row" href="chapter.html">
+            <div class="chap-no">06</div>
+            <div>
+              <div class="chap-title">Read replicas and the lag you forgot to handle</div>
+              <div class="chap-sub">Read-your-writes, sticky routing, and the three bugs replication lag always produces first.</div>
+            </div>
+            <div class="chap-stat">22 min · 04 Jun</div>
+          </a>
+
+          <a class="chap-row" href="chapter.html">
+            <div class="chap-no">07</div>
+            <div>
+              <div class="chap-title">Queues: making slow things someone else's problem</div>
+              <div class="chap-sub">Backpressure, retries, dead letters, and why "just add a queue" moves the failure rather than removing it.</div>
+            </div>
+            <div class="chap-stat">26 min · 25 Jun</div>
+          </a>
+
+          <a class="chap-row" href="chapter.html">
+            <div class="chap-no">08</div>
+            <div>
+              <div class="chap-title">Idempotency as a design constraint</div>
+              <div class="chap-sub">Once retries exist, every write needs an identity. The data model that gives it one.</div>
+            </div>
+            <div class="chap-stat">19 min · 09 Jul</div>
+          </a>
+        </div>
+
+        <div class="part-block">
+          <div class="part-head">
+            <div>
+              <div class="part-kicker">Part III</div>
+              <div class="part-name">Living with it</div>
+            </div>
+            <div class="part-meta">4 chapters · 1 h 55 · publishing</div>
+          </div>
+
+          <a class="chap-row" href="chapter.html">
+            <div class="chap-no">09</div>
+            <div>
+              <div class="chap-title">Sharding: the decision you can't take back</div>
+              <div class="chap-sub">Picking a key, living with the wrong one, and the migration nobody budgets for.</div>
+            </div>
+            <div class="chap-stat">28 min · 24 Jul</div>
+          </a>
+
+          <div class="chap-row locked">
+            <div class="chap-no">10</div>
+            <div>
+              <div class="chap-title">Observability for a system you didn't design</div>
+              <div class="chap-sub">Traces first, logs second, dashboards last.</div>
+            </div>
+            <div class="chap-stat">due 07 Aug</div>
+          </div>
+
+          <div class="chap-row locked">
+            <div class="chap-no">11</div>
+            <div>
+              <div class="chap-title">Failure drills and the runbook that survives them</div>
+              <div class="chap-sub">Killing things on purpose, on a Tuesday afternoon.</div>
+            </div>
+            <div class="chap-stat">due 14 Aug</div>
+          </div>
+
+          <div class="chap-row locked">
+            <div class="chap-no">12</div>
+            <div>
+              <div class="chap-title">The interview version of all this</div>
+              <div class="chap-sub">Compressing twelve chapters into forty-five minutes on a whiteboard.</div>
+            </div>
+            <div class="chap-stat">due 21 Aug</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="hero-actions" style="margin-top:8px;">
+      <a class="btn-primary" href="chapter.html">Start from chapter 1 <span class="arrow">→</span></a>
+      <a class="btn-ghost" href="series.html">All series</a>
+    </div>
+  </div>
+</section>
+
+<footer class="colophon">
+  <div class="wrap">
+    <div class="colo-grid">
+      <div>
+        <div class="colo-brand">duckthedev<span>.</span></div>
+        <p class="colo-note">
+          A personal notebook about backends, databases and the tools in between.
+          Written by Duc Hoang. No trackers, no popups, no reading time paywall.
+        </p>
+      </div>
+      <div class="colo-col">
+        <h5>Read</h5>
+        <ul>
+          <li><a href="series.html">Series</a></li>
+          <li><a href="blog.html">All articles</a></li>
+          <li><a href="topics.html">Topics</a></li>
+          <li><a href="#">RSS feed</a></li>
+        </ul>
+      </div>
+      <div class="colo-col">
+        <h5>Me</h5>
+        <ul>
+          <li><a href="about.html">About / CV</a></li>
+          <li><a href="#">GitHub</a></li>
+          <li><a href="#">LinkedIn</a></li>
+          <li><a href="#">Email</a></li>
+        </ul>
+      </div>
+      <div class="colo-col">
+        <h5>Colophon</h5>
+        <ul>
+          <li>Fraunces &amp; Newsreader</li>
+          <li>JetBrains Mono</li>
+          <li>Notion as CMS</li>
+          <li>Next.js on Vercel</li>
+        </ul>
+      </div>
+    </div>
+    <div class="colo-foot">
+      <span>© 2019—2026 Duc Hoang</span>
+      <span>Built with more coffee than sense</span>
+      <span>Mock — v0.1</span>
+    </div>
+  </div>
+</footer>
+
+<script src="assets/app.js"></script>
+</body>
+</html>

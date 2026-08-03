@@ -1,0 +1,19 @@
+# deps & build
+node_modules/
+dist/
+.astro/
+
+# cache Notion khi dev
+.cache/
+
+# repo tham khảo (clone ngoài, không thuộc project)
+.ref/
+
+# secrets & dữ liệu workspace cá nhân
+.env
+.env.*
+!.env.example
+scripts/notion-ids.json
+
+# hệ điều hành / editor
+.DS_Store

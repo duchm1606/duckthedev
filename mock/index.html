@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>duckthedev — notes &amp; essays of a working engineer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,700;0,9..144,800;1,9..144,400;1,9..144,500;1,9..144,700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+<!-- ============ Masthead ============ -->
+<header class="masthead">
+  <div class="wrap">
+    <div class="masthead-row">
+      <a class="brand" href="index.html">
+        <span class="brand-mark">D.</span>
+        <span class="brand-name">duckthedev</span>
+        <span class="brand-tag">notes &amp; essays of a working engineer</span>
+      </a>
+      <nav class="primary-nav">
+        <a class="nav-link active" href="index.html">Home</a>
+        <a class="nav-link" href="series.html">Series</a>
+        <a class="nav-link" href="blog.html">Blog</a>
+        <a class="nav-link" href="topics.html">Topics</a>
+        <a class="nav-link" href="about.html">About</a>
+        <button class="theme-toggle" aria-label="Toggle theme"><span data-theme-label>dim</span></button>
+      </nav>
+    </div>
+  </div>
+  <div class="progress-line" id="progress-line"></div>
+</header>
+
+<!-- ============ Hero / identity ============ -->
+<section class="hero">
+  <div class="hero-deco">
+    Now writing<br>
+    Jul — Sep 2026
+  </div>
+  <div class="wrap">
+    <div class="hero-grid">
+      <div class="hero-main">
+        <div class="hero-eyebrow">
+          <span class="hero-label">Hi, I'm Duc</span>
+          <span class="hero-marker">Backend &amp; platform engineer · 7 yrs shipping</span>
+        </div>
+        <h1 class="hero-title">
+          I write down<br>
+          what I <em>break.</em>
+        </h1>
+        <p class="hero-deck">
+          A personal notebook that grew into a publication. I work on <strong>distributed backends,
+          developer tooling and the boring infrastructure</strong> that keeps them alive. Everything here is
+          a note first and an article second — written while the bug was still fresh, then edited
+          until it would survive a code review.
+        </p>
+        <div class="hero-actions">
+          <a class="btn-primary" href="post.html">Read the latest essay <span class="arrow">→</span></a>
+          <a class="btn-ghost" href="about.html">About me / CV</a>
+        </div>
+        <div class="hero-ornament">
+          <span>Set in Fraunces, Newsreader &amp; JetBrains Mono</span>
+          <svg class="hero-ornament-svg" viewBox="0 0 80 24" fill="none">
+            <path d="M0 12 Q 20 0, 40 12 T 80 12" stroke="var(--accent)" stroke-width="1" fill="none"/>
+            <circle cx="40" cy="12" r="2" fill="var(--accent)"/>
+          </svg>
+        </div>
+      </div>
+
+      <aside class="hero-aside">
+        <div class="aside-head">
+          <span>Desk log</span>
+          <em>what I touched this week</em>
+        </div>
+        <ul class="aside-list">
+          <li>
+            <span class="aside-date">Jul 30</span>
+            <span class="aside-title">Postgres LISTEN/NOTIFY at 4k msg/s <em>(note)</em></span>
+            <span class="aside-tag published">out</span>
+          </li>
+          <li>
+            <span class="aside-date">Jul 28</span>
+            <span class="aside-title">Go 1.24 tool directives <em>(note)</em></span>
+            <span class="aside-tag published">out</span>
+          </li>
+          <li>
+            <span class="aside-date">Jul 26</span>
+            <span class="aside-title">Rewriting our k8s operator in 400 lines <em>(essay)</em></span>
+            <span class="aside-tag published">out</span>
+          </li>
+          <li>
+            <span class="aside-date">Aug 04</span>
+            <span class="aside-title">Tracing a p99 that only happens on Mondays</span>
+            <span class="aside-tag scheduled">scheduled</span>
+          </li>
+          <li>
+            <span class="aside-date">Aug 09</span>
+            <span class="aside-title">A tiny CDC pipeline you can read in one sitting</span>
+            <span class="aside-tag draft">draft</span>
+          </li>
+        </ul>
+        <div class="aside-foot">Newsletter · every other Friday</div>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<!-- ============ Featured ============ -->
+<section class="section">
+  <div class="wrap">
+    <div class="section-head">
+      <div>
+        <div class="section-eyebrow">I. Featured</div>
+      </div>
+      <a class="section-link" href="blog.html">All articles →</a>
+    </div>
+
+    <div class="featured-grid">
+      <a class="feat-lead" href="post.html">
+        <div class="feat-kicker">Essay · 22 min · Distributed systems</div>
+        <h3 class="feat-title">Rewriting our Kubernetes operator in 400 lines of Go</h3>
+        <p class="feat-deck">
+          We had a 6,000-line operator nobody dared to touch. Deleting the framework, the code
+          generation and four layers of abstraction left us with 400 lines, a reconcile loop we can
+          read out loud, and an on-call rotation that finally sleeps.
+        </p>
+        <div class="feat-figure">figure — reconcile loop, before &amp; after</div>
+        <div class="post-meta">
+          <span>26 Jul 2026</span><span class="dot">·</span>
+          <span>Kubernetes</span><span class="dot">·</span>
+          <span>Go</span><span class="dot">·</span>
+          <span>4,900 words</span>
+        </div>
+      </a>
+
+      <div class="feat-side">
+        <a class="feat-item" href="post.html">
+          <div class="feat-num">ii.</div>
+          <div>
+            <h4>What actually happens when Postgres runs out of connections</h4>
+            <p>A walkthrough of the failure, from pgbouncer's pool to the kernel's accept queue — with the reproduction script.</p>
+            <div class="post-meta"><span>14 Jul 2026</span><span class="dot">·</span><span>Postgres</span><span class="dot">·</span><span>16 min</span></div>
+          </div>
+        </a>
+        <a class="feat-item" href="post.html">
+          <div class="feat-num">iii.</div>
+          <div>
+            <h4>Idempotency keys are a data model, not a header</h4>
+            <p>Every payment integration I've reviewed gets this wrong in the same three ways. Here's the table schema that fixes it.</p>
+            <div class="post-meta"><span>28 Jun 2026</span><span class="dot">·</span><span>Backend</span><span class="dot">·</span><span>12 min</span></div>
+          </div>
+        </a>
+        <a class="feat-item" href="post.html">
+          <div class="feat-num">iv.</div>
+          <div>
+            <h4>Reading the Go scheduler by printing things</h4>
+            <p>No tracing tools, no papers. Just <code>GODEBUG=schedtrace</code>, a whiteboard, and an afternoon.</p>
+            <div class="post-meta"><span>09 Jun 2026</span><span class="dot">·</span><span>Go</span><span class="dot">·</span><span>19 min</span></div>
+          </div>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ Series ============ -->
+<section class="section">
+  <div class="wrap">
+    <div class="section-head">
+      <div>
+        <div class="section-eyebrow">II. Series</div>
+      </div>
+      <a class="section-link" href="series.html">All 6 series →</a>
+    </div>
+
+    <div class="series-list">
+      <a class="series-item" href="series-detail.html">
+        <div class="ser-num">i.</div>
+        <div>
+          <h3 class="ser-title">System Design, from first principles</h3>
+          <p class="ser-desc">Twelve chapters that build one system end to end — deriving each component from the failure that demands it, instead of naming it.</p>
+          <div class="ser-tags">
+            <span class="chip solid">Architecture</span><span class="chip">Postgres</span><span class="chip">Observability</span>
+          </div>
+        </div>
+        <div class="ser-side">
+          <span class="state-tag state-ongoing">publishing weekly</span>
+          <div class="ser-note">9 of 12 out · latest 24 Jul</div>
+        </div>
+      </a>
+
+      <a class="series-item" href="series-detail.html">
+        <div class="ser-num">ii.</div>
+        <div>
+          <h3 class="ser-title">Reading <em>Designing Data-Intensive Applications</em></h3>
+          <p class="ser-desc">One chapter of Kleppmann per entry: what it says, what I disagree with, and what it looks like in a codebase I maintain.</p>
+          <div class="ser-tags">
+            <span class="chip solid">Book notes</span><span class="chip">Architecture</span><span class="chip">Kafka</span>
+          </div>
+        </div>
+        <div class="ser-side">
+          <span class="state-tag state-ongoing">ongoing</span>
+          <div class="ser-note">4 of 12 out · latest 18 Jul</div>
+        </div>
+      </a>
+
+      <a class="series-item" href="series-detail.html">
+        <div class="ser-num">iii.</div>
+        <div>
+          <h3 class="ser-title">Postgres internals, one query at a time</h3>
+          <p class="ser-desc">How a row becomes a result: parser, planner, MVCC, buffer pool and WAL — with experiments you can reproduce on a laptop.</p>
+          <div class="ser-tags">
+            <span class="chip solid">Postgres</span><span class="chip">Performance</span><span class="chip">Debugging</span>
+          </div>
+        </div>
+        <div class="ser-side">
+          <span class="state-tag state-done">complete</span>
+          <div class="ser-note">all 8 chapters out</div>
+        </div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ============ Latest blog posts ============ -->
+<section class="section">
+  <div class="wrap">
+    <div class="section-head">
+      <div>
+        <div class="section-eyebrow">III. Latest articles</div>
+      </div>
+      <div class="filter-row" data-target="#latest-list">
+        <button class="filter active" data-filter="all">All <span>26</span></button>
+        <button class="filter" data-filter="backend">Backend <span>11</span></button>
+        <button class="filter" data-filter="devops">DevOps <span>7</span></button>
+        <button class="filter" data-filter="career">Career <span>4</span></button>
+      </div>
+    </div>
+
+    <div class="article-list" id="latest-list">
+      <article class="article-row" data-tags="devops backend">
+        <div class="art-date">26 Jul 2026</div>
+        <div>
+          <h3 class="art-title">Rewriting our Kubernetes operator in 400 lines of Go <span class="badge-pin">pinned</span></h3>
+          <p class="art-desc">Deleting the framework left us with a reconcile loop we can read out loud — and an on-call rotation that finally sleeps.</p>
+        </div>
+        <div class="art-side">
+          <div class="tag-chips"><span class="chip">Kubernetes</span><span class="chip">Go</span></div>
+          <div class="art-read">22 min read</div>
+        </div>
+      </article>
+
+      <article class="article-row" data-tags="backend">
+        <div class="art-date">14 Jul 2026</div>
+        <div>
+          <h3 class="art-title">What actually happens when Postgres runs out of connections</h3>
+          <p class="art-desc">From pgbouncer's pool down to the kernel accept queue, with a reproduction script you can run on a laptop.</p>
+        </div>
+        <div class="art-side">
+          <div class="tag-chips"><span class="chip">Postgres</span><span class="chip">Linux</span></div>
+          <div class="art-read">16 min read</div>
+        </div>
+      </article>
+
+      <article class="article-row" data-tags="backend">
+        <div class="art-date">28 Jun 2026</div>
+        <div>
+          <h3 class="art-title">Idempotency keys are a data model, not a header</h3>
+          <p class="art-desc">Three ways every payment integration gets retries wrong, and the four-column table that fixes all of them.</p>
+        </div>
+        <div class="art-side">
+          <div class="tag-chips"><span class="chip">Backend</span><span class="chip">API</span></div>
+          <div class="art-read">12 min read</div>
+        </div>
+      </article>
+
+      <article class="article-row" data-tags="backend">
+        <div class="art-date">09 Jun 2026</div>
+        <div>
+          <h3 class="art-title">Reading the Go scheduler by printing things</h3>
+          <p class="art-desc">No tracing tools, no papers — just <code style="font-family:var(--mono);font-size:.8em;background:var(--bg-3);padding:1px 4px;color:var(--accent);">GODEBUG=schedtrace</code>, a whiteboard and an afternoon.</p>
+        </div>
+        <div class="art-side">
+          <div class="tag-chips"><span class="chip">Go</span><span class="chip">Runtime</span></div>
+          <div class="art-read">19 min read</div>
+        </div>
+      </article>
+
+      <article class="article-row" data-tags="devops">
+        <div class="art-date">21 May 2026</div>
+        <div>
+          <h3 class="art-title">Our CI was slow because of one <code style="font-family:var(--mono);font-size:.8em;background:var(--bg-3);padding:1px 4px;color:var(--accent);">COPY .</code></h3>
+          <p class="art-desc">A Docker layer-caching story that ended with a 9-minute build becoming 40 seconds, and a rule I now apply everywhere.</p>
+        </div>
+        <div class="art-side">
+          <div class="tag-chips"><span class="chip">Docker</span><span class="chip">CI/CD</span></div>
+          <div class="art-read">8 min read</div>
+        </div>
+      </article>
+
+      <article class="article-row" data-tags="career">
+        <div class="art-date">30 Apr 2026</div>
+        <div>
+          <h3 class="art-title">Seven years in, the code review comments I keep writing</h3>
+          <p class="art-desc">A catalogue of the same twelve remarks, why they matter, and how to design them out of a codebase entirely.</p>
+        </div>
+        <div class="art-side">
+          <div class="tag-chips"><span class="chip">Career</span><span class="chip">Craft</span></div>
+          <div class="art-read">14 min read</div>
+        </div>
+      </article>
+    </div>
+
+    <div class="list-foot">
+      <span>Showing 6 of 26 articles.</span>
+      <a class="section-link" href="blog.html">Browse the archive →</a>
+    </div>
+  </div>
+</section>
+
+<!-- ============ Recently updated notes ============ -->
+<section class="section">
+  <div class="wrap">
+    <div class="section-head">
+      <div>
+        <div class="section-eyebrow">IV. Notes</div>
+      </div>
+      <a class="section-link" href="blog.html">All notes →</a>
+    </div>
+
+    <div class="notes-grid">
+      <div class="note-row"><span class="note-icon">§</span><span class="note-title">Postgres LISTEN/NOTIFY at 4k msg/s</span><span class="note-date">30 Jul</span></div>
+      <div class="note-row"><span class="note-icon">§</span><span class="note-title">Go 1.24 <code style="font-family:var(--mono);font-size:.8em;color:var(--accent);">tool</code> directives, in practice</span><span class="note-date">28 Jul</span></div>
+      <div class="note-row"><span class="note-icon">§</span><span class="note-title">kubectl debug for distroless images</span><span class="note-date">22 Jul</span></div>
+      <div class="note-row"><span class="note-icon">§</span><span class="note-title">Timezone handling that survives DST</span><span class="note-date">19 Jul</span></div>
+      <div class="note-row"><span class="note-icon">§</span><span class="note-title">A tmux config I've kept for six years</span><span class="note-date">11 Jul</span></div>
+      <div class="note-row"><span class="note-icon">§</span><span class="note-title">Why our p99 is a histogram lie</span><span class="note-date">05 Jul</span></div>
+      <div class="note-row"><span class="note-icon">§</span><span class="note-title">Zero-downtime column renames</span><span class="note-date">01 Jul</span></div>
+      <div class="note-row"><span class="note-icon">§</span><span class="note-title">SQLite as a test fixture, honestly</span><span class="note-date">24 Jun</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ Main topics ============ -->
+<section class="section">
+  <div class="wrap">
+    <div class="section-head">
+      <div>
+        <div class="section-eyebrow">V. Topics</div>
+      </div>
+      <a class="section-link" href="topics.html">All 24 topics →</a>
+    </div>
+
+    <div class="topics-flow">
+      <a class="topic-pill" href="topics.html"><span class="glyph"><img src="https://cdn.simpleicons.org/go" alt="" loading="lazy"></span><span class="name">Golang</span><span class="count">— 31</span></a>
+      <a class="topic-pill" href="topics.html"><span class="glyph"><img src="https://cdn.simpleicons.org/postgresql" alt="" loading="lazy"></span><span class="name">Postgres</span><span class="count">— 24</span></a>
+      <a class="topic-pill" href="topics.html"><span class="glyph"><img src="https://cdn.simpleicons.org/kubernetes" alt="" loading="lazy"></span><span class="name">Kubernetes</span><span class="count">— 18</span></a>
+      <a class="topic-pill" href="topics.html"><span class="glyph"><img src="https://cdn.simpleicons.org/docker" alt="" loading="lazy"></span><span class="name">Docker</span><span class="count">— 16</span></a>
+      <a class="topic-pill" href="topics.html"><span class="glyph"><img src="https://cdn.simpleicons.org/typescript" alt="" loading="lazy"></span><span class="name">TypeScript</span><span class="count">— 15</span></a>
+      <a class="topic-pill" href="topics.html"><span class="glyph invert"><img src="https://cdn.simpleicons.org/opentelemetry" alt="" loading="lazy"></span><span class="name">Observability</span><span class="count">— 12</span></a>
+      <a class="topic-pill" href="topics.html"><span class="glyph"><img src="https://cdn.simpleicons.org/linux" alt="" loading="lazy"></span><span class="name">Linux</span><span class="count">— 11</span></a>
+      <a class="topic-pill" href="topics.html"><span class="glyph">Ar</span><span class="name">Architecture</span><span class="count">— 9</span></a>
+      <a class="topic-pill" href="topics.html"><span class="glyph">Cr</span><span class="name">Career</span><span class="count">— 7</span></a>
+    </div>
+  </div>
+</section>
+
+<!-- ============ Colophon ============ -->
+<footer class="colophon">
+  <div class="wrap">
+    <div class="colo-grid">
+      <div>
+        <div class="colo-brand">duckthedev<span>.</span></div>
+        <p class="colo-note">
+          A personal notebook about backends, databases and the tools in between.
+          Written by Duc Hoang. No trackers, no popups, no reading time paywall.
+        </p>
+      </div>
+      <div class="colo-col">
+        <h5>Read</h5>
+        <ul>
+          <li><a href="series.html">Series</a></li>
+          <li><a href="blog.html">All articles</a></li>
+          <li><a href="topics.html">Topics</a></li>
+          <li><a href="#">RSS feed</a></li>
+        </ul>
+      </div>
+      <div class="colo-col">
+        <h5>Me</h5>
+        <ul>
+          <li><a href="about.html">About / CV</a></li>
+          <li><a href="#">GitHub</a></li>
+          <li><a href="#">LinkedIn</a></li>
+          <li><a href="#">Email</a></li>
+        </ul>
+      </div>
+      <div class="colo-col">
+        <h5>Colophon</h5>
+        <ul>
+          <li>Fraunces &amp; Newsreader</li>
+          <li>JetBrains Mono</li>
+          <li>Notion as CMS</li>
+          <li>Next.js on Vercel</li>
+        </ul>
+      </div>
+    </div>
+    <div class="colo-foot">
+      <span>© 2019—2026 Duc Hoang</span>
+      <span>Built with more coffee than sense</span>
+      <span>Mock — v0.1</span>
+    </div>
+  </div>
+</footer>
+
+<script src="assets/app.js"></script>
+</body>
+</html>

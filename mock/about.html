@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>About me — duckthedev</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,700;0,9..144,800;1,9..144,400;1,9..144,500;1,9..144,700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+<header class="masthead">
+  <div class="wrap">
+    <div class="masthead-row">
+      <a class="brand" href="index.html">
+        <span class="brand-mark">D.</span>
+        <span class="brand-name">duckthedev</span>
+        <span class="brand-tag">notes &amp; essays of a working engineer</span>
+      </a>
+      <nav class="primary-nav">
+        <a class="nav-link" href="index.html">Home</a>
+        <a class="nav-link" href="series.html">Series</a>
+        <a class="nav-link" href="blog.html">Blog</a>
+        <a class="nav-link" href="topics.html">Topics</a>
+        <a class="nav-link active" href="about.html">About</a>
+        <button class="theme-toggle" aria-label="Toggle theme"><span data-theme-label>dim</span></button>
+      </nav>
+    </div>
+  </div>
+  <div class="progress-line" id="progress-line"></div>
+</header>
+
+<div class="wrap">
+  <div class="breadcrumb"><a href="index.html">Home</a><span class="sep">/</span><span>About</span></div>
+</div>
+
+<!-- ============ Page head ============ -->
+<section class="wrap">
+  <div class="page-head">
+    <div class="page-eyebrow">About me · Curriculum vitæ</div>
+    <h1 class="page-title">Duc Hoang, <em>engineer</em><br>and reluctant writer.</h1>
+    <p class="page-deck">
+      Seven years building backends that other teams depend on: payment flows, event pipelines,
+      internal platforms. I like systems small enough to hold in my head, databases that tell the
+      truth, and documentation written by the person who fixed the bug.
+    </p>
+    <div class="page-stats">
+      <span><strong>7</strong> years of experience</span>
+      <span><strong>4</strong> companies</span>
+      <span><strong>118</strong> published notes</span>
+      <span><strong>2</strong> open-source tools</span>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CV ============ -->
+<section class="section" style="border-bottom:none;">
+  <div class="wrap">
+    <div class="cv-grid">
+
+      <!-- Aside -->
+      <aside class="cv-aside">
+        <div class="portrait">DH</div>
+        <div class="availability">Open to interesting problems</div>
+        <ul class="coord-list">
+          <li><span class="k">From</span><span class="v">Đà Nẵng, VN</span></li>
+          <li><span class="k">Based</span><span class="v">Ho Chi Minh City</span></li>
+          <li><span class="k">Email</span><a class="v" href="#">me@duckthedev.com</a></li>
+          <li><span class="k">GitHub</span><a class="v" href="#">github.com/duckthedev</a></li>
+          <li><span class="k">LinkedIn</span><a class="v" href="#">in/duckthedev</a></li>
+          <li><span class="k">Languages</span><span class="v">Vietnamese, English</span></li>
+        </ul>
+        <a class="btn-ghost" href="#" style="justify-content:center;">Download CV (PDF)</a>
+      </aside>
+
+      <!-- Main -->
+      <div class="cv-main">
+
+        <div class="quote-block">
+          I'd rather ship a boring system that three people fully understand than a clever one
+          that only its author can debug at 3 a.m.
+          <cite>— my one strong opinion</cite>
+        </div>
+
+        <!-- Experiences -->
+        <div class="cv-group">
+          <div class="cv-group-title">I. Experience</div>
+
+          <article class="cv-item">
+            <div class="cv-logo">Ax</div>
+            <div>
+              <div class="cv-head">
+                <div>
+                  <div class="cv-role">Senior Backend Engineer</div>
+                  <div class="cv-where"><a href="#">Axiom Pay</a> · Singapore / remote</div>
+                </div>
+                <div class="cv-date">2023 — present</div>
+              </div>
+              <ul class="cv-activity">
+                <li>Own the payment orchestration service: ~9M transactions/month across six PSPs, with exactly-once settlement guarantees built on Postgres and an outbox pattern.</li>
+                <li>Led the migration from a shared monolith database to per-service schemas without a maintenance window; wrote the dual-write &amp; backfill tooling now used by four teams.</li>
+                <li>Cut p99 checkout latency from 1.8s to 340ms by removing three synchronous calls and one very confident cache.</li>
+                <li>Mentor two engineers; run the internal "how it actually works" seminar every second Thursday.</li>
+              </ul>
+              <div class="tech-row">
+                <span class="tech">go</span><span class="tech">postgres</span><span class="tech">kafka</span>
+                <span class="tech">kubernetes</span><span class="tech">terraform</span><span class="tech">grafana</span>
+                <span class="tech">opentelemetry</span><span class="tech">redis</span><span class="tech">grpc</span>
+              </div>
+            </div>
+          </article>
+
+          <article class="cv-item">
+            <div class="cv-logo">Lm</div>
+            <div>
+              <div class="cv-head">
+                <div>
+                  <div class="cv-role">Backend Engineer</div>
+                  <div class="cv-where"><a href="#">Lumen Logistics</a> · Ho Chi Minh City</div>
+                </div>
+                <div class="cv-date">2021 — 2023</div>
+              </div>
+              <ul class="cv-activity">
+                <li>Built the route-planning API serving 1,200 drivers; designed the geospatial data model on PostGIS and kept it under 100ms at the 95th percentile.</li>
+                <li>Replaced a nightly CSV import with a change-data-capture pipeline (Debezium → Kafka → warehouse), reducing data freshness from 24 hours to under a minute.</li>
+                <li>Introduced structured logging and tracing across eight services; on-call pages dropped by roughly half in two quarters.</li>
+              </ul>
+              <div class="tech-row">
+                <span class="tech">go</span><span class="tech">python</span><span class="tech">postgis</span>
+                <span class="tech">debezium</span><span class="tech">kafka</span><span class="tech">docker</span><span class="tech">gitlab-ci</span>
+              </div>
+            </div>
+          </article>
+
+          <article class="cv-item">
+            <div class="cv-logo">Nv</div>
+            <div>
+              <div class="cv-head">
+                <div>
+                  <div class="cv-role">Full-stack Developer</div>
+                  <div class="cv-where"><a href="#">Novaweb Studio</a> · Đà Nẵng</div>
+                </div>
+                <div class="cv-date">2019 — 2021</div>
+              </div>
+              <ul class="cv-activity">
+                <li>Delivered eleven client projects end-to-end: Node/TypeScript APIs, React front-ends, and the deployment pipelines nobody else wanted to own.</li>
+                <li>Wrote the studio's project starter kit — still in use, still the reason new projects take two days instead of two weeks.</li>
+              </ul>
+              <div class="tech-row">
+                <span class="tech">typescript</span><span class="tech">nodejs</span><span class="tech">react</span>
+                <span class="tech">nextjs</span><span class="tech">mysql</span><span class="tech">nginx</span><span class="tech">aws</span>
+              </div>
+            </div>
+          </article>
+
+          <article class="cv-item">
+            <div class="cv-logo">§</div>
+            <div>
+              <div class="cv-head">
+                <div>
+                  <div class="cv-role">Freelance &amp; self-directed work</div>
+                  <div class="cv-where">Various · remote</div>
+                </div>
+                <div class="cv-date">2017 — 2019</div>
+              </div>
+              <ul class="cv-activity">
+                <li>Small business websites, scraping jobs, and one inventory system that is somehow still running in production today.</li>
+              </ul>
+            </div>
+          </article>
+        </div>
+
+        <!-- Education -->
+        <div class="cv-group">
+          <div class="cv-group-title">II. Education</div>
+
+          <article class="cv-item">
+            <div class="cv-logo">UT</div>
+            <div>
+              <div class="cv-head">
+                <div>
+                  <div class="cv-role">B.Eng. Computer Science</div>
+                  <div class="cv-where">University of Technology · Ho Chi Minh City</div>
+                </div>
+                <div class="cv-date">2015 — 2019</div>
+              </div>
+              <ul class="cv-activity">
+                <li>Thesis on distributed task scheduling; graduated with distinction.</li>
+              </ul>
+            </div>
+          </article>
+
+          <article class="cv-item">
+            <div class="cv-logo">✎</div>
+            <div>
+              <div class="cv-head">
+                <div>
+                  <div class="cv-role">Self-taught, continuously</div>
+                  <div class="cv-where">This website is the transcript</div>
+                </div>
+                <div class="cv-date">2019 — present</div>
+              </div>
+              <ul class="cv-activity">
+                <li>Designing Data-Intensive Applications, the Postgres source, and far too many incident write-ups from other people's companies.</li>
+              </ul>
+            </div>
+          </article>
+        </div>
+
+        <!-- Skills -->
+        <div class="cv-group">
+          <div class="cv-group-title">III. Skills</div>
+          <div class="skill-grid">
+            <div class="skill-block">
+              <h4>Languages</h4>
+              <div class="tech-row">
+                <span class="tech">go</span><span class="tech">typescript</span><span class="tech">python</span>
+                <span class="tech">sql</span><span class="tech">bash</span><span class="tech">rust (learning)</span>
+              </div>
+            </div>
+            <div class="skill-block">
+              <h4>Data</h4>
+              <div class="tech-row">
+                <span class="tech">postgres</span><span class="tech">postgis</span><span class="tech">redis</span>
+                <span class="tech">kafka</span><span class="tech">clickhouse</span><span class="tech">sqlite</span>
+              </div>
+            </div>
+            <div class="skill-block">
+              <h4>Infrastructure</h4>
+              <div class="tech-row">
+                <span class="tech">kubernetes</span><span class="tech">docker</span><span class="tech">terraform</span>
+                <span class="tech">aws</span><span class="tech">gcp</span><span class="tech">github-actions</span>
+              </div>
+            </div>
+            <div class="skill-block">
+              <h4>Observability</h4>
+              <div class="tech-row">
+                <span class="tech">opentelemetry</span><span class="tech">grafana</span><span class="tech">prometheus</span>
+                <span class="tech">loki</span><span class="tech">sentry</span>
+              </div>
+            </div>
+            <div class="skill-block">
+              <h4>Practices</h4>
+              <div class="tech-row">
+                <span class="tech">design-docs</span><span class="tech">incident-review</span><span class="tech">code-review</span>
+                <span class="tech">mentoring</span><span class="tech">on-call</span>
+              </div>
+            </div>
+            <div class="skill-block">
+              <h4>Front-end (enough)</h4>
+              <div class="tech-row">
+                <span class="tech">react</span><span class="tech">nextjs</span><span class="tech">tailwind</span><span class="tech">htmx</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Projects -->
+        <div class="cv-group">
+          <div class="cv-group-title">IV. Things I made</div>
+
+          <article class="cv-item">
+            <div class="cv-logo">ob</div>
+            <div>
+              <div class="cv-head">
+                <div>
+                  <div class="cv-role">outboxd</div>
+                  <div class="cv-where">Open source · <a href="#">github.com/duckthedev/outboxd</a></div>
+                </div>
+                <div class="cv-date">2024 — present</div>
+              </div>
+              <ul class="cv-activity">
+                <li>A 700-line transactional outbox relay for Postgres → Kafka. 1.4k stars, used in production by a handful of teams braver than me.</li>
+              </ul>
+              <div class="tech-row"><span class="tech">go</span><span class="tech">postgres</span><span class="tech">kafka</span></div>
+            </div>
+          </article>
+
+          <article class="cv-item">
+            <div class="cv-logo">pq</div>
+            <div>
+              <div class="cv-head">
+                <div>
+                  <div class="cv-role">pgquiet</div>
+                  <div class="cv-where">Open source · <a href="#">github.com/duckthedev/pgquiet</a></div>
+                </div>
+                <div class="cv-date">2022 — present</div>
+              </div>
+              <ul class="cv-activity">
+                <li>A CLI that tells you which of your Postgres indexes nobody has used since the last restart, and whether it's safe to drop them.</li>
+              </ul>
+              <div class="tech-row"><span class="tech">go</span><span class="tech">postgres</span><span class="tech">tui</span></div>
+            </div>
+          </article>
+        </div>
+
+        <!-- Contact -->
+        <div class="cv-group" style="margin-bottom:0;">
+          <div class="cv-group-title">V. Say hello</div>
+          <p style="color:var(--ink-2);max-width:60ch;">
+            I read every email, and I answer most of them. Good reasons to write: you found a mistake
+            in an article, you're stuck on something I've written about, or you have a system that
+            keeps you up at night and want a second opinion.
+          </p>
+          <div class="hero-actions" style="margin-top:22px;">
+            <a class="btn-primary" href="#">me@duckthedev.com <span class="arrow">→</span></a>
+            <a class="btn-ghost" href="#">GitHub</a>
+            <a class="btn-ghost" href="#">LinkedIn</a>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="colophon">
+  <div class="wrap">
+    <div class="colo-grid">
+      <div>
+        <div class="colo-brand">duckthedev<span>.</span></div>
+        <p class="colo-note">
+          A personal notebook about backends, databases and the tools in between.
+          Written by Duc Hoang. No trackers, no popups, no reading time paywall.
+        </p>
+      </div>
+      <div class="colo-col">
+        <h5>Read</h5>
+        <ul>
+          <li><a href="series.html">Series</a></li>
+          <li><a href="blog.html">All articles</a></li>
+          <li><a href="topics.html">Topics</a></li>
+          <li><a href="#">RSS feed</a></li>
+        </ul>
+      </div>
+      <div class="colo-col">
+        <h5>Me</h5>
+        <ul>
+          <li><a href="about.html">About / CV</a></li>
+          <li><a href="#">GitHub</a></li>
+          <li><a href="#">LinkedIn</a></li>
+          <li><a href="#">Email</a></li>
+        </ul>
+      </div>
+      <div class="colo-col">
+        <h5>Colophon</h5>
+        <ul>
+          <li>Fraunces &amp; Newsreader</li>
+          <li>JetBrains Mono</li>
+          <li>Notion as CMS</li>
+          <li>Next.js on Vercel</li>
+        </ul>
+      </div>
+    </div>
+    <div class="colo-foot">
+      <span>© 2019—2026 Duc Hoang</span>
+      <span>Built with more coffee than sense</span>
+      <span>Mock — v0.1</span>
+    </div>
+  </div>
+</footer>
+
+<script src="assets/app.js"></script>
+</body>
+</html>

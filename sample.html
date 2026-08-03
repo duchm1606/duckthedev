@@ -1,0 +1,3131 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Forge — A serial publication for working programmers</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,700;0,9..144,800;1,9..144,400;1,9..144,500;1,9..144,700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ============ Tokens ============ */
+:root {
+  --bg: #f3ebd9;
+  --bg-2: #faf3e2;
+  --bg-3: #e9dec3;
+  --bg-code: #efe5cc;
+  --ink: #1c1813;
+  --ink-2: #4a4338;
+  --ink-3: #847a64;
+  --rule: #c9be9f;
+  --rule-soft: #ddd1b3;
+  --accent: #8a2317;
+  --accent-2: #6b1c12;
+  --gold: #a87714;
+  --sage: #5d7440;
+  --rust-red: #b03a2e;
+  --rust-green: #4a7c3c;
+  --serif-display: "Fraunces", Georgia, serif;
+  --serif-body: "Newsreader", Georgia, serif;
+  --mono: "JetBrains Mono", "SF Mono", Menlo, monospace;
+  --max: 1280px;
+}
+
+[data-theme="dim"] {
+  --bg: #181410;
+  --bg-2: #211c15;
+  --bg-3: #141009;
+  --bg-code: #1f1a13;
+  --ink: #e6dec8;
+  --ink-2: #b8ad94;
+  --ink-3: #7d735a;
+  --rule: #3a3328;
+  --rule-soft: #2a2418;
+  --accent: #d8a070;
+  --accent-2: #b88050;
+  --gold: #d4a83a;
+  --sage: #9ab068;
+  --rust-red: #d97070;
+  --rust-green: #88b878;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { 
+  scroll-behavior: smooth;
+  scroll-padding-top: 100px;
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--serif-body);
+  font-size: 17px;
+  line-height: 1.62;
+  font-feature-settings: "kern", "liga", "onum";
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  transition: background 0.4s ease, color 0.4s ease;
+  overflow-x: hidden;
+}
+
+/* Paper grain */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.08 0 0 0 0 0.06 0 0 0 0 0.03 0 0 0 0.5 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  opacity: 0.35;
+  mix-blend-mode: multiply;
+  z-index: 9999;
+}
+[data-theme="dim"] body::before {
+  mix-blend-mode: screen;
+  opacity: 0.12;
+}
+
+a { color: inherit; text-decoration: none; }
+button { font: inherit; cursor: pointer; background: none; border: none; color: inherit; padding: 0; }
+ol, ul { list-style: none; }
+::selection { background: var(--accent); color: var(--bg); }
+
+/* ============ Layout ============ */
+.wrap { max-width: var(--max); margin: 0 auto; padding: 0 36px; }
+@media (max-width: 720px) { .wrap { padding: 0 20px; } }
+
+/* ============ Masthead ============ */
+.masthead {
+  border-bottom: 1px solid var(--rule);
+  background: var(--bg);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.masthead-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 18px 0 14px;
+  gap: 24px;
+}
+
+.brand { display: flex; align-items: baseline; gap: 12px; cursor: pointer; }
+
+.brand-mark {
+  font-family: var(--serif-display);
+  font-weight: 800;
+  font-size: 28px;
+  color: var(--accent);
+  letter-spacing: -0.06em;
+  line-height: 1;
+}
+
+.brand-name {
+  font-family: var(--serif-display);
+  font-weight: 700;
+  font-size: 22px;
+  letter-spacing: -0.015em;
+}
+
+.brand-tag {
+  font-style: italic;
+  font-size: 13px;
+  color: var(--ink-3);
+  border-left: 1px solid var(--rule);
+  padding-left: 12px;
+  font-family: var(--serif-body);
+}
+
+@media (max-width: 720px) { .brand-tag { display: none; } }
+
+.primary-nav { display: flex; align-items: center; gap: 28px; }
+
+.primary-nav a, .primary-nav button.nav-link {
+  font-size: 14px;
+  color: var(--ink-2);
+  transition: color 0.2s;
+  position: relative;
+  font-family: var(--serif-body);
+  cursor: pointer;
+}
+
+.primary-nav a:hover, .primary-nav button.nav-link:hover { color: var(--accent); }
+
+.primary-nav .nav-link.active {
+  color: var(--ink);
+  font-weight: 500;
+}
+.primary-nav .nav-link.active::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 0; right: 0;
+  height: 2px;
+  background: var(--accent);
+}
+
+.theme-toggle {
+  border: 1px solid var(--rule);
+  padding: 6px 12px;
+  font-size: 11px;
+  font-variant: small-caps;
+  letter-spacing: 0.08em;
+  color: var(--ink-2);
+  transition: all 0.2s;
+}
+
+.theme-toggle:hover { border-color: var(--ink); color: var(--ink); }
+
+.masthead-meta {
+  display: flex;
+  gap: 10px;
+  font-size: 11px;
+  color: var(--ink-3);
+  font-variant: small-caps;
+  letter-spacing: 0.06em;
+  padding-bottom: 12px;
+  align-items: center;
+}
+
+.masthead-meta .spacer { flex: 1; }
+.masthead-meta .ornament { color: var(--accent); }
+
+.progress-line {
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  height: 2px;
+  background: var(--accent);
+  width: 0%;
+  transition: width 0.1s linear;
+}
+
+/* ============ View switching ============ */
+.view { display: none; }
+.view.active { display: block; animation: viewIn 0.4s ease-out; }
+@keyframes viewIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ============ Hero ============ */
+.hero {
+  padding: 72px 0 96px;
+  border-bottom: 1px solid var(--rule);
+  position: relative;
+}
+
+.hero-grid {
+  display: grid;
+  grid-template-columns: 7fr 5fr;
+  gap: 72px;
+}
+
+@media (max-width: 900px) {
+  .hero-grid { grid-template-columns: 1fr; gap: 56px; }
+}
+
+.hero-eyebrow {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--rule);
+  margin-bottom: 28px;
+}
+
+.hero-label {
+  font-size: 11px;
+  font-variant: small-caps;
+  letter-spacing: 0.12em;
+  color: var(--accent);
+  font-weight: 500;
+}
+
+.hero-marker {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--ink-3);
+}
+
+.hero-title {
+  font-family: var(--serif-display);
+  font-weight: 700;
+  font-size: clamp(46px, 7.4vw, 92px);
+  line-height: 0.94;
+  letter-spacing: -0.028em;
+  margin-bottom: 32px;
+  font-variation-settings: "opsz" 144;
+}
+
+.hero-title em {
+  font-style: italic;
+  font-weight: 400;
+  color: var(--accent);
+  font-variation-settings: "opsz" 144;
+}
+
+.hero-deck {
+  font-size: 19px;
+  line-height: 1.55;
+  max-width: 560px;
+  margin-bottom: 40px;
+  color: var(--ink-2);
+}
+
+.hero-deck::first-line { font-variant: small-caps; }
+
+.hero-meta {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 28px;
+  border-top: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+  padding: 22px 0;
+  margin-bottom: 32px;
+}
+
+.meta-cell { display: flex; flex-direction: column; gap: 3px; }
+
+.meta-label {
+  font-size: 10px;
+  font-variant: small-caps;
+  letter-spacing: 0.1em;
+  color: var(--ink-3);
+}
+
+.meta-value {
+  font-family: var(--serif-display);
+  font-size: 19px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
+.meta-sub {
+  font-size: 12px;
+  color: var(--ink-3);
+  font-style: italic;
+}
+
+.hero-actions { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; }
+
+.btn-primary {
+  background: var(--ink);
+  color: var(--bg);
+  padding: 14px 22px;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  border: none;
+  font-family: var(--serif-body);
+}
+
+.btn-primary:hover { background: var(--accent); }
+.btn-primary .arrow { transition: transform 0.2s; }
+.btn-primary:hover .arrow { transform: translateX(3px); }
+
+.btn-ghost {
+  padding: 14px 8px;
+  font-size: 14px;
+  color: var(--ink-2);
+  border-bottom: 1px solid var(--ink-3);
+  transition: all 0.2s;
+  cursor: pointer;
+  background: none;
+  font-family: var(--serif-body);
+}
+
+.btn-ghost:hover { color: var(--accent); border-color: var(--accent); }
+
+/* Hero aside */
+.hero-aside {
+  border-left: 1px solid var(--rule);
+  padding-left: 36px;
+}
+
+@media (max-width: 900px) {
+  .hero-aside { border-left: none; border-top: 1px solid var(--rule); padding-left: 0; padding-top: 36px; }
+}
+
+.aside-head {
+  font-size: 11px;
+  font-variant: small-caps;
+  letter-spacing: 0.12em;
+  color: var(--ink-3);
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--rule);
+  margin-bottom: 4px;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.aside-head em {
+  font-family: var(--serif-body);
+  font-style: italic;
+  font-size: 12px;
+  font-variant: normal;
+  letter-spacing: 0;
+  color: var(--ink-3);
+}
+
+.aside-list li {
+  display: grid;
+  grid-template-columns: 56px 1fr auto;
+  gap: 14px;
+  align-items: baseline;
+  padding: 14px 0;
+  border-bottom: 1px dotted var(--rule);
+  font-size: 14px;
+  transition: background 0.2s;
+  cursor: pointer;
+}
+
+.aside-list li:hover { background: var(--bg-2); margin: 0 -8px; padding-left: 8px; padding-right: 8px; }
+
+.aside-date {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--ink-3);
+}
+
+.aside-title em {
+  color: var(--ink-3);
+  font-style: italic;
+  font-size: 12px;
+}
+
+.aside-tag {
+  font-size: 9px;
+  font-variant: small-caps;
+  letter-spacing: 0.08em;
+  padding: 2px 7px;
+  border: 1px solid var(--rule);
+  white-space: nowrap;
+}
+
+.aside-tag.published { color: var(--sage); border-color: var(--sage); }
+.aside-tag.scheduled { color: var(--ink-3); }
+.aside-tag.draft { color: var(--gold); border-color: var(--gold); }
+
+.aside-foot {
+  margin-top: 18px;
+  font-size: 12px;
+  color: var(--ink-3);
+  font-style: italic;
+  text-align: right;
+}
+
+.hero-deco {
+  position: absolute;
+  right: 36px;
+  top: 36px;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--ink-3);
+  text-align: right;
+  line-height: 1.5;
+}
+
+@media (max-width: 720px) { .hero-deco { display: none; } }
+
+/* Hero illustration ornament */
+.hero-ornament {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 24px;
+  gap: 12px;
+  align-items: center;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--ink-3);
+}
+
+.hero-ornament-svg {
+  width: 80px;
+  height: 24px;
+  opacity: 0.6;
+}
+
+/* ============ Section head ============ */
+.section-head {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 48px;
+  align-items: end;
+  padding: 80px 0 40px;
+  border-bottom: 1px solid var(--rule);
+  margin-bottom: 48px;
+}
+
+@media (max-width: 900px) {
+  .section-head { grid-template-columns: 1fr; gap: 28px; padding: 56px 0 32px; }
+}
+
+.section-eyebrow {
+  font-size: 11px;
+  font-variant: small-caps;
+  letter-spacing: 0.12em;
+  color: var(--accent);
+  font-weight: 500;
+  margin-bottom: 14px;
+  font-family: var(--serif-body);
+}
+
+.section-title {
+  font-family: var(--serif-display);
+  font-weight: 500;
+  font-size: clamp(28px, 3.4vw, 40px);
+  line-height: 1.08;
+  letter-spacing: -0.018em;
+  max-width: 720px;
+  font-variation-settings: "opsz" 72;
+}
+
+.section-title em { font-style: italic; font-weight: 400; color: var(--accent); }
+
+.section-deck {
+  font-size: 16px;
+  color: var(--ink-2);
+  max-width: 560px;
+  margin-top: 14px;
+  line-height: 1.55;
+}
+
+.filter-row { display: flex; gap: 4px; flex-wrap: wrap; }
+
+.filter {
+  font-size: 12px;
+  padding: 8px 14px;
+  border: 1px solid var(--rule);
+  background: var(--bg);
+  color: var(--ink-2);
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--serif-body);
+}
+
+.filter:hover { border-color: var(--ink-3); }
+.filter.active { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+
+.filter span {
+  font-family: var(--mono);
+  font-size: 10px;
+  opacity: 0.6;
+}
+
+/* ============ Library ============ */
+.library { padding-bottom: 32px; }
+
+.library-list { display: flex; flex-direction: column; }
+
+.library-item {
+  display: grid;
+  grid-template-columns: 48px 1fr 200px;
+  gap: 32px;
+  padding: 28px 0;
+  border-bottom: 1px solid var(--rule-soft);
+  align-items: start;
+  transition: background 0.2s;
+  cursor: pointer;
+}
+
+.library-item:hover { background: var(--bg-2); margin: 0 -12px; padding-left: 12px; padding-right: 12px; }
+
+@media (max-width: 720px) {
+  .library-item { grid-template-columns: 32px 1fr; gap: 16px; }
+  .library-item .lib-progress { grid-column: 1 / -1; }
+}
+
+.lib-num {
+  font-family: var(--serif-display);
+  font-style: italic;
+  font-weight: 400;
+  font-size: 28px;
+  color: var(--ink-3);
+  line-height: 1;
+}
+
+.lib-title {
+  font-family: var(--serif-display);
+  font-weight: 500;
+  font-size: 22px;
+  letter-spacing: -0.012em;
+  margin-bottom: 6px;
+  font-variation-settings: "opsz" 36;
+}
+
+.library-item:hover .lib-title { color: var(--accent); }
+
+.lib-desc {
+  font-size: 15px;
+  color: var(--ink-2);
+  margin-bottom: 10px;
+  max-width: 540px;
+  line-height: 1.55;
+}
+
+.lib-meta {
+  display: flex;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--ink-3);
+  font-variant: small-caps;
+  letter-spacing: 0.04em;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.lib-meta .dot { color: var(--rule); }
+
+.lib-progress { display: flex; flex-direction: column; gap: 8px; }
+
+.progress-bar {
+  height: 4px;
+  background: var(--bg-3);
+  position: relative;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--accent);
+  position: relative;
+  transition: width 0.6s ease;
+}
+
+.progress-fill.done { background: var(--sage); }
+.progress-fill.new { background: var(--gold); }
+
+.progress-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--ink-3);
+  letter-spacing: 0.02em;
+}
+
+.progress-label strong { color: var(--ink); font-weight: 500; }
+.progress-label em { color: var(--sage); font-style: italic; }
+.progress-label em.new-tag { color: var(--gold); }
+
+.lib-foot {
+  padding: 32px 0 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 13px;
+  color: var(--ink-3);
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+/* Library stats strip */
+.lib-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0;
+  border-top: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+  margin-top: 48px;
+}
+
+@media (max-width: 720px) { .lib-stats { grid-template-columns: repeat(2, 1fr); } }
+
+.lib-stat {
+  padding: 24px 24px 24px 0;
+  border-right: 1px solid var(--rule);
+}
+.lib-stat:last-child { border-right: none; padding-right: 0; }
+
+.lib-stat-num {
+  font-family: var(--serif-display);
+  font-weight: 500;
+  font-size: 40px;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: var(--accent);
+  font-variation-settings: "opsz" 96;
+}
+
+.lib-stat-label {
+  font-size: 11px;
+  font-variant: small-caps;
+  letter-spacing: 0.1em;
+  color: var(--ink-3);
+  margin-top: 8px;
+}
+
+/* ============ Series detail ============ */
+.series-detail { padding-bottom: 80px; }
+
+.series-grid {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: 56px;
+  align-items: start;
+}
+
+@media (max-width: 900px) { .series-grid { grid-template-columns: 1fr; } }
+
+.prereq-panel {
+  background: var(--bg-2);
+  border: 1px solid var(--rule);
+  padding: 24px;
+  position: relative;
+}
+
+.prereq-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 16px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--rule);
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.prereq-title {
+  font-family: var(--serif-display);
+  font-weight: 500;
+  font-size: 16px;
+  letter-spacing: -0.01em;
+  font-style: italic;
+}
+
+.prereq-hint {
+  font-size: 11px;
+  color: var(--ink-3);
+  font-style: italic;
+}
+
+.prereq-svg {
+  width: 100%;
+  height: auto;
+  display: block;
+  font-family: var(--serif-body);
+}
+
+.prereq-svg .edge {
+  stroke: var(--rule);
+  stroke-width: 1;
+  fill: none;
+  transition: stroke 0.25s, opacity 0.25s, stroke-width 0.25s;
+}
+
+.prereq-svg .edge.dashed { stroke-dasharray: 4 3; }
+
+.prereq-svg .edge.highlighted {
+  stroke: var(--accent);
+  stroke-width: 2;
+  opacity: 1;
+}
+
+.prereq-svg .edge.dimmed { opacity: 0.1; }
+
+.prereq-svg .node {
+  cursor: pointer;
+  transition: opacity 0.25s;
+}
+
+.prereq-svg .node.dimmed { opacity: 0.25; }
+
+.prereq-svg .node-rect {
+  fill: var(--bg);
+  stroke: var(--ink-2);
+  stroke-width: 1;
+  transition: fill 0.25s, stroke 0.25s;
+}
+
+.prereq-svg .node.done .node-rect { fill: var(--sage); stroke: var(--sage); }
+.prereq-svg .node.current .node-rect { fill: var(--accent); stroke: var(--accent); }
+.prereq-svg .node.highlighted .node-rect { stroke: var(--accent); stroke-width: 2; }
+
+.prereq-svg .node-text {
+  font-family: var(--serif-display);
+  font-size: 13px;
+  font-weight: 500;
+  fill: var(--ink);
+  text-anchor: middle;
+  dominant-baseline: middle;
+  pointer-events: none;
+}
+
+.prereq-svg .node.done .node-text,
+.prereq-svg .node.current .node-text { fill: var(--bg); }
+
+.prereq-svg .node-label {
+  font-family: var(--serif-body);
+  font-size: 11px;
+  fill: var(--ink-2);
+  pointer-events: none;
+}
+
+.prereq-svg .node.done .node-label,
+.prereq-svg .node.current .node-label { fill: var(--ink); font-weight: 500; }
+
+.prereq-svg .node.current .node-label { font-style: italic; }
+
+.map-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  font-size: 11px;
+  color: var(--ink-3);
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--rule);
+  font-variant: small-caps;
+  letter-spacing: 0.04em;
+}
+
+.map-legend > * { display: flex; align-items: center; gap: 6px; }
+
+.legend-swatch {
+  width: 12px;
+  height: 12px;
+  border: 1px solid var(--ink-2);
+  background: var(--bg);
+}
+
+.legend-swatch.done { background: var(--sage); border-color: var(--sage); }
+.legend-swatch.current { background: var(--accent); border-color: var(--accent); }
+.legend-swatch.line { height: 2px; background: var(--ink-2); }
+.legend-swatch.line-dashed { height: 2px; background: repeating-linear-gradient(90deg, var(--ink-2) 0 4px, transparent 4px 7px); border: none; }
+
+.map-detail {
+  margin-top: 16px;
+  padding: 14px 16px;
+  background: var(--bg);
+  border-left: 2px solid var(--accent);
+  font-size: 13px;
+  color: var(--ink-2);
+  font-style: italic;
+  line-height: 1.5;
+  min-height: 24px;
+  transition: opacity 0.2s;
+}
+
+.map-detail .detail-label {
+  font-style: normal;
+  font-variant: small-caps;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+  font-size: 10px;
+  font-weight: 500;
+  display: block;
+  margin-bottom: 4px;
+}
+
+/* Chapter list panel */
+.chapter-list-panel { position: sticky; top: 130px; }
+
+.chapter-list-head {
+  font-size: 11px;
+  font-variant: small-caps;
+  letter-spacing: 0.12em;
+  color: var(--ink-3);
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--rule);
+  margin-bottom: 4px;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.chapter-list-head em { font-style: italic; font-size: 12px; font-variant: normal; letter-spacing: 0; }
+
+.chapter-list-items li {
+  display: grid;
+  grid-template-columns: 32px 1fr auto;
+  gap: 14px;
+  padding: 12px 0;
+  border-bottom: 1px dotted var(--rule);
+  align-items: baseline;
+  font-size: 14px;
+  transition: background 0.2s;
+  cursor: pointer;
+}
+
+.chapter-list-items li:hover { background: var(--bg-2); margin: 0 -8px; padding-left: 8px; padding-right: 8px; }
+
+.ch-num {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--ink-3);
+}
+
+.ch-state {
+  font-size: 10px;
+  font-variant: small-caps;
+  letter-spacing: 0.08em;
+  color: var(--ink-3);
+}
+
+.chapter-list-items li.done .ch-state { color: var(--sage); }
+.chapter-list-items li.current .ch-state { color: var(--accent); }
+.chapter-list-items li.current .ch-title { font-style: italic; color: var(--accent); }
+
+/* Series sidebar extras */
+.series-tools {
+  margin-top: 32px;
+  padding: 20px;
+  background: var(--bg-2);
+  border: 1px solid var(--rule);
+}
+
+.series-tools h4 {
+  font-family: var(--serif-display);
+  font-weight: 500;
+  font-size: 14px;
+  font-variant: small-caps;
+  letter-spacing: 0.08em;
+  color: var(--ink-3);
+  margin-bottom: 12px;
+}
+
+.series-tools a {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 0;
+  font-size: 13px;
+  color: var(--ink-2);
+  transition: color 0.2s;
+}
+
+.series-tools a:hover { color: var(--accent); }
+
+.series-tools a::before {
+  content: '→';
+  color: var(--accent);
+  font-family: var(--mono);
+}
+
+.series-note {
+  margin-top: 16px;
+  padding: 16px 20px;
+  background: rgba(168, 119, 20, 0.06);
+  border-left: 2px solid var(--gold);
+  font-size: 13px;
+  color: var(--ink-2);
+  line-height: 1.5;
+}
+
+.series-note em {
+  font-family: var(--serif-display);
+  font-style: italic;
+  color: var(--ink);
+  display: block;
+  margin-bottom: 4px;
+  font-size: 14px;
+}
+
+/* ============ Chapter ============ */
+.chapter { padding: 0 0 80px; border-top: 1px solid var(--rule); }
+
+.chapter-head {
+  padding: 72px 0 48px;
+  border-bottom: 1px solid var(--rule);
+  margin-bottom: 56px;
+}
+
+.chapter-eyebrow {
+  display: flex;
+  gap: 10px;
+  font-size: 11px;
+  font-variant: small-caps;
+  letter-spacing: 0.12em;
+  color: var(--accent);
+  margin-bottom: 18px;
+  align-items: baseline;
+  flex-wrap: wrap;
+}
+
+.chapter-eyebrow .dot { color: var(--rule); }
+.chapter-eyebrow .series-name { color: var(--ink-3); cursor: pointer; }
+.chapter-eyebrow .series-name:hover { color: var(--accent); }
+
+.chapter-title {
+  font-family: var(--serif-display);
+  font-weight: 500;
+  font-size: clamp(36px, 5vw, 60px);
+  line-height: 1.02;
+  letter-spacing: -0.025em;
+  margin-bottom: 22px;
+  max-width: 900px;
+  font-variation-settings: "opsz" 96;
+}
+
+.chapter-title em { font-style: italic; font-weight: 400; color: var(--accent); }
+
+.chapter-byline {
+  font-size: 14px;
+  color: var(--ink-3);
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  flex-wrap: wrap;
+}
+
+.chapter-byline em { color: var(--ink); font-style: italic; }
+
+.chapter-layout {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 64px;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .chapter-layout { grid-template-columns: 1fr; gap: 32px; }
+}
+
+/* TOC */
+.chapter-toc { position: sticky; top: 130px; align-self: start; }
+@media (max-width: 900px) { .chapter-toc { position: static; } }
+
+.toc-section { margin-bottom: 28px; }
+
+.toc-label {
+  font-size: 10px;
+  font-variant: small-caps;
+  letter-spacing: 0.12em;
+  color: var(--ink-3);
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--rule);
+  margin-bottom: 8px;
+}
+
+.toc-list li { padding: 6px 0; font-size: 13px; }
+.toc-list li a { color: var(--ink-2); transition: color 0.2s; display: block; padding-left: 12px; border-left: 2px solid transparent; line-height: 1.4; }
+.toc-list li a:hover { color: var(--accent); }
+.toc-list li.active a { color: var(--accent); border-left-color: var(--accent); font-weight: 500; }
+
+.checklist li {
+  display: grid;
+  grid-template-columns: 18px 1fr;
+  gap: 8px;
+  padding: 6px 0;
+  font-size: 13px;
+  color: var(--ink-2);
+  align-items: baseline;
+}
+
+.checklist li .check-box {
+  width: 12px;
+  height: 12px;
+  border: 1px solid var(--ink-3);
+  display: inline-block;
+  position: relative;
+  margin-top: 2px;
+  transition: all 0.3s;
+}
+
+.checklist li.checked .check-box { background: var(--sage); border-color: var(--sage); }
+.checklist li.checked .check-box::after {
+  content: '';
+  position: absolute;
+  left: 2px;
+  top: 0px;
+  width: 4px;
+  height: 8px;
+  border: solid var(--bg);
+  border-width: 0 1.5px 1.5px 0;
+  transform: rotate(45deg);
+}
+
+.checklist li.checked { color: var(--ink-3); text-decoration: line-through; text-decoration-color: var(--rule); }
+
+.checklist li.auto em {
+  font-style: italic;
+  font-size: 11px;
+  color: var(--ink-3);
+  display: block;
+}
+
+.checklist li.auto.celebrated .check-box {
+  background: var(--gold);
+  border-color: var(--gold);
+  animation: pop 0.5s ease;
+}
+
+@keyframes pop {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.5); }
+  100% { transform: scale(1); }
+}
+
+.mark-done-btn {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--ink);
+  background: var(--ink);
+  color: var(--bg);
+  font-size: 12px;
+  font-variant: small-caps;
+  letter-spacing: 0.08em;
+  transition: all 0.2s;
+  cursor: pointer;
+  font-family: var(--serif-body);
+}
+
+.mark-done-btn:hover { background: var(--accent); border-color: var(--accent); }
+.mark-done-btn.done { background: transparent; color: var(--sage); border-color: var(--sage); }
+
+/* Chapter body */
+.chapter-body {
+  max-width: 680px;
+  font-size: 18px;
+  line-height: 1.68;
+  color: var(--ink);
+}
+
+.chapter-body h3 {
+  font-family: var(--serif-display);
+  font-weight: 500;
+  font-size: 28px;
+  line-height: 1.15;
+  letter-spacing: -0.015em;
+  margin: 48px 0 16px;
+  font-variation-settings: "opsz" 48;
+  scroll-margin-top: 110px;
+}
+
+.chapter-body h3 .num {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--accent);
+  font-weight: 500;
+  letter-spacing: 0;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.chapter-body p { margin-bottom: 22px; }
+
+.chapter-body p:first-of-type::first-letter {
+  font-family: var(--serif-display);
+  font-weight: 700;
+  font-size: 64px;
+  float: left;
+  line-height: 0.85;
+  padding: 6px 8px 0 0;
+  color: var(--accent);
+  font-variation-settings: "opsz" 144;
+}
+
+.chapter-body code {
+  font-family: var(--mono);
+  font-size: 0.82em;
+  background: var(--bg-3);
+  padding: 1px 6px;
+  border-radius: 1px;
+  color: var(--accent);
+  letter-spacing: -0.01em;
+}
+
+[data-theme="dim"] .chapter-body code { color: var(--gold); }
+
+.chapter-body strong { color: var(--ink); font-weight: 600; }
+
+.code-block {
+  font-family: var(--mono);
+  font-size: 13px;
+  background: var(--bg-code);
+  padding: 18px 22px;
+  margin: 24px -22px;
+  border-left: 2px solid var(--accent);
+  overflow-x: auto;
+  line-height: 1.6;
+  color: var(--ink);
+  white-space: pre;
+}
+
+@media (max-width: 720px) { .code-block { margin: 24px 0; } }
+
+.code-block .kw { color: var(--accent); font-weight: 500; }
+.code-block .str { color: var(--sage); }
+.code-block .com { color: var(--ink-3); font-style: italic; }
+.code-block .num-lit { color: var(--gold); }
+
+[data-theme="dim"] .code-block .kw { color: var(--accent); }
+[data-theme="dim"] .code-block .str { color: var(--sage); }
+
+.pull-quote {
+  font-family: var(--serif-display);
+  font-style: italic;
+  font-weight: 400;
+  font-size: 24px;
+  line-height: 1.32;
+  margin: 36px 0;
+  padding: 0 0 0 24px;
+  border-left: 2px solid var(--accent);
+  color: var(--ink);
+  letter-spacing: -0.012em;
+  font-variation-settings: "opsz" 72;
+}
+
+.pull-quote-attr {
+  display: block;
+  font-size: 12px;
+  color: var(--ink-3);
+  font-style: normal;
+  margin-top: 12px;
+  font-variant: small-caps;
+  letter-spacing: 0.06em;
+  font-family: var(--serif-body);
+}
+
+/* ============ Playground ============ */
+.playground {
+  margin: 36px 0;
+  border: 1px solid var(--rule);
+  background: var(--bg-2);
+}
+
+.pg-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 12px 18px;
+  border-bottom: 1px solid var(--rule);
+  background: var(--bg);
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.pg-label {
+  font-size: 10px;
+  font-variant: small-caps;
+  letter-spacing: 0.12em;
+  color: var(--accent);
+  font-weight: 500;
+}
+
+.pg-title {
+  font-family: var(--serif-display);
+  font-style: italic;
+  font-size: 14px;
+  color: var(--ink-2);
+  font-weight: 400;
+}
+
+.pg-title strong { font-style: normal; font-weight: 500; color: var(--ink); }
+
+.pg-reset {
+  font-size: 10px;
+  font-variant: small-caps;
+  letter-spacing: 0.08em;
+  color: var(--ink-3);
+  border-bottom: 1px dotted var(--ink-3);
+  transition: color 0.2s;
+}
+.pg-reset:hover { color: var(--accent); border-color: var(--accent); }
+
+.pg-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: 240px;
+}
+
+@media (max-width: 720px) { .pg-grid { grid-template-columns: 1fr; } }
+
+.pg-code {
+  border-right: 1px solid var(--rule);
+  position: relative;
+  display: flex;
+}
+
+@media (max-width: 720px) { .pg-code { border-right: none; border-bottom: 1px solid var(--rule); } }
+
+.pg-input {
+  width: 100%;
+  font-family: var(--mono);
+  font-size: 13px;
+  line-height: 1.6;
+  background: var(--bg-code);
+  color: var(--ink);
+  border: none;
+  padding: 16px 18px;
+  resize: none;
+  outline: none;
+  min-height: 240px;
+  white-space: pre;
+  tab-size: 2;
+}
+
+.pg-input::placeholder { color: var(--ink-3); }
+
+.pg-output { display: flex; flex-direction: column; }
+
+.pg-output-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--ink-3);
+  padding: 8px 18px;
+  border-bottom: 1px solid var(--rule);
+  background: var(--bg);
+  font-variant: small-caps;
+  letter-spacing: 0.08em;
+}
+
+.pg-output-content {
+  font-family: var(--mono);
+  font-size: 13px;
+  line-height: 1.6;
+  padding: 16px 18px;
+  color: var(--ink-2);
+  white-space: pre-wrap;
+  word-break: break-word;
+  flex: 1;
+}
+
+.pg-output-content.error { color: var(--rust-red); }
+
+.pg-output-content .result-line { display: block; }
+.pg-output-content .result-line::before { content: '› '; color: var(--ink-3); }
+
+/* ============ Diff widget ============ */
+.diff-widget {
+  margin: 36px 0;
+  border: 1px solid var(--rule);
+  background: var(--bg-2);
+}
+
+.diff-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 12px 18px;
+  border-bottom: 1px solid var(--rule);
+  background: var(--bg);
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.diff-meta { display: flex; gap: 12px; align-items: baseline; flex-wrap: wrap; }
+
+.diff-label {
+  font-size: 10px;
+  font-variant: small-caps;
+  letter-spacing: 0.12em;
+  color: var(--gold);
+  font-weight: 500;
+}
+
+.diff-title {
+  font-family: var(--serif-display);
+  font-style: italic;
+  font-size: 14px;
+  color: var(--ink-2);
+  font-weight: 400;
+}
+
+.diff-action {
+  font-size: 12px;
+  padding: 6px 14px;
+  border: 1px solid var(--ink);
+  background: var(--ink);
+  color: var(--bg);
+  font-variant: small-caps;
+  letter-spacing: 0.08em;
+  transition: all 0.2s;
+  cursor: pointer;
+  font-family: var(--serif-body);
+  white-space: nowrap;
+}
+
+.diff-action:hover { background: var(--accent); border-color: var(--accent); }
+.diff-action.applied { background: transparent; color: var(--ink-3); border-color: var(--rule); }
+
+.diff-body {
+  padding: 0;
+  font-family: var(--mono);
+  font-size: 13px;
+  line-height: 1.65;
+  position: relative;
+  overflow: hidden;
+}
+
+.diff-line {
+  display: grid;
+  grid-template-columns: 32px 1fr;
+  padding: 0;
+  border-bottom: 1px dotted var(--rule-soft);
+  transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.diff-line:last-child { border-bottom: none; }
+
+.diff-line .gutter {
+  text-align: right;
+  padding: 4px 10px;
+  color: var(--ink-3);
+  font-size: 11px;
+  background: var(--bg);
+  border-right: 1px solid var(--rule-soft);
+  user-select: none;
+}
+
+.diff-line .code {
+  padding: 4px 14px;
+  white-space: pre;
+  overflow-x: auto;
+  color: var(--ink);
+}
+
+.diff-line.removed { background: rgba(176, 58, 46, 0.08); }
+.diff-line.removed .gutter::before { content: '-'; color: var(--rust-red); }
+.diff-line.removed .code { color: var(--rust-red); text-decoration: line-through; text-decoration-color: rgba(176, 58, 46, 0.4); }
+
+.diff-line.added { background: rgba(74, 124, 60, 0.08); }
+.diff-line.added .gutter::before { content: '+'; color: var(--rust-green); }
+.diff-line.added .code { color: var(--rust-green); }
+
+.diff-line.unchanged .gutter::before { content: ' '; }
+
+.diff-widget.collapsed .diff-line.removed {
+  max-height: 0;
+  opacity: 0;
+  padding: 0;
+  overflow: hidden;
+  border: none;
+}
+
+.diff-widget.collapsed .diff-line.added {
+  background: transparent;
+  color: var(--ink);
+}
+
+.diff-widget.collapsed .diff-line.added .gutter::before { content: ' '; color: var(--ink-3); }
+
+/* ============ Next chapter ============ */
+.next-up {
+  border-top: 1px solid var(--rule);
+  padding: 56px 0;
+  background: var(--bg-2);
+}
+
+.next-up-grid {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 32px;
+  align-items: end;
+}
+
+@media (max-width: 720px) { .next-up-grid { grid-template-columns: 1fr; } }
+
+.next-up-label {
+  font-size: 11px;
+  font-variant: small-caps;
+  letter-spacing: 0.12em;
+  color: var(--ink-3);
+  margin-bottom: 10px;
+}
+
+.next-up-title {
+  font-family: var(--serif-display);
+  font-weight: 500;
+  font-style: italic;
+  font-size: 28px;
+  letter-spacing: -0.015em;
+  margin-bottom: 8px;
+  font-variation-settings: "opsz" 48;
+}
+
+.next-up-meta { font-size: 13px; color: var(--ink-3); }
+
+.next-up-cta {
+  font-size: 14px;
+  color: var(--accent);
+  border-bottom: 1px solid var(--accent);
+  padding-bottom: 2px;
+  transition: opacity 0.2s;
+  cursor: pointer;
+}
+
+.next-up-cta:hover { opacity: 0.6; }
+
+/* ============ Discussion ============ */
+.discussion { padding: 80px 0; border-top: 1px solid var(--rule); }
+
+.discussion-grid {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 64px;
+}
+
+@media (max-width: 900px) {
+  .discussion-grid { grid-template-columns: 1fr; gap: 32px; }
+}
+
+.discussion-side { position: sticky; top: 130px; align-self: start; }
+@media (max-width: 900px) { .discussion-side { position: static; } }
+
+.discussion-side h3 {
+  font-family: var(--serif-display);
+  font-weight: 500;
+  font-size: 16px;
+  margin-bottom: 8px;
+  font-style: italic;
+}
+
+.discussion-side p {
+  font-size: 13px;
+  color: var(--ink-3);
+  line-height: 1.55;
+  margin-bottom: 16px;
+}
+
+.discussion-side .rules {
+  font-size: 12px;
+  color: var(--ink-2);
+  border-top: 1px solid var(--rule);
+  padding-top: 14px;
+}
+
+.discussion-side .rules li {
+  padding: 4px 0;
+  font-style: italic;
+  color: var(--ink-3);
+}
+
+.discussion-side .rules li::before { content: '— '; color: var(--accent); }
+
+.comment-compose {
+  display: grid;
+  grid-template-columns: 40px 1fr;
+  gap: 14px;
+  margin-bottom: 36px;
+  padding-bottom: 28px;
+  border-bottom: 1px solid var(--rule);
+}
+
+.compose-avatar {
+  width: 40px;
+  height: 40px;
+  background: var(--accent);
+  color: var(--bg);
+  display: grid;
+  place-items: center;
+  font-family: var(--serif-display);
+  font-weight: 500;
+  font-size: 14px;
+  letter-spacing: -0.02em;
+}
+
+.compose-body { display: flex; flex-direction: column; gap: 10px; }
+
+.compose-input {
+  width: 100%;
+  font-family: var(--serif-body);
+  font-size: 16px;
+  background: transparent;
+  color: var(--ink);
+  border: 1px solid var(--rule);
+  padding: 12px 14px;
+  resize: vertical;
+  min-height: 80px;
+  outline: none;
+  transition: border-color 0.2s;
+  line-height: 1.5;
+}
+
+.compose-input:focus { border-color: var(--accent); }
+.compose-input::placeholder { color: var(--ink-3); font-style: italic; }
+
+.compose-foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  color: var(--ink-3);
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.compose-submit {
+  padding: 7px 16px;
+  background: var(--ink);
+  color: var(--bg);
+  font-size: 12px;
+  font-variant: small-caps;
+  letter-spacing: 0.06em;
+  transition: background 0.2s;
+  cursor: pointer;
+  font-family: var(--serif-body);
+  border: none;
+}
+
+.compose-submit:hover { background: var(--accent); }
+
+.comment-list { display: flex; flex-direction: column; gap: 28px; }
+
+.comment {
+  display: grid;
+  grid-template-columns: 40px 1fr;
+  gap: 14px;
+}
+
+.comment-avatar {
+  width: 40px;
+  height: 40px;
+  background: var(--bg-3);
+  color: var(--ink-2);
+  display: grid;
+  place-items: center;
+  font-family: var(--serif-display);
+  font-weight: 500;
+  font-size: 14px;
+  border: 1px solid var(--rule);
+}
+
+.comment-body { font-size: 15px; }
+
+.comment-head {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  margin-bottom: 6px;
+  flex-wrap: wrap;
+}
+
+.comment-author { font-weight: 500; color: var(--ink); font-family: var(--serif-display); font-size: 15px; }
+
+.comment-badge {
+  font-size: 9px;
+  font-variant: small-caps;
+  letter-spacing: 0.08em;
+  padding: 2px 7px;
+  border: 1px solid var(--accent);
+  color: var(--accent);
+}
+
+.comment-badge.contrib { border-color: var(--sage); color: var(--sage); }
+
+.comment-meta { font-size: 12px; color: var(--ink-3); font-style: italic; }
+
+.comment-text { line-height: 1.55; color: var(--ink-2); }
+.comment-text code { font-family: var(--mono); font-size: 0.85em; background: var(--bg-3); padding: 1px 5px; color: var(--accent); }
+
+.comment-actions {
+  display: flex;
+  gap: 14px;
+  margin-top: 10px;
+  font-size: 12px;
+  color: var(--ink-3);
+}
+
+.comment-actions a { transition: color 0.2s; cursor: pointer; }
+.comment-actions a:hover { color: var(--accent); }
+
+.comment-replies {
+  margin-top: 18px;
+  padding-left: 24px;
+  border-left: 2px solid var(--rule);
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.comment-replies .comment { grid-template-columns: 32px 1fr; gap: 12px; }
+.comment-replies .comment-avatar { width: 32px; height: 32px; font-size: 12px; }
+.comment-replies .comment-text { font-size: 14px; }
+
+/* ============ Celebration ============ */
+.celebration {
+  position: fixed;
+  bottom: 32px;
+  right: 32px;
+  background: var(--bg-2);
+  border: 1px solid var(--gold);
+  padding: 20px 24px;
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  z-index: 200;
+  transform: translateY(140%);
+  transition: transform 0.5s cubic-bezier(0.2, 0.9, 0.3, 1.2);
+  box-shadow: 0 8px 32px rgba(168, 119, 20, 0.2);
+  max-width: 360px;
+}
+
+.celebration.show { transform: translateY(0); }
+
+.celebration-tick {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+}
+
+.celebration-tick path {
+  fill: none;
+  stroke: var(--gold);
+  stroke-width: 4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 80;
+  stroke-dashoffset: 80;
+}
+
+.celebration.show .celebration-tick path {
+  animation: drawTick 0.7s 0.2s ease-out forwards;
+}
+
+@keyframes drawTick {
+  to { stroke-dashoffset: 0; }
+}
+
+.celebration-text { display: flex; flex-direction: column; gap: 2px; }
+
+.celebration-title {
+  font-family: var(--serif-display);
+  font-weight: 500;
+  font-style: italic;
+  font-size: 16px;
+  color: var(--ink);
+}
+
+.celebration-sub {
+  font-size: 12px;
+  color: var(--ink-3);
+  font-family: var(--mono);
+}
+
+.celebration-close {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  font-size: 14px;
+  color: var(--ink-3);
+  line-height: 1;
+  padding: 4px;
+  cursor: pointer;
+}
+
+.celebration-close:hover { color: var(--accent); }
+
+.confetti-piece {
+  position: fixed;
+  width: 6px;
+  height: 10px;
+  pointer-events: none;
+  z-index: 199;
+  animation: confettiBurst 1.4s cubic-bezier(0.2, 0.6, 0.3, 1) forwards;
+}
+
+@keyframes confettiBurst {
+  0% { transform: translate(0, 0) rotate(0deg); opacity: 1; }
+  100% { transform: translate(var(--dx), var(--dy)) rotate(var(--rot)); opacity: 0; }
+}
+
+/* ============ Footer ============ */
+.colophon {
+  border-top: 1px solid var(--rule);
+  padding: 56px 0 32px;
+  background: var(--bg-2);
+}
+
+.colophon-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: 48px;
+  margin-bottom: 40px;
+}
+
+@media (max-width: 720px) {
+  .colophon-grid { grid-template-columns: 1fr 1fr; gap: 32px; }
+}
+
+.col-block h4 {
+  font-family: var(--serif-display);
+  font-weight: 500;
+  font-size: 11px;
+  font-variant: small-caps;
+  letter-spacing: 0.12em;
+  color: var(--accent);
+  margin-bottom: 12px;
+}
+
+.col-block p {
+  font-size: 13px;
+  color: var(--ink-2);
+  line-height: 1.55;
+}
+
+.col-block p em { font-style: italic; color: var(--ink); }
+
+.col-block ul li { padding: 3px 0; font-size: 13px; }
+.col-block ul li a { color: var(--ink-2); transition: color 0.2s; cursor: pointer; }
+.col-block ul li a:hover { color: var(--accent); }
+
+.colophon-foot {
+  border-top: 1px solid var(--rule);
+  padding-top: 18px;
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--ink-3);
+  font-variant: small-caps;
+  letter-spacing: 0.06em;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.colophon-mark {
+  font-family: var(--serif-display);
+  font-style: italic;
+  font-weight: 400;
+  font-size: 14px;
+  color: var(--accent);
+  font-variant: normal;
+  letter-spacing: 0;
+}
+
+/* ============ Reduced motion ============ */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+  html { scroll-behavior: auto; }
+}
+
+@media (pointer: coarse) {
+  .library-item:hover { background: transparent; margin: 0; padding: 28px 0; }
+  .aside-list li:hover { background: transparent; margin: 0; padding: 14px 0; }
+}
+
+@media (max-width: 480px) {
+  .primary-nav { gap: 16px; }
+  .primary-nav a:not(:last-of-type):not(.nav-link) { display: none; }
+  .hero-meta { grid-template-columns: 1fr 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- ============ Masthead ============ -->
+<header class="masthead">
+  <div class="wrap">
+    <div class="masthead-row">
+      <div class="brand" onclick="navigate('home')">
+        <span class="brand-mark">F.</span>
+        <span class="brand-name">Forge</span>
+        <span class="brand-tag">a serial publication for working programmers</span>
+      </div>
+      <nav class="primary-nav">
+        <button class="nav-link active" data-view="home" onclick="navigate('home')">Library</button>
+        <button class="nav-link" data-view="series" onclick="navigate('series')">Series</button>
+        <button class="nav-link" data-view="chapter" onclick="navigate('chapter')">Reading</button>
+        <button class="nav-link" data-view="discussion" onclick="navigate('discussion')">Marginalia</button>
+        <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
+          <span data-theme-label>dim</span>
+        </button>
+      </nav>
+    </div>
+    <div class="masthead-meta">
+      <span>Vol. III</span>
+      <span class="ornament">§</span>
+      <span>Issue 14</span>
+      <span class="ornament">§</span>
+      <span>Tuesday, 12 March 2024</span>
+      <span class="spacer"></span>
+      <span>Edited by H. Voss &amp; T. Klein, Brooklyn &amp; Lisbon</span>
+    </div>
+  </div>
+  <div class="progress-line" id="progress-line"></div>
+</header>
+
+<!-- ============================================== -->
+<!-- VIEW: HOME / LIBRARY                            -->
+<!-- ============================================== -->
+<section id="view-home" class="view active">
+
+<!-- ============ Hero ============ -->
+<section class="hero">
+  <div class="hero-deco">
+    Series on view<br>
+    Mar 11 — Apr 19
+  </div>
+  <div class="wrap">
+    <div class="hero-grid">
+      <div class="hero-main">
+        <div class="hero-eyebrow">
+          <span class="hero-label">Currently Serializing</span>
+          <span class="hero-marker">№ 5 of 9 · publishes Friday</span>
+        </div>
+        <h1 class="hero-title">
+          Systems Programming<br>
+          <em>in Rust.</em>
+        </h1>
+        <p class="hero-deck">
+          A nine-chapter deep dive into the machine layer — ownership, lifetimes,
+          async, unsafe, and the small bridges we build to C. Written for engineers
+          who already ship code in another language and want to understand Rust
+          from the metal up, not from the marketing down.
+        </p>
+        <div class="hero-meta">
+          <div class="meta-cell">
+            <span class="meta-label">Author</span>
+            <span class="meta-value">Helena Voss</span>
+            <span class="meta-sub">Ferrous Systems, Berlin</span>
+          </div>
+          <div class="meta-cell">
+            <span class="meta-label">Length</span>
+            <span class="meta-value">49,200 words</span>
+            <span class="meta-sub">≈ 4 hours reading</span>
+          </div>
+          <div class="meta-cell">
+            <span class="meta-label">Level</span>
+            <span class="meta-value">Advanced</span>
+            <span class="meta-sub">C / C++ helpful</span>
+          </div>
+        </div>
+        <div class="hero-actions">
+          <button class="btn-primary" onclick="navigate('chapter')">
+            Continue reading · Ch. 5
+            <span class="arrow">→</span>
+          </button>
+          <button class="btn-ghost" onclick="navigate('series')">View the chapter map</button>
+        </div>
+        <div class="hero-ornament">
+          <span>Issue 14 · set in Fraunces &amp; Newsreader</span>
+          <svg class="hero-ornament-svg" viewBox="0 0 80 24" fill="none">
+            <path d="M0 12 Q 20 0, 40 12 T 80 12" stroke="var(--accent)" stroke-width="1" fill="none"/>
+            <circle cx="40" cy="12" r="2" fill="var(--accent)"/>
+          </svg>
+        </div>
+      </div>
+      <aside class="hero-aside">
+        <div class="aside-head">
+          <span>This Week</span>
+          <em>five chapters, five series</em>
+        </div>
+        <ul class="aside-list">
+          <li onclick="navigate('chapter')">
+            <span class="aside-date">Mar 11</span>
+            <span class="aside-title">Ch. 4 · Error Handling <em>(Rust)</em></span>
+            <span class="aside-tag published">out</span>
+          </li>
+          <li onclick="navigate('chapter')">
+            <span class="aside-date">Mar 12</span>
+            <span class="aside-title">Ch. 7 · Streaming UI <em>(React)</em></span>
+            <span class="aside-tag published">out</span>
+          </li>
+          <li onclick="navigate('chapter')">
+            <span class="aside-date">Mar 13</span>
+            <span class="aside-title">Ch. 2 · Index Design <em>(Postgres)</em></span>
+            <span class="aside-tag published">out</span>
+          </li>
+          <li onclick="navigate('chapter')">
+            <span class="aside-date">Mar 14</span>
+            <span class="aside-title">Ch. 5 · Memory Models <em>(Go)</em></span>
+            <span class="aside-tag scheduled">scheduled</span>
+          </li>
+          <li onclick="navigate('chapter')">
+            <span class="aside-date">Mar 15</span>
+            <span class="aside-title">Ch. 5 · Concurrency <em>(Rust)</em></span>
+            <span class="aside-tag draft">Friday</span>
+          </li>
+        </ul>
+        <div class="aside-foot">Next issue · 19 March</div>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<!-- ============ Library ============ -->
+<section class="library" id="library">
+  <div class="wrap">
+    <div class="section-head">
+      <div>
+        <div class="section-eyebrow">II. The Library</div>
+        <h2 class="section-title">Thirty-one series, two hundred and forty-seven chapters. <em>Each one finished before it begins.</em></h2>
+        <p class="section-deck">A series is a sustained argument, not a stream of posts. Pick one and read it through; the prerequisites are mapped, not implied.</p>
+      </div>
+      <div class="filter-row">
+        <button class="filter active">All <span>31</span></button>
+        <button class="filter">In progress <span>7</span></button>
+        <button class="filter">Completed <span>11</span></button>
+        <button class="filter">New <span>3</span></button>
+      </div>
+    </div>
+
+    <div class="library-list">
+      <article class="library-item" onclick="navigate('series')">
+        <div class="lib-num">i.</div>
+        <div class="lib-body">
+          <h3 class="lib-title">Systems Programming in Rust</h3>
+          <p class="lib-desc">Ownership, lifetimes, async, unsafe, FFI — from the metal up. The series this issue is built around.</p>
+          <div class="lib-meta">
+            <span>Helena Voss</span><span class="dot">·</span>
+            <span>9 chapters</span><span class="dot">·</span>
+            <span>Advanced</span><span class="dot">·</span>
+            <span>49k words</span>
+          </div>
+        </div>
+        <div class="lib-progress">
+          <div class="progress-bar"><div class="progress-fill" style="width: 44%"></div></div>
+          <div class="progress-label"><strong>4</strong> / 9 read · 44%</div>
+        </div>
+      </article>
+
+      <article class="library-item" onclick="navigate('series')">
+        <div class="lib-num">ii.</div>
+        <div class="lib-body">
+          <h3 class="lib-title">Building a Compiler in OCaml</h3>
+          <p class="lib-desc">From lexer to LLVM IR, twelve chapters of working code. We end with a language that supports closures, pattern matching, and tail-call optimization.</p>
+          <div class="lib-meta">
+            <span>Tomás Klein</span><span class="dot">·</span>
+            <span>12 chapters</span><span class="dot">·</span>
+            <span>Advanced</span><span class="dot">·</span>
+            <span>71k words</span>
+          </div>
+        </div>
+        <div class="lib-progress">
+          <div class="progress-bar"><div class="progress-fill" style="width: 8%"></div></div>
+          <div class="progress-label"><strong>1</strong> / 12 read · 8%</div>
+        </div>
+      </article>
+
+      <article class="library-item" onclick="navigate('series')">
+        <div class="lib-num">iii.</div>
+        <div class="lib-body">
+          <h3 class="lib-title">Postgres, From the Inside</h3>
+          <p class="lib-desc">How a row becomes a query result. Buffer pool, WAL, the planner, MVCC — explained with reproducible experiments on a real database.</p>
+          <div class="lib-meta">
+            <span>Ines Magnúsdóttir</span><span class="dot">·</span>
+            <span>8 chapters</span><span class="dot">·</span>
+            <span>Intermediate</span>
+          </div>
+        </div>
+        <div class="lib-progress">
+          <div class="progress-bar"><div class="progress-fill done" style="width: 100%"></div></div>
+          <div class="progress-label"><strong>8</strong> / 8 read · <em>finished</em></div>
+        </div>
+      </article>
+
+      <article class="library-item" onclick="navigate('series')">
+        <div class="lib-num">iv.</div>
+        <div class="lib-body">
+          <h3 class="lib-title">Designing React Without Redux</h3>
+          <p class="lib-desc">A series on local state, suspense, server components, and the patterns that let you build real applications without a global store.</p>
+          <div class="lib-meta">
+            <span>Aaron Yeboah</span><span class="dot">·</span>
+            <span>10 chapters</span><span class="dot">·</span>
+            <span>Intermediate</span>
+          </div>
+        </div>
+        <div class="lib-progress">
+          <div class="progress-bar"><div class="progress-fill" style="width: 60%"></div></div>
+          <div class="progress-label"><strong>6</strong> / 10 read · 60%</div>
+        </div>
+      </article>
+
+      <article class="library-item" onclick="navigate('series')">
+        <div class="lib-num">v.</div>
+        <div class="lib-body">
+          <h3 class="lib-title">Memory Models in Go</h3>
+          <p class="lib-desc">The happens-before relation, why <code style="font-family:var(--mono);font-size:0.85em;background:var(--bg-3);padding:1px 4px;color:var(--accent);">atomic.Int64</code> is not a mutex, and how to write a lock-free queue without lying to yourself.</p>
+          <div class="lib-meta">
+            <span>Devansh Mehta</span><span class="dot">·</span>
+            <span>6 chapters</span><span class="dot">·</span>
+            <span>Advanced</span>
+          </div>
+        </div>
+        <div class="lib-progress">
+          <div class="progress-bar"><div class="progress-fill" style="width: 0%"></div></div>
+          <div class="progress-label"><strong>0</strong> / 6 · not started</div>
+        </div>
+      </article>
+
+      <article class="library-item" onclick="navigate('series')">
+        <div class="lib-num">vi.</div>
+        <div class="lib-body">
+          <h3 class="lib-title">A Year of CSS</h3>
+          <p class="lib-desc">Subgrid, container queries, cascade layers, the new color spaces. Forty-eight weekly chapters; each one a self-contained technique.</p>
+          <div class="lib-meta">
+            <span>Mira Cline</span><span class="dot">·</span>
+            <span>48 chapters</span><span class="dot">·</span>
+            <span>All levels</span>
+          </div>
+        </div>
+        <div class="lib-progress">
+          <div class="progress-bar"><div class="progress-fill" style="width: 23%"></div></div>
+          <div class="progress-label"><strong>11</strong> / 48 read · 23%</div>
+        </div>
+      </article>
+
+      <article class="library-item" onclick="navigate('series')">
+        <div class="lib-num">vii.</div>
+        <div class="lib-body">
+          <h3 class="lib-title">The C ORM You Don't Need</h3>
+          <p class="lib-desc">A series on writing database code in pure C — prepared statements, result mapping, migration handling. By the end you'll have written a 600-line library you understand completely.</p>
+          <div class="lib-meta">
+            <span>Pierre Aubin</span><span class="dot">·</span>
+            <span>5 chapters</span><span class="dot">·</span>
+            <span>Intermediate</span>
+          </div>
+        </div>
+        <div class="lib-progress">
+          <div class="progress-bar"><div class="progress-fill new" style="width: 0%"></div></div>
+          <div class="progress-label"><strong>0</strong> / 5 · <em class="new-tag">new</em></div>
+        </div>
+      </article>
+    </div>
+
+    <div class="lib-foot">
+      <span>Showing 7 of 31 series.</span>
+      <a style="color: var(--accent); border-bottom: 1px solid var(--accent); padding-bottom: 2px; cursor: pointer;">Browse the full library →</a>
+    </div>
+
+    <div class="lib-stats">
+      <div class="lib-stat">
+        <div class="lib-stat-num">31</div>
+        <div class="lib-stat-label">Active series</div>
+      </div>
+      <div class="lib-stat">
+        <div class="lib-stat-num">247</div>
+        <div class="lib-stat-label">Chapters total</div>
+      </div>
+      <div class="lib-stat">
+        <div class="lib-stat-num" style="color: var(--sage);">11</div>
+        <div class="lib-stat-label">Completed</div>
+      </div>
+      <div class="lib-stat">
+        <div class="lib-stat-num" style="color: var(--gold);">3</div>
+        <div class="lib-stat-label">New this quarter</div>
+      </div>
+    </div>
+  </div>
+</section>
+</section>
+
+<!-- ============================================== -->
+<!-- VIEW: SERIES DETAIL                             -->
+<!-- ============================================== -->
+<section id="view-series" class="view">
+<section class="series-detail" id="series-detail">
+  <div class="wrap">
+    <div class="section-head">
+      <div>
+        <div class="section-eyebrow">III. The Series Map</div>
+        <h2 class="section-title">Prerequisites, <em>made visible.</em></h2>
+        <p class="section-deck">Every series has a dependency graph. Hover a chapter to see what it requires and what it unlocks. Dashed lines are recommendations; solid lines are required.</p>
+      </div>
+    </div>
+
+    <div class="series-grid">
+      <div class="prereq-panel">
+        <div class="prereq-head">
+          <span class="prereq-title">Systems Programming in Rust · dependency graph</span>
+          <span class="prereq-hint">hover to trace</span>
+        </div>
+        <svg class="prereq-svg" viewBox="0 0 720 480" preserveAspectRatio="xMidYMid meet">
+          <g class="edges">
+            <line class="edge" data-from="1" data-to="2" x1="360" y1="50" x2="180" y2="140" />
+            <line class="edge" data-from="1" data-to="3" x1="360" y1="50" x2="540" y2="140" />
+            <line class="edge" data-from="2" data-to="4" x1="180" y1="140" x2="360" y2="230" />
+            <line class="edge" data-from="3" data-to="4" x1="540" y1="140" x2="360" y2="230" />
+            <line class="edge" data-from="2" data-to="7" x1="180" y1="140" x2="120" y2="320" />
+            <line class="edge" data-from="4" data-to="5" x1="360" y1="230" x2="540" y2="320" />
+            <line class="edge dashed" data-from="3" data-to="5" x1="540" y1="140" x2="540" y2="320" />
+            <line class="edge" data-from="5" data-to="6" x1="540" y1="320" x2="540" y2="410" />
+            <line class="edge" data-from="7" data-to="8" x1="120" y1="320" x2="120" y2="410" />
+            <line class="edge" data-from="4" data-to="9" x1="360" y1="230" x2="360" y2="410" />
+            <line class="edge" data-from="6" data-to="9" x1="540" y1="410" x2="360" y2="410" />
+            <line class="edge dashed" data-from="8" data-to="9" x1="120" y1="410" x2="360" y2="410" />
+          </g>
+          
+          <g class="nodes">
+            <g class="node done" data-id="1" data-title="Memory & Ownership" data-desc="The foundational chapter. Stack vs heap, move semantics, why Rust has no null." transform="translate(360,50)">
+              <rect class="node-rect" x="-18" y="-18" width="36" height="36" />
+              <text class="node-text" y="1">1</text>
+              <text class="node-label" x="0" y="-30" text-anchor="middle">Memory &amp; Ownership</text>
+            </g>
+            <g class="node done" data-id="2" data-title="Borrowing & Lifetimes" data-desc="References, the borrow checker's two rules, lifetime elision." transform="translate(180,140)">
+              <rect class="node-rect" x="-18" y="-18" width="36" height="36" />
+              <text class="node-text" y="1">2</text>
+              <text class="node-label" x="0" y="-30" text-anchor="middle">Borrowing &amp; Lifetimes</text>
+            </g>
+            <g class="node done" data-id="3" data-title="Traits & Generics" data-desc="Trait objects vs generics, monomorphization, dyn dispatch." transform="translate(540,140)">
+              <rect class="node-rect" x="-18" y="-18" width="36" height="36" />
+              <text class="node-text" y="1">3</text>
+              <text class="node-label" x="0" y="-30" text-anchor="middle">Traits &amp; Generics</text>
+            </g>
+            <g class="node done" data-id="4" data-title="Error Handling" data-desc="Result, ?, thiserror, anyhow — and when to use which." transform="translate(360,230)">
+              <rect class="node-rect" x="-18" y="-18" width="36" height="36" />
+              <text class="node-text" y="1">4</text>
+              <text class="node-label" x="0" y="-30" text-anchor="middle">Error Handling</text>
+            </g>
+            <g class="node current" data-id="5" data-title="Concurrency" data-desc="Threads, Mutex, Arc, scoped threads — the chapter you're reading now." transform="translate(540,320)">
+              <rect class="node-rect" x="-18" y="-18" width="36" height="36" />
+              <text class="node-text" y="1">5</text>
+              <text class="node-label" x="0" y="38" text-anchor="middle">Concurrency ← you are here</text>
+            </g>
+            <g class="node" data-id="6" data-title="Async & Await" data-desc="Futures, pinning, executors, and why async isn't threads." transform="translate(540,410)">
+              <rect class="node-rect" x="-18" y="-18" width="36" height="36" />
+              <text class="node-text" y="1">6</text>
+              <text class="node-label" x="0" y="38" text-anchor="middle">Async &amp; Await</text>
+            </g>
+            <g class="node" data-id="7" data-title="Unsafe Rust" data-desc="The four unsafe superpowers, when to reach for them, FFI." transform="translate(120,320)">
+              <rect class="node-rect" x="-18" y="-18" width="36" height="36" />
+              <text class="node-text" y="1">7</text>
+              <text class="node-label" x="0" y="-30" text-anchor="middle">Unsafe Rust</text>
+            </g>
+            <g class="node" data-id="8" data-title="FFI" data-desc="Calling C, being called by C, cbindgen, the ABI surface." transform="translate(120,410)">
+              <rect class="node-rect" x="-18" y="-18" width="36" height="36" />
+              <text class="node-text" y="1">8</text>
+              <text class="node-label" x="0" y="38" text-anchor="middle">FFI</text>
+            </g>
+            <g class="node" data-id="9" data-title="Shipping a CLI" data-desc="Capstone — bring it all together into a real shipped tool." transform="translate(360,410)">
+              <rect class="node-rect" x="-18" y="-18" width="36" height="36" />
+              <text class="node-text" y="1">9</text>
+              <text class="node-label" x="0" y="38" text-anchor="middle">Shipping a CLI</text>
+            </g>
+          </g>
+        </svg>
+        <div class="map-legend">
+          <span><span class="legend-swatch"></span>not started</span>
+          <span><span class="legend-swatch done"></span>read</span>
+          <span><span class="legend-swatch current"></span>current</span>
+          <span><span class="legend-swatch line"></span>required</span>
+          <span><span class="legend-swatch line-dashed"></span>recommended</span>
+        </div>
+        <div class="map-detail" id="map-detail">
+          <span class="detail-label">Hover a node</span>
+          <span id="map-detail-text">Move your cursor over any chapter in the graph to see its prerequisites and what it unlocks.</span>
+        </div>
+      </div>
+
+      <div>
+        <div class="chapter-list-panel">
+          <div class="chapter-list-head">
+            <span>Chapters</span>
+            <em>9 total</em>
+          </div>
+          <ol class="chapter-list-items">
+            <li class="done" onclick="navigate('chapter')"><span class="ch-num">01</span><span class="ch-title">Memory &amp; Ownership</span><span class="ch-state">read</span></li>
+            <li class="done" onclick="navigate('chapter')"><span class="ch-num">02</span><span class="ch-title">Borrowing &amp; Lifetimes</span><span class="ch-state">read</span></li>
+            <li class="done" onclick="navigate('chapter')"><span class="ch-num">03</span><span class="ch-title">Traits &amp; Generics</span><span class="ch-state">read</span></li>
+            <li class="done" onclick="navigate('chapter')"><span class="ch-num">04</span><span class="ch-title">Error Handling</span><span class="ch-state">read</span></li>
+            <li class="current" onclick="navigate('chapter')"><span class="ch-num">05</span><span class="ch-title">Concurrency</span><span class="ch-state">reading</span></li>
+            <li onclick="navigate('chapter')"><span class="ch-num">06</span><span class="ch-title">Async &amp; Await</span><span class="ch-state">locked</span></li>
+            <li onclick="navigate('chapter')"><span class="ch-num">07</span><span class="ch-title">Unsafe Rust</span><span class="ch-state">locked</span></li>
+            <li onclick="navigate('chapter')"><span class="ch-num">08</span><span class="ch-title">FFI</span><span class="ch-state">locked</span></li>
+            <li onclick="navigate('chapter')"><span class="ch-num">09</span><span class="ch-title">Shipping a CLI</span><span class="ch-state">locked</span></li>
+          </ol>
+        </div>
+
+        <div class="series-tools">
+          <h4>Series tools</h4>
+          <a>Download as PDF</a>
+          <a>RSS · Atom feed</a>
+          <a>Clone errata on GitHub</a>
+          <a>Bookmark this series</a>
+        </div>
+
+        <div class="series-note">
+          <em>Stuck on a chapter?</em>
+          Each chapter ends with a marginalia thread. Helena reads every note and replies within a day or two.
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+</section>
+
+<!-- ============================================== -->
+<!-- VIEW: CHAPTER                                   -->
+<!-- ============================================== -->
+<section id="view-chapter" class="view">
+<section class="chapter" id="chapter">
+  <div class="wrap">
+    <header class="chapter-head">
+      <div class="chapter-eyebrow">
+        <span class="series-name" onclick="navigate('series')">Systems Programming in Rust</span>
+        <span class="dot">·</span>
+        <span>Chapter 5 of 9</span>
+        <span class="dot">·</span>
+        <span>4,200 words</span>
+      </div>
+      <h2 class="chapter-title">Concurrency, <em>without the surprises.</em></h2>
+      <div class="chapter-byline">
+        By <em>Helena Voss</em> · published 15 March 2024 · revised once
+      </div>
+    </header>
+
+    <div class="chapter-layout">
+      <aside class="chapter-toc">
+        <div class="toc-section">
+          <div class="toc-label">On this page</div>
+          <ul class="toc-list" id="toc-list">
+            <li class="active"><a href="#h-1" data-target="h-1">The two cultures</a></li>
+            <li><a href="#h-2" data-target="h-2">Threads &amp; their cost</a></li>
+            <li><a href="#h-3" data-target="h-3">Try it yourself</a></li>
+            <li><a href="#h-4" data-target="h-4">From channels to scopes</a></li>
+            <li><a href="#h-5" data-target="h-5">When to use what</a></li>
+          </ul>
+        </div>
+        <div class="toc-section">
+          <div class="toc-label">Your progress</div>
+          <ul class="checklist" id="checklist">
+            <li class="checked" data-check="h-1"><span class="check-box"></span><span>Read §1 — the two cultures</span></li>
+            <li class="checked" data-check="h-2"><span class="check-box"></span><span>Read §2 — threads &amp; their cost</span></li>
+            <li data-check="h-3"><span class="check-box"></span><span>Run the playground</span></li>
+            <li data-check="h-4"><span class="check-box"></span><span>Apply the §4 refactor</span></li>
+            <li class="auto" id="auto-check" data-check="h-5"><span class="check-box"></span><span>Finish the chapter <em>(auto at 80%)</em></span></li>
+          </ul>
+        </div>
+        <div class="toc-section">
+          <button class="mark-done-btn" id="mark-done">Mark chapter complete</button>
+        </div>
+      </aside>
+
+      <article class="chapter-body">
+        <h3 id="h-1"><span class="num">§ 1.</span> The two cultures of concurrency</h3>
+        <p>There are two ways to write concurrent programs in Rust, and they have almost nothing in common. The first inherits from C: you spawn operating-system threads, share memory through <code>Mutex&lt;T&gt;</code> and <code>Arc&lt;T&gt;</code>, and reason about correctness the way you reason about a database transaction — by holding locks in a fixed order and hoping nobody reorders them six months from now.</p>
+        <p>The second inherits from Erlang: you create lightweight tasks, you send messages between them, and you never share mutable state at all. The compiler can prove this; the runtime can guarantee it.</p>
+        <p>Most teams pick one and stick with it. A few try to use both in the same codebase, and those teams usually end up writing two programs that happen to share a <code>Cargo.toml</code>. This chapter is about the first culture, because it is the harder one to learn, and the one the borrow checker was specifically designed to make safe.</p>
+
+        <h3 id="h-2"><span class="num">§ 2.</span> Threads, and what they cost</h3>
+        <p>A thread in Rust costs about eight kilobytes of stack on Linux, plus whatever the kernel allocates for its bookkeeping. That number is small enough that you can spawn thousands of them, and large enough that you should not spawn millions.</p>
+        <p>The cost you actually feel, though, is not the memory — it is the coordination. Every shared piece of state needs a lock, every lock needs a discipline, and every discipline is one rename away from a deadlock.</p>
+
+        <blockquote class="pull-quote">
+          Every lock needs a discipline. Every discipline is one rename away from a deadlock.
+          <span class="pull-quote-attr">— the first law of concurrent Rust</span>
+        </blockquote>
+
+        <p>Here is the smallest interesting example: ten threads incrementing a shared counter.</p>
+
+        <div class="code-block"><span class="kw">use</span> std::thread;
+<span class="kw">use</span> std::sync::{Arc, Mutex};
+
+<span class="kw">let</span> counter = Arc::new(Mutex::new(<span class="num-lit">0</span>));
+<span class="kw">let</span> <span class="kw">mut</span> handles = vec![];
+
+<span class="kw">for</span> _ <span class="kw">in</span> <span class="num-lit">0</span>..<span class="num-lit">10</span> {
+    <span class="kw">let</span> counter = Arc::clone(&counter);
+    handles.push(thread::spawn(<span class="kw">move</span> || {
+        <span class="kw">let</span> <span class="kw">mut</span> num = counter.lock().unwrap();
+        *num += <span class="num-lit">1</span>;
+    }));
+}
+
+<span class="kw">for</span> handle <span class="kw">in</span> handles {
+    handle.join().unwrap();
+}
+
+println!(<span class="str">"Result: {}"</span>, *counter.lock().unwrap());</div>
+
+        <p>The output is <code>10</code>, every time. That is the whole point. Swap <code>Mutex</code> for <code>RefCell</code> and the program will not compile; the borrow checker has your back. Drop the <code>Arc</code> and the program will not compile either; lifetime analysis has your back. The only thing the compiler cannot do is stop you from writing a deadlock — that one is on you.</p>
+
+        <h3 id="h-3"><span class="num">§ 3.</span> Try it yourself</h3>
+        <p>Rust does not run in this browser, but the analogous pattern in JavaScript does. Three jobs, dispatched concurrently. Edit the code below — the output updates as you type. Try changing the order of the array, or replacing <code>map</code> with a sequential loop and watch the output ordering change.</p>
+
+        <div class="playground">
+          <div class="pg-head">
+            <span class="pg-label">Live · JavaScript</span>
+            <span class="pg-title"><strong>Three jobs, run concurrently.</strong> <em>The same pattern, runnable.</em></span>
+            <button class="pg-reset" id="pg-reset">reset</button>
+          </div>
+          <div class="pg-grid">
+            <div class="pg-code">
+              <textarea class="pg-input" id="pg-input" spellcheck="false">// Three jobs, run concurrently.
+// Try editing the timings or results.
+
+const jobs = [
+  { name: "fetch user",     ms: 12 },
+  { name: "fetch posts",    ms: 48 },
+  { name: "fetch comments", ms: 23 }
+];
+
+const runJob = (job) => 
+  `${job.name} → ${job.ms}ms`;
+
+// Run all, gather results in order
+const results = jobs.map(runJob);
+
+console.log("jobs:", results.length);
+console.log("first:", results[0]);
+console.log("all:", results.join(", "));</textarea>
+            </div>
+            <div class="pg-output">
+              <div class="pg-output-label">stdout</div>
+              <pre class="pg-output-content" id="pg-output"></pre>
+            </div>
+          </div>
+        </div>
+
+        <p>If the playground feels pedestrian — three jobs, three results — that is the point. The interesting line is the one you do not see: <em>no thread ever read another thread's half-written data</em>. In Rust that is a compile-time guarantee. In JavaScript it is a single-threaded runtime. Both work; only one scales to eight cores without you noticing.</p>
+
+        <h3 id="h-4"><span class="num">§ 4.</span> From channels to scoped threads</h3>
+        <p>Channels work, but for short-lived threads they are more machinery than the job needs. Rust 1.63 introduced scoped threads, which let you borrow from the parent scope without channels or <code>Arc</code>. Click <em>apply</em> below to watch the refactor happen — the removed lines collapse, the added lines lose their highlight, and you're left with the equivalent program in less code.</p>
+
+        <div class="diff-widget" id="diff-widget">
+          <div class="diff-head">
+            <div class="diff-meta">
+              <span class="diff-label">Refactor · Rust 1.63+</span>
+              <span class="diff-title">From channels to scoped threads — same semantics, half the code.</span>
+            </div>
+            <button class="diff-action" id="diff-action">apply change →</button>
+          </div>
+          <div class="diff-body">
+            <div class="diff-line removed"><span class="gutter"></span><span class="code"><span class="kw">let</span> (tx, rx) = mpsc::channel();</span></div>
+            <div class="diff-line removed"><span class="gutter"></span><span class="code"><span class="kw">let</span> h = thread::spawn(<span class="kw">move</span> || {</span></div>
+            <div class="diff-line removed"><span class="gutter"></span><span class="code">    tx.send(<span class="str">"hello"</span>).unwrap();</span></div>
+            <div class="diff-line removed"><span class="gutter"></span><span class="code">});</span></div>
+            <div class="diff-line removed"><span class="gutter"></span><span class="code">println!(<span class="str">"{}"</span>, rx.recv().unwrap());</span></div>
+            <div class="diff-line removed"><span class="gutter"></span><span class="code">h.join().unwrap();</span></div>
+            <div class="diff-line added"><span class="gutter"></span><span class="code">thread::scope(|s| {</span></div>
+            <div class="diff-line added"><span class="gutter"></span><span class="code">    <span class="kw">let</span> h = s.spawn(|| <span class="str">"hello"</span>);</span></div>
+            <div class="diff-line added"><span class="gutter"></span><span class="code">    println!(<span class="str">"{}"</span>, h.join().unwrap());</span></div>
+            <div class="diff-line added"><span class="gutter"></span><span class="code">});</span></div>
+            <div class="diff-line unchanged"><span class="gutter"></span><span class="code"><span class="com">// both versions print: hello</span></span></div>
+          </div>
+        </div>
+
+        <p>The right side borrows <code>"hello"</code> directly from the parent scope. The compiler can prove the threads will not outlive the scope, so no channel, no <code>Arc</code>, no clone. Six lines become four, and the type system did the audit for you.</p>
+
+        <h3 id="h-5"><span class="num">§ 5.</span> When to use what</h3>
+        <p>After six years of writing concurrent Rust in production, my rule of thumb is small enough to fit on a sticky note:</p>
+        <p>If the work is independent and CPU-bound, use <code>rayon</code>. If the work is I/O-bound, use async. If you are sharing a small piece of state across threads, use <code>Mutex</code>. If you are sharing a lot of state, redesign until you aren't.</p>
+        <p>That last rule is the most important one in this chapter. The borrow checker will not let you write a data race, but it will happily let you write a program that is correct and slow — a program that spends half its runtime acquiring locks it didn't need, and the other half waiting on channels it didn't need either. Concurrency is not a feature you add. It is a structure you choose, and the best choice is almost always the smallest one.</p>
+        <p>Chapter 6 takes the other culture — async — and shows why it is not, as the docs sometimes suggest, just "threads but cheaper."</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ============ Next up ============ -->
+<section class="next-up">
+  <div class="wrap">
+    <div class="next-up-grid">
+      <div>
+        <div class="next-up-label">Next in this series · Chapter 6 of 9</div>
+        <h3 class="next-up-title">Async &amp; Await — the same problem, smaller stacks.</h3>
+        <div class="next-up-meta">Publishes 22 March · Helena Voss · 5,100 words</div>
+      </div>
+      <a class="next-up-cta" onclick="showToast('Chapter 6 reserved — we\'ll notify you on the 22nd.')">reserve the chapter →</a>
+    </div>
+  </div>
+</section>
+
+<!-- ============ Discussion ============ -->
+<section class="discussion" id="discussion">
+  <div class="wrap">
+    <div class="section-head" style="padding-top: 0;">
+      <div>
+        <div class="section-eyebrow">V. Marginalia</div>
+        <h2 class="section-title">Reader notes on Chapter 5 · <em>23 so far.</em></h2>
+      </div>
+    </div>
+
+    <div class="discussion-grid">
+      <aside class="discussion-side">
+        <h3>The house rules</h3>
+        <p>Comments on Forge are read by the author before they appear. We are not optimizing for engagement; we are optimizing for the reader six months from now who finds this thread via search.</p>
+        <ul class="rules">
+          <li>Cite the paragraph you're responding to.</li>
+          <li>If you found a bug in the code, file it on the errata page.</li>
+          <li>Disagree without dismissing.</li>
+        </ul>
+      </aside>
+
+      <div class="discussion-main">
+        <div class="comment-compose">
+          <div class="compose-avatar">YO</div>
+          <div class="compose-body">
+            <textarea class="compose-input" id="compose-input" placeholder="Add a note, a correction, or a question about Chapter 5. Markdown supported."></textarea>
+            <div class="compose-foot">
+              <span>Cite line numbers when possible. Be kind.</span>
+              <button class="compose-submit" id="compose-submit">submit note</button>
+            </div>
+          </div>
+        </div>
+
+        <ul class="comment-list">
+          <li class="comment">
+            <div class="comment-avatar">LP</div>
+            <div class="comment-body">
+              <div class="comment-head">
+                <span class="comment-author">Lia Park</span>
+                <span class="comment-badge">reader</span>
+                <span class="comment-meta">3 days ago</span>
+              </div>
+              <p class="comment-text">The "one rename away from a deadlock" line is going on the wall. I've spent two weeks debugging exactly that — someone renamed a method, the lock order in the call site flipped, and CI didn't catch it because the deadlock only triggered under load.</p>
+              <div class="comment-actions">
+                <a>↑ 47</a>
+                <a>reply</a>
+                <a>cite §2</a>
+              </div>
+              <ul class="comment-replies">
+                <li class="comment">
+                  <div class="comment-avatar">HV</div>
+                  <div class="comment-body">
+                    <div class="comment-head">
+                      <span class="comment-author">Helena Voss</span>
+                      <span class="comment-badge">author</span>
+                      <span class="comment-meta">2 days ago</span>
+                    </div>
+                    <p class="comment-text">Thank you, Lia. The standard remedy is to make the lock order a property of the type system — wrap the locks in newtypes with an explicit <code>Order</code> trait, and the rename becomes a compile error. I should have mentioned this in §2; I'll add it to the errata.</p>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </li>
+
+          <li class="comment">
+            <div class="comment-avatar">FR</div>
+            <div class="comment-body">
+              <div class="comment-head">
+                <span class="comment-author">Felix Reuter</span>
+                <span class="comment-badge contrib">contributor</span>
+                <span class="comment-meta">2 days ago</span>
+              </div>
+              <p class="comment-text">Question on §4: with scoped threads, what happens if the spawned thread panics? With the channel version, the <code>recv()</code> would return an error; with the scoped version, does <code>join()</code> return the <code>Result</code>?</p>
+              <div class="comment-actions">
+                <a>↑ 12</a>
+                <a>reply</a>
+                <a>cite §4</a>
+              </div>
+              <ul class="comment-replies">
+                <li class="comment">
+                  <div class="comment-avatar">HV</div>
+                  <div class="comment-body">
+                    <div class="comment-head">
+                      <span class="comment-author">Helena Voss</span>
+                      <span class="comment-badge">author</span>
+                      <span class="comment-meta">2 days ago</span>
+                    </div>
+                    <p class="comment-text">Yes — <code>ScopedJoinHandle::join</code> returns <code>Result&lt;T, Box&lt;dyn Any&gt;&gt;</code>, same as the unscoped version. The difference is that the panic is guaranteed to be observed before the scope returns, which is the property that lets you skip the channel.</p>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </li>
+
+          <li class="comment">
+            <div class="comment-avatar">PA</div>
+            <div class="comment-body">
+              <div class="comment-head">
+                <span class="comment-author">Pierre Aubin</span>
+                <span class="comment-meta">1 day ago</span>
+              </div>
+              <p class="comment-text">Minor nit on the 8KB stack figure — Linux default is 8MB <em>virtual</em>, but only ~4KB committed per thread on x86_64 until the thread actually uses it. So the memory cost of an idle thread is closer to 4KB than 8KB. The 8KB number is the right one to quote for "how much do I pay if the thread actually runs", which is what you meant.</p>
+              <div class="comment-actions">
+                <a>↑ 23</a>
+                <a>reply</a>
+                <a>cite §2</a>
+              </div>
+            </div>
+          </li>
+
+          <li class="comment">
+            <div class="comment-avatar">DM</div>
+            <div class="comment-body">
+              <div class="comment-head">
+                <span class="comment-author">Devansh Mehta</span>
+                <span class="comment-meta">14 hours ago</span>
+              </div>
+              <p class="comment-text">I'd push back gently on "redesign until you aren't [sharing state]". Sometimes the shared state <em>is</em> the program — a cache, an in-memory index, a connection pool. The question isn't whether to share, it's whether the sharing is in the hot path. If it is, fine, take the lock; if it isn't, move it out of the locked region.</p>
+              <div class="comment-actions">
+                <a>↑ 8</a>
+                <a>reply</a>
+                <a>cite §5</a>
+              </div>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+</section>
+
+<!-- ============================================== -->
+<!-- VIEW: MARGINALIA (discussion-only shortcut)     -->
+<!-- ============================================== -->
+<section id="view-discussion" class="view">
+<section class="discussion" style="padding-top: 80px;">
+  <div class="wrap">
+    <div class="section-head" style="padding-top: 0;">
+      <div>
+        <div class="section-eyebrow">V. Marginalia</div>
+        <h2 class="section-title">Reader notes across all series · <em>this week.</em></h2>
+        <p class="section-deck">A snapshot of the most-cited marginalia from the last seven days. Click any thread to jump to the chapter.</p>
+      </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 220px; gap: 64px; align-items: start;">
+      <div class="discussion-main">
+        <ul class="comment-list">
+          <li class="comment" onclick="navigate('chapter')" style="cursor: pointer;">
+            <div class="comment-avatar">LP</div>
+            <div class="comment-body">
+              <div class="comment-head">
+                <span class="comment-author">Lia Park</span>
+                <span class="comment-badge">on Ch.5 · Concurrency</span>
+                <span class="comment-meta">3 days ago</span>
+              </div>
+              <p class="comment-text">The "one rename away from a deadlock" line is going on the wall. I've spent two weeks debugging exactly that — someone renamed a method, the lock order in the call site flipped, and CI didn't catch it because the deadlock only triggered under load.</p>
+              <div class="comment-actions">
+                <a>↑ 47</a>
+                <a>cite §2</a>
+              </div>
+            </div>
+          </li>
+          <li class="comment" onclick="navigate('chapter')" style="cursor: pointer;">
+            <div class="comment-avatar">IM</div>
+            <div class="comment-body">
+              <div class="comment-head">
+                <span class="comment-author">Ines Magnúsdóttir</span>
+                <span class="comment-badge">on Ch.2 · Index Design</span>
+                <span class="comment-meta">2 days ago</span>
+              </div>
+              <p class="comment-text">The buffer-pool diagram in §3 finally made MVCC click for me. One question: when you say "the planner chooses a sequential scan even when an index exists", does that depend on the visibility map, or purely on row count estimates?</p>
+              <div class="comment-actions">
+                <a>↑ 31</a>
+                <a>cite §3</a>
+              </div>
+            </div>
+          </li>
+          <li class="comment" onclick="navigate('chapter')" style="cursor: pointer;">
+            <div class="comment-avatar">TK</div>
+            <div class="comment-body">
+              <div class="comment-head">
+                <span class="comment-author">Tomás Klein</span>
+                <span class="comment-badge contrib">contributor</span>
+                <span class="comment-meta">4 days ago</span>
+              </div>
+              <p class="comment-text">A small correction on the OCaml compiler series, Ch.7 — the closure conversion step should hoist <code>free_vars</code> out of the inner loop, not recompute per-branch. The published code is O(n²) on nested matches. Fix is in the errata.</p>
+              <div class="comment-actions">
+                <a>↑ 19</a>
+                <a>cite §7</a>
+              </div>
+            </div>
+          </li>
+          <li class="comment" onclick="navigate('chapter')" style="cursor: pointer;">
+            <div class="comment-avatar">MC</div>
+            <div class="comment-body">
+              <div class="comment-head">
+                <span class="comment-author">Mira Cline</span>
+                <span class="comment-badge">on Ch.14 · Cascade Layers</span>
+                <span class="comment-meta">5 days ago</span>
+              </div>
+              <p class="comment-text">Tested <code>@layer</code> across Safari 17.2, Firefox 122, Chrome 121 — all stable. The one surprise: <code>revert-layer</code> behaves differently in Firefox when the layer is empty. Filed a bug; will report back.</p>
+              <div class="comment-actions">
+                <a>↑ 14</a>
+                <a>cite §2</a>
+              </div>
+            </div>
+          </li>
+        </ul>
+      </div>
+
+      <aside class="discussion-side">
+        <h3>By series</h3>
+        <p>Where this week's marginalia landed.</p>
+        <ul class="rules">
+          <li>Rust · 8 notes</li>
+          <li>Postgres · 5 notes</li>
+          <li>OCaml Compiler · 4 notes</li>
+          <li>CSS · 3 notes</li>
+          <li>React · 2 notes</li>
+          <li>Go Memory · 1 note</li>
+        </ul>
+      </aside>
+    </div>
+  </div>
+</section>
+</section>
+
+<!-- ============ Colophon ============ -->
+<footer class="colophon">
+  <div class="wrap">
+    <div class="colophon-grid">
+      <div class="col-block">
+        <h4>Colophon</h4>
+        <p>Set in <em>Fraunces</em> for display, <em>Newsreader</em> for body, and <em>JetBrains Mono</em> for code. Composed in a single HTML file with vanilla CSS and JavaScript — no build step, no framework, no tracking. Source on request.</p>
+      </div>
+      <div class="col-block">
+        <h4>Masthead</h4>
+        <p><em>Helena Voss</em>, editor.<br><em>Tomás Klein</em>, contributing editor.<br>Mira Cline, copy.</p>
+      </div>
+      <div class="col-block">
+        <h4>Subscribe</h4>
+        <ul>
+          <li><a>RSS · Atom</a></li>
+          <li><a>Email (Tuesdays)</a></li>
+          <li><a>PDF edition</a></li>
+        </ul>
+      </div>
+      <div class="col-block">
+        <h4>Errata</h4>
+        <p>Found a mistake? <a style="color:var(--accent);border-bottom:1px solid var(--accent);cursor:pointer;">File a correction.</a> We publish a list every quarter and credit the reader.</p>
+      </div>
+    </div>
+    <div class="colophon-foot">
+      <span>Forge · Vol. III · Issue 14 · 12 March 2024</span>
+      <span class="colophon-mark">— set in Brooklyn &amp; Lisbon —</span>
+      <span>© 2024 Forge Press</span>
+    </div>
+  </div>
+</footer>
+
+<!-- Celebration toast -->
+<div class="celebration" id="celebration">
+  <button class="celebration-close" id="celebration-close" aria-label="Dismiss">×</button>
+  <svg class="celebration-tick" viewBox="0 0 50 50">
+    <path d="M 10 28 L 22 40 L 42 14" />
+  </svg>
+  <div class="celebration-text">
+    <span class="celebration-title">Chapter 5 — read.</span>
+    <span class="celebration-sub">5 of 9 · 56% through the series</span>
+  </div>
+</div>
+
+<script>
+(function() {
+  'use strict';
+
+  /* ============ Theme toggle ============ */
+  const root = document.documentElement;
+  const toggle = document.getElementById('theme-toggle');
+  const label = toggle.querySelector('[data-theme-label]');
+  
+  const saved = localStorage.getItem('forge-theme');
+  if (saved) {
+    root.setAttribute('data-theme', saved);
+    label.textContent = saved === 'dim' ? 'light' : 'dim';
+  }
+  
+  toggle.addEventListener('click', () => {
+    const current = root.getAttribute('data-theme');
+    const next = current === 'dim' ? 'light' : 'dim';
+    root.setAttribute('data-theme', next);
+    label.textContent = next === 'dim' ? 'light' : 'dim';
+    localStorage.setItem('forge-theme', next);
+  });
+
+  /* ============ View switching ============ */
+  window.navigate = function(view) {
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    const target = document.getElementById('view-' + view);
+    if (target) target.classList.add('active');
+    
+    document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+    const navEl = document.querySelector(`.nav-link[data-view="${view}"]`);
+    if (navEl) navEl.classList.add('active');
+    
+    window.scrollTo({ top: 0, behavior: 'instant' });
+    
+    // Re-init chapter interactions if entering chapter view
+    if (view === 'chapter') {
+      setTimeout(() => {
+        if (!chapterInited) {
+          initChapterInteractions();
+          chapterInited = true;
+        }
+        runPlayground();
+        updateProgress();
+      }, 50);
+    }
+  };
+
+  /* ============ Reading progress bar ============ */
+  const progressLine = document.getElementById('progress-line');
+  const chapter = document.getElementById('chapter');
+  
+  function updateProgress() {
+    if (!chapter) return;
+    if (!document.getElementById('view-chapter').classList.contains('active')) {
+      progressLine.style.width = '0%';
+      return;
+    }
+    const rect = chapter.getBoundingClientRect();
+    const total = rect.height - window.innerHeight;
+    if (total <= 0) {
+      progressLine.style.width = '100%';
+      return;
+    }
+    const scrolled = Math.max(0, -rect.top);
+    const pct = Math.max(0, Math.min(1, scrolled / total));
+    progressLine.style.width = (pct * 100) + '%';
+  }
+  
+  window.addEventListener('scroll', updateProgress, { passive: true });
+
+  /* ============ Prereq map interactions ============ */
+  const svg = document.querySelector('.prereq-svg');
+  if (svg) {
+    const nodes = svg.querySelectorAll('.node');
+    const edges = svg.querySelectorAll('.edge');
+    const mapDetailText = document.getElementById('map-detail-text');
+    const adj = {
+      '1': ['2', '3'],
+      '2': ['1', '4', '7'],
+      '3': ['1', '4', '5'],
+      '4': ['2', '3', '5', '9'],
+      '5': ['3', '4', '6', '9'],
+      '6': ['5', '9'],
+      '7': ['2', '8'],
+      '8': ['7', '9'],
+      '9': ['4', '6', '8']
+    };
+
+    function highlight(id) {
+      const node = svg.querySelector(`.node[data-id="${id}"]`);
+      if (!node) return;
+      const title = node.dataset.title;
+      const desc = node.dataset.desc;
+      const connected = adj[id] || [];
+      
+      nodes.forEach(n => {
+        const nid = n.dataset.id;
+        if (nid === id || connected.includes(nid)) {
+          n.classList.add('highlighted');
+          n.classList.remove('dimmed');
+        } else {
+          n.classList.add('dimmed');
+          n.classList.remove('highlighted');
+        }
+      });
+      edges.forEach(e => {
+        if (e.dataset.from === id || e.dataset.to === id) {
+          e.classList.add('highlighted');
+          e.classList.remove('dimmed');
+        } else {
+          e.classList.add('dimmed');
+          e.classList.remove('highlighted');
+        }
+      });
+      
+      if (mapDetailText) {
+        mapDetailText.textContent = desc;
+        const label = document.querySelector('.map-detail .detail-label');
+        if (label) label.textContent = 'Ch. ' + id + ' · ' + title;
+      }
+    }
+
+    function clearHighlight() {
+      nodes.forEach(n => { n.classList.remove('highlighted', 'dimmed'); });
+      edges.forEach(e => { e.classList.remove('highlighted', 'dimmed'); });
+      const label = document.querySelector('.map-detail .detail-label');
+      if (label) label.textContent = 'Hover a node';
+      if (mapDetailText) mapDetailText.textContent = 'Move your cursor over any chapter in the graph to see its prerequisites and what it unlocks.';
+    }
+
+    nodes.forEach(node => {
+      node.addEventListener('mouseenter', () => highlight(node.dataset.id));
+      node.addEventListener('mouseleave', clearHighlight);
+      node.addEventListener('focus', () => highlight(node.dataset.id));
+      node.addEventListener('blur', clearHighlight);
+      node.setAttribute('tabindex', '0');
+    });
+  }
+
+  /* ============ Playground ============ */
+  const pgInput = document.getElementById('pg-input');
+  const pgOutput = document.getElementById('pg-output');
+  const pgReset = document.getElementById('pg-reset');
+  const defaultCode = pgInput.value;
+  
+  function runPlayground() {
+    if (!pgInput) return;
+    const code = pgInput.value;
+    const lines = [];
+    const fakeConsole = {
+      log: (...args) => {
+        const formatted = args.map(a => {
+          if (a === null) return 'null';
+          if (a === undefined) return 'undefined';
+          if (typeof a === 'string') return a;
+          try { return JSON.stringify(a); } catch(e) { return String(a); }
+        }).join(' ');
+        lines.push(formatted);
+      },
+      error: (...args) => lines.push('Error: ' + args.join(' ')),
+      warn: (...args) => lines.push('Warning: ' + args.join(' '))
+    };
+    
+    try {
+      const fn = new Function('console', code);
+      fn(fakeConsole);
+      pgOutput.classList.remove('error');
+      pgOutput.innerHTML = lines.length 
+        ? lines.map(l => `<span class="result-line">${escapeHtml(l)}</span>`).join('')
+        : '<span style="color: var(--ink-3); font-style: italic;">(no output)</span>';
+    } catch (e) {
+      pgOutput.classList.add('error');
+      pgOutput.textContent = '→ ' + e.message;
+    }
+  }
+  
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+  
+  let pgTimer;
+  pgInput.addEventListener('input', () => {
+    clearTimeout(pgTimer);
+    pgTimer = setTimeout(runPlayground, 80);
+    // Auto-mark the playground checklist item
+    markCheck('h-3');
+  });
+  
+  pgInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      const start = pgInput.selectionStart;
+      const end = pgInput.selectionEnd;
+      pgInput.value = pgInput.value.substring(0, start) + '  ' + pgInput.value.substring(end);
+      pgInput.selectionStart = pgInput.selectionEnd = start + 2;
+      runPlayground();
+    }
+  });
+  
+  if (pgReset) {
+    pgReset.addEventListener('click', () => {
+      pgInput.value = defaultCode;
+      runPlayground();
+    });
+  }
+
+  /* ============ Diff widget ============ */
+  const diffWidget = document.getElementById('diff-widget');
+  const diffAction = document.getElementById('diff-action');
+  let diffApplied = false;
+  
+  diffAction.addEventListener('click', () => {
+    diffApplied = !diffApplied;
+    if (diffApplied) {
+      diffWidget.classList.add('collapsed');
+      diffAction.textContent = 'reset ←';
+      diffAction.classList.add('applied');
+      markCheck('h-4');
+      showToast('Refactor applied — 6 lines became 4.');
+    } else {
+      diffWidget.classList.remove('collapsed');
+      diffAction.textContent = 'apply change →';
+      diffAction.classList.remove('applied');
+    }
+  });
+
+  /* ============ Sticky TOC active heading ============ */
+  const headings = document.querySelectorAll('.chapter-body h3');
+  const tocLinks = document.querySelectorAll('#toc-list li');
+  
+  const headingObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const id = entry.target.id;
+        tocLinks.forEach(li => {
+          const link = li.querySelector('a');
+          if (link && link.dataset.target === id) {
+            li.classList.add('active');
+          } else {
+            li.classList.remove('active');
+          }
+        });
+        // Mark the corresponding checklist item
+        if (id) markCheck(id);
+      }
+    });
+  }, { rootMargin: '-100px 0px -70% 0px', threshold: 0 });
+  
+  headings.forEach(h => headingObserver.observe(h));
+
+  // TOC click smooth scroll
+  tocLinks.forEach(li => {
+    const a = li.querySelector('a');
+    if (a) {
+      a.addEventListener('click', (e) => {
+        e.preventDefault();
+        const target = document.getElementById(a.dataset.target);
+        if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    }
+  });
+
+  /* ============ Checklist management ============ */
+  function markCheck(id) {
+    const item = document.querySelector(`.checklist li[data-check="${id}"]`);
+    if (item && !item.classList.contains('checked')) {
+      item.classList.add('checked');
+    }
+  }
+
+  /* ============ Scroll celebration ============ */
+  const chapterBody = document.querySelector('.chapter-body');
+  const celebration = document.getElementById('celebration');
+  const celebrationClose = document.getElementById('celebration-close');
+  const autoCheck = document.getElementById('auto-check');
+  const markDoneBtn = document.getElementById('mark-done');
+  
+  let celebrated = false;
+  let markDoneClicked = false;
+  
+  function triggerCelebration() {
+    if (celebrated) return;
+    celebrated = true;
+    celebration.classList.add('show');
+    autoCheck.classList.add('checked', 'celebrated');
+    playChime();
+    spawnConfetti();
+  }
+  
+  function spawnConfetti() {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const colors = ['#8a2317', '#a87714', '#5d7440', '#6b1c12', '#b03a2e'];
+    const rect = celebration.getBoundingClientRect();
+    const originX = rect.left + rect.width / 2;
+    const originY = rect.top + rect.height / 2;
+    
+    for (let i = 0; i < 24; i++) {
+      const piece = document.createElement('div');
+      piece.className = 'confetti-piece';
+      piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+      piece.style.left = originX + 'px';
+      piece.style.top = originY + 'px';
+      const angle = (Math.random() * Math.PI * 2);
+      const dist = 60 + Math.random() * 180;
+      piece.style.setProperty('--dx', Math.cos(angle) * dist + 'px');
+      piece.style.setProperty('--dy', Math.sin(angle) * dist - 40 + 'px');
+      piece.style.setProperty('--rot', (Math.random() * 720 - 360) + 'deg');
+      piece.style.animationDelay = (Math.random() * 0.1) + 's';
+      document.body.appendChild(piece);
+      setTimeout(() => piece.remove(), 1600);
+    }
+  }
+  
+  function playChime() {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    try {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtx) return;
+      const ctx = new AudioCtx();
+      const now = ctx.currentTime;
+      
+      // Two-tone soft chime — perfect fifth (A5 + E6)
+      const notes = [
+        { freq: 880, start: 0,    dur: 0.5 },
+        { freq: 1318, start: 0.08, dur: 0.6 }
+      ];
+      
+      notes.forEach(n => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.value = n.freq;
+        gain.gain.setValueAtTime(0, now + n.start);
+        gain.gain.linearRampToValueAtTime(0.08, now + n.start + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + n.start + n.dur);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now + n.start);
+        osc.stop(now + n.start + n.dur + 0.05);
+      });
+    } catch(e) { /* silent */ }
+  }
+  
+  function checkScrollProgress() {
+    if (!chapterBody || celebrated) return;
+    if (!document.getElementById('view-chapter').classList.contains('active')) return;
+    const rect = chapterBody.getBoundingClientRect();
+    const windowHeight = window.innerHeight;
+    const scrolled = windowHeight - rect.top;
+    const total = rect.height;
+    const pct = scrolled / total;
+    if (pct >= 0.8) {
+      triggerCelebration();
+    }
+  }
+  
+  window.addEventListener('scroll', checkScrollProgress, { passive: true });
+  
+  celebrationClose.addEventListener('click', () => {
+    celebration.classList.remove('show');
+  });
+  
+  markDoneBtn.addEventListener('click', () => {
+    if (!markDoneClicked) {
+      markDoneClicked = true;
+      markDoneBtn.textContent = '✓ chapter marked complete';
+      markDoneBtn.classList.add('done');
+      triggerCelebration();
+    }
+  });
+
+  /* ============ Library filter (visual only) ============ */
+  document.querySelectorAll('.filter').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.filter').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    });
+  });
+
+  /* ============ Compose submit ============ */
+  const composeSubmit = document.getElementById('compose-submit');
+  const composeInput = document.getElementById('compose-input');
+  if (composeSubmit) {
+    composeSubmit.addEventListener('click', () => {
+      if (composeInput.value.trim()) {
+        composeInput.value = '';
+        composeInput.placeholder = 'Thanks — your note is in review. It will appear here once the author reads it.';
+        showToast('Note submitted — in review.');
+      }
+    });
+  }
+
+  /* ============ Toast ============ */
+  let toastTimer;
+  window.showToast = function(text) {
+    let toast = document.getElementById('forge-toast');
+    if (!toast) {
+      toast = document.createElement('div');
+      toast.id = 'forge-toast';
+      toast.style.cssText = `
+        position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%) translateY(20px);
+        background: var(--ink); color: var(--bg); padding: 10px 18px;
+        font-family: var(--serif-body); font-size: 13px; font-style: italic;
+        z-index: 250; opacity: 0; transition: all 0.3s; pointer-events: none;
+        border-left: 2px solid var(--accent);
+      `;
+      document.body.appendChild(toast);
+    }
+    toast.textContent = text;
+    toast.style.opacity = '1';
+    toast.style.transform = 'translateX(-50%) translateY(0)';
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => {
+      toast.style.opacity = '0';
+      toast.style.transform = 'translateX(-50%) translateY(20px)';
+    }, 2400);
+  };
+
+  /* ============ Chapter init ============ */
+  let chapterInited = false;
+  function initChapterInteractions() {
+    runPlayground();
+  }
+  
+  // Initial run
+  runPlayground();
+
+})();
+</script>
+
+</body>
+</html>

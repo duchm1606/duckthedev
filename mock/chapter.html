@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ch. 5 · Consistent hashing — System Design — duckthedev</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,700;0,9..144,800;1,9..144,400;1,9..144,500;1,9..144,700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+<header class="masthead">
+  <div class="wrap">
+    <div class="masthead-row">
+      <a class="brand" href="index.html">
+        <span class="brand-mark">D.</span>
+        <span class="brand-name">duckthedev</span>
+        <span class="brand-tag">notes &amp; essays of a working engineer</span>
+      </a>
+      <nav class="primary-nav">
+        <a class="nav-link" href="index.html">Home</a>
+        <a class="nav-link active" href="series.html">Series</a>
+        <a class="nav-link" href="blog.html">Blog</a>
+        <a class="nav-link" href="topics.html">Topics</a>
+        <a class="nav-link" href="about.html">About</a>
+        <button class="theme-toggle" aria-label="Toggle theme"><span data-theme-label>dim</span></button>
+      </nav>
+    </div>
+  </div>
+  <div class="progress-line" id="progress-line"></div>
+</header>
+
+<div class="wrap">
+  <div class="breadcrumb">
+    <a href="index.html">Home</a><span class="sep">/</span>
+    <a href="series.html">Series</a><span class="sep">/</span>
+    <a href="series-detail.html">System Design</a><span class="sep">/</span>
+    <span>Ch. 5</span>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="reader-grid">
+
+    <!-- ===== Level 1 TOC: the series outline ===== -->
+    <aside class="outline">
+      <div class="outline-head">
+        <div class="outline-kicker">Series · 12 chapters</div>
+        <a class="outline-title" href="series-detail.html">System Design, from first principles</a>
+        <div class="outline-note">9 published · 3 to come</div>
+      </div>
+
+      <details open>
+        <summary>Part I · One box</summary>
+        <a class="chap-link" href="chapter.html"><span class="n">01</span><span>The whole system on one machine</span></a>
+        <a class="chap-link" href="chapter.html"><span class="n">02</span><span>Measuring before deciding</span></a>
+        <a class="chap-link" href="chapter.html"><span class="n">03</span><span>Vertical scaling is underrated</span></a>
+        <a class="chap-link" href="chapter.html"><span class="n">04</span><span>Statelessness, and the lie of the session</span></a>
+      </details>
+
+      <details open>
+        <summary>Part II · Spreading the load</summary>
+        <a class="chap-link active" href="chapter.html"><span class="n">05</span><span>Consistent hashing, and why your cache ring rotates</span></a>
+        <a class="chap-link" href="chapter.html"><span class="n">06</span><span>Read replicas and the lag you forgot</span></a>
+        <a class="chap-link" href="chapter.html"><span class="n">07</span><span>Queues: making slow things someone else's problem</span></a>
+        <a class="chap-link" href="chapter.html"><span class="n">08</span><span>Idempotency as a design constraint</span></a>
+      </details>
+
+      <details>
+        <summary>Part III · Living with it</summary>
+        <a class="chap-link" href="chapter.html"><span class="n">09</span><span>Sharding: the decision you can't take back</span></a>
+        <span class="chap-link locked"><span class="n">10</span><span>Observability for a system you didn't design</span></span>
+        <span class="chap-link locked"><span class="n">11</span><span>Failure drills and the runbook</span></span>
+        <span class="chap-link locked"><span class="n">12</span><span>The interview version of all this</span></span>
+      </details>
+
+      <div class="outline-foot">Next chapter out 07 Aug</div>
+    </aside>
+
+    <!-- ===== The chapter itself ===== -->
+    <article class="post-body">
+      <div class="chapter-head">
+        <div class="chapter-kicker">
+          <span>Part II</span><span class="dot">·</span>
+          <span>Chapter 5 of 12</span><span class="dot">·</span>
+          <span>24 min</span>
+        </div>
+        <h1 class="chapter-title">Consistent hashing, and why your cache ring <em>rotates</em></h1>
+        <p class="chapter-deck">
+          We started with <code>hash(key) % n</code> because it was obvious. This chapter is about the
+          afternoon that taught us why it isn't, and how the ring falls out of the fix.
+        </p>
+      </div>
+
+      <p class="lede">
+        Adding one cache node should invalidate roughly one node's worth of keys. Ours invalidated
+        ninety-four percent of them, at 11:40 on a Thursday, while a marketing campaign was running.
+      </p>
+
+      <p>
+        The mechanism is not subtle once you see it. With four nodes, key <code>user:9021</code> lands
+        on <code>9021 % 4 = 1</code>. Add a fifth node and the same key lands on <code>9021 % 5 = 1</code>
+        — by luck. Almost every other key moves. The modulus is part of the address, so changing the
+        modulus rewrites every address at once.
+      </p>
+
+      <h2 id="c1">What we actually needed</h2>
+      <p>
+        Before reaching for a known answer, it is worth writing the requirement down. We needed a
+        mapping from keys to nodes where adding or removing a node moves only the keys that node is
+        responsible for — and nothing else.
+      </p>
+      <ul class="bullets">
+        <li>Deterministic: any client computes the same mapping without coordination.</li>
+        <li>Balanced: no node holds a wildly disproportionate share.</li>
+        <li>Stable: a membership change of one node moves ≈ 1/n of keys, not all of them.</li>
+      </ul>
+
+      <div class="callout">
+        <div class="ico">!</div>
+        <p>
+          That third property is the whole chapter. If you only remember one sentence: consistent
+          hashing is not about hashing better, it's about making the address independent of the
+          number of nodes.
+        </p>
+      </div>
+
+      <h3 id="c1a">Why "add a node" is the hard case</h3>
+      <p>
+        Removal is easier to reason about — the keys have to go somewhere, and any neighbour will do.
+        Addition is where naive schemes fail, because a new node has to steal a fair share from
+        everyone without anyone coordinating the theft.
+      </p>
+
+      <h2 id="c2">Deriving the ring</h2>
+      <p>
+        Stop hashing to a node index and start hashing to a fixed space — say, all 32-bit integers.
+        Nodes hash into that same space. A key belongs to the first node clockwise from it. Now the
+        address of a key never mentions <em>n</em> at all.
+      </p>
+
+      <div class="code-block">
+        <div class="code-head">
+          <span>ring.go</span>
+          <span>go · 22 lines</span>
+        </div>
+<pre><span class="cm">// Ring maps a key to the first node clockwise on a 32-bit circle.</span>
+<span class="kw">type</span> Ring <span class="kw">struct</span> {
+    points []uint32          <span class="cm">// sorted virtual node positions</span>
+    owner  <span class="kw">map</span>[uint32]<span class="kw">string</span> <span class="cm">// position -&gt; node name</span>
+}
+
+<span class="kw">func</span> (r *Ring) Add(node <span class="kw">string</span>, vnodes <span class="kw">int</span>) {
+    <span class="kw">for</span> i := 0; i &lt; vnodes; i++ {
+        p := crc32.ChecksumIEEE([]<span class="kw">byte</span>(fmt.Sprintf(<span class="str">"%s#%d"</span>, node, i)))
+        r.points = <span class="kw">append</span>(r.points, p)
+        r.owner[p] = node
+    }
+    slices.Sort(r.points)
+}
+
+<span class="kw">func</span> (r *Ring) Get(key <span class="kw">string</span>) <span class="kw">string</span> {
+    h := crc32.ChecksumIEEE([]<span class="kw">byte</span>(key))
+    i, _ := slices.BinarySearch(r.points, h)
+    <span class="kw">if</span> i == <span class="kw">len</span>(r.points) {
+        i = 0 <span class="cm">// wrap around the circle</span>
+    }
+    <span class="kw">return</span> r.owner[r.points[i]]
+}</pre>
+      </div>
+
+      <h3 id="c2a">Virtual nodes, and why 150 is the usual number</h3>
+      <p>
+        With one point per node the distribution is bad — random placement leaves gaps, and one node
+        can own a third of the circle. Giving each node 100–200 virtual positions averages the
+        variance away. We measured 150 as the point where the marginal improvement stopped paying
+        for the memory.
+      </p>
+
+      <h2 id="c3">Measuring the rebalance</h2>
+      <p>
+        The satisfying part: with the ring in place, adding a fifth node to our four-node cluster
+        moved 19.4% of keys. The theoretical figure is 20%. The old scheme, on the same key set,
+        moved 94.2%.
+      </p>
+
+      <h2 id="c4">What this doesn't solve</h2>
+      <p>
+        Hot keys. If one key gets a tenth of your traffic, the ring routes all of it to one node
+        with perfect consistency. That's chapter 7's problem, and the fix is not in the hash
+        function.
+      </p>
+
+      <div class="post-meta" style="margin-top:34px;padding-top:18px;border-top:1px solid var(--rule);">
+        <span>Filed under</span>
+        <a class="chip" href="topics.html">Architecture</a>
+        <a class="chip" href="topics.html">Go</a>
+        <a class="chip" href="topics.html">Performance</a>
+        <span class="dot">·</span>
+        <span>Published 14 May 2026</span>
+      </div>
+
+      <div class="post-nav" style="margin-top:44px;">
+        <a href="chapter.html">
+          <span class="dir">← Ch. 4</span>
+          <span class="t">Statelessness, and the lie of the session</span>
+        </a>
+        <a href="chapter.html">
+          <span class="dir">Ch. 6 →</span>
+          <span class="t">Read replicas and the lag you forgot to handle</span>
+        </a>
+      </div>
+    </article>
+
+    <!-- ===== Level 2 TOC: headings of this chapter ===== -->
+    <aside class="post-aside">
+      <div class="toc-title">On this page</div>
+      <nav class="toc">
+        <a href="#c1">What we actually needed</a>
+        <a href="#c1a" class="sub">Why "add a node" is hard</a>
+        <a href="#c2">Deriving the ring</a>
+        <a href="#c2a" class="sub">Virtual nodes</a>
+        <a href="#c3">Measuring the rebalance</a>
+        <a href="#c4">What this doesn't solve</a>
+      </nav>
+
+      <div class="toc-title" style="margin-top:30px;">Elsewhere</div>
+      <nav class="toc">
+        <a href="post.html">Idempotency keys are a data model</a>
+        <a href="post.html">Why our p99 is a histogram lie</a>
+        <a href="topics.html">More on Architecture</a>
+      </nav>
+    </aside>
+
+  </div>
+</div>
+
+<footer class="colophon">
+  <div class="wrap">
+    <div class="colo-grid">
+      <div>
+        <div class="colo-brand">duckthedev<span>.</span></div>
+        <p class="colo-note">
+          A personal notebook about backends, databases and the tools in between.
+          Written by Duc Hoang. No trackers, no popups, no reading time paywall.
+        </p>
+      </div>
+      <div class="colo-col">
+        <h5>Read</h5>
+        <ul>
+          <li><a href="series.html">Series</a></li>
+          <li><a href="blog.html">All articles</a></li>
+          <li><a href="topics.html">Topics</a></li>
+          <li><a href="#">RSS feed</a></li>
+        </ul>
+      </div>
+      <div class="colo-col">
+        <h5>Me</h5>
+        <ul>
+          <li><a href="about.html">About / CV</a></li>
+          <li><a href="#">GitHub</a></li>
+          <li><a href="#">LinkedIn</a></li>
+          <li><a href="#">Email</a></li>
+        </ul>
+      </div>
+      <div class="colo-col">
+        <h5>Colophon</h5>
+        <ul>
+          <li>Fraunces &amp; Newsreader</li>
+          <li>JetBrains Mono</li>
+          <li>Notion as CMS</li>
+          <li>Next.js on Vercel</li>
+        </ul>
+      </div>
+    </div>
+    <div class="colo-foot">
+      <span>© 2019—2026 Duc Hoang</span>
+      <span>Built with more coffee than sense</span>
+      <span>Mock — v0.1</span>
+    </div>
+  </div>
+</footer>
+
+<script src="assets/app.js"></script>
+</body>
+</html>
