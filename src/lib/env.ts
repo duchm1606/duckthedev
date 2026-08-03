@@ -1,5 +1,5 @@
-// Đọc env chạy được ở cả hai ngữ cảnh: trong Astro/Vite (import.meta.env,
-// đã load .env) lẫn script node thuần (process.env).
+// Env reader that works in both contexts: inside Astro/Vite builds
+// (import.meta.env, .env already loaded) and plain node scripts (process.env).
 export function env(key: string): string | undefined {
   const v =
     (typeof import.meta !== 'undefined' && (import.meta as any).env?.[key]) ??
@@ -9,7 +9,7 @@ export function env(key: string): string | undefined {
 
 export function requireEnv(key: string): string {
   const v = env(key)
-  if (!v) throw new Error(`Thiếu biến môi trường ${key} — xem .env.example`)
+  if (!v) throw new Error(`Missing environment variable ${key} — see .env.example`)
   return v
 }
 

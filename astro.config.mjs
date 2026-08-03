@@ -6,6 +6,6 @@ const { PUBLIC_SITE_URL } = loadEnv(process.env.NODE_ENV ?? 'production', proces
 
 export default defineConfig({
   site: PUBLIC_SITE_URL || 'https://duckthedev.com',
-  // SSG toàn phần — nội dung mới = rebuild (cron/manual), không có runtime server
+  // Full SSG — fresh content means a rebuild (cron/manual), no runtime server
   output: 'static',
 })

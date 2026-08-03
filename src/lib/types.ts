@@ -1,5 +1,5 @@
-// Kiểu dữ liệu sau normalize — xem docs/notion-cms.md §12.
-// Field `// derived` được tính lúc build, không tồn tại trong Notion.
+// Normalized domain types — see docs/notion-cms.md §12.
+// Fields marked `// derived` are computed at build time and do not exist in Notion.
 
 export type Topic = {
   id: string
@@ -27,13 +27,13 @@ export type Post = {
   type: 'article' | 'note'
   status: 'idea' | 'draft' | 'review' | 'published'
   published: boolean
-  date: string // ISO; với chapter chưa ra là ngày dự kiến
+  date: string // ISO; for unreleased chapters this is the expected date
   updated?: string
   description: string
   topics: Topic[]
   series?: { slug: string; name: string }
   part?: PartRef
-  order?: number // số chapter trong series
+  order?: number // chapter number within the series
   pinned: boolean
   featuredOrder?: number
   relatedIds: string[]
@@ -94,5 +94,5 @@ export type SiteData = {
   topics: Topic[]
   skills: Skill[]
   cv: CvEntry[]
-  site: Record<string, string> // DB `Site` key/value
+  site: Record<string, string> // `Site` database key/value pairs
 }

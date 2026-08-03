@@ -1,0 +1,23 @@
+---
+// Renders a Notion rich_text array: annotations nest inward
+// (link > code > bold > italic > strikethrough > underline).
+// Equations and mentions degrade to their plain text.
+interface Props {
+  text: any[] | undefined
+}
+const { text = [] } = Astro.props
+---
+
+{
+  text.map((t) => {
+    const a = t.annotations ?? {}
+    let node: any = t.plain_text
+    if (a.code) node = <code>{node}</code>
+    if (a.bold) node = <strong>{node}</strong>
+    if (a.italic) node = <em>{node}</em>
+    if (a.strikethrough) node = <s>{node}</s>
+    if (a.underline) node = <u>{node}</u>
+    if (t.href) node = <a class="link" href={t.href}>{node}</a>
+    return node
+  })
+}

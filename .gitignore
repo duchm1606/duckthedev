@@ -3,17 +3,23 @@ node_modules/
 dist/
 .astro/
 
-# cache Notion khi dev
+# Notion dev cache & downloaded images
 .cache/
+public/images/notion/
 
-# repo tham khảo (clone ngoài, không thuộc project)
+# reference repos (external clones, not part of this project)
 .ref/
 
-# secrets & dữ liệu workspace cá nhân
+# secrets & personal workspace data
 .env
 .env.*
 !.env.example
 scripts/notion-ids.json
 
-# hệ điều hành / editor
+# OS / editor
 .DS_Store
+
+# debug artifacts
+.playwright-mcp/
+*.png
+!public/**/*.png

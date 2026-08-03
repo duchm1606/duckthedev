@@ -1,9 +1,9 @@
-// Client Notion official API (2025-09-03), dùng chung cho build Astro và script node.
-// - throttle ~3 req/s (rate limit thật của Notion)
-// - retry với backoff cho 408/429/5xx, tôn trọng Retry-After
-// - phân trang tự động (query database, block children)
-// - dev-cache ra .cache/notion/ để save-file không thành một đợt gọi API
-// - env chỉ giữ database_id; data_source_id (API mới) được resolve ở đây
+// Notion official API client (2025-09-03), shared by Astro builds and node scripts.
+// - throttles to ~3 req/s (Notion's real rate limit)
+// - retries 408/429/5xx with backoff, honoring Retry-After
+// - auto-paginates (database queries, block children)
+// - dev cache in .cache/notion/ so a file save doesn't trigger an API burst
+// - .env only holds database_id; data_source_id (new API) is resolved here
 
 import { createHash } from 'node:crypto'
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
@@ -28,7 +28,7 @@ const DB_ENV: Record<DbKey, string> = {
   site: 'NOTION_DB_SITE',
 }
 
-// ── throttle: xếp hàng mọi request, giãn cách tối thiểu THROTTLE_MS ──
+// ── throttle: queue every request, keep at least THROTTLE_MS between them ──
 let queue: Promise<unknown> = Promise.resolve()
 let lastAt = 0
 function throttled<T>(fn: () => Promise<T>): Promise<T> {
@@ -42,7 +42,7 @@ function throttled<T>(fn: () => Promise<T>): Promise<T> {
   return run
 }
 
-// ── dev-cache: tắt ở prod hoặc khi NOTION_CACHE=off ──
+// ── dev cache: disabled in prod or when NOTION_CACHE=off ──
 const CACHE_DIR = join(process.cwd(), '.cache', 'notion')
 const cacheEnabled = () => !isProd() && env('NOTION_CACHE') !== 'off'
 
@@ -86,7 +86,7 @@ async function request(path: string, body?: unknown, method?: string): Promise<a
     const delay = retryAfter > 0 ? retryAfter * 1000 : 500 * 2 ** attempt
     await new Promise((r) => setTimeout(r, delay))
   }
-  throw new Error(`Notion API lỗi: ${lastError} (${path})`)
+  throw new Error(`Notion API error: ${lastError} (${path})`)
 }
 
 // ── data source resolution ──
@@ -98,12 +98,12 @@ async function dataSourceId(db: DbKey): Promise<string> {
   const dbId = requireEnv(DB_ENV[db])
   const res = await request(`/databases/${dbId}`)
   const id = res.data_sources?.[0]?.id
-  if (!id) throw new Error(`Database ${db} (${dbId}) không có data source nào`)
+  if (!id) throw new Error(`Database ${db} (${dbId}) has no data sources`)
   dataSourceIds.set(db, id)
   return id
 }
 
-/** Query toàn bộ page của một database, tự phân trang. */
+/** Query all pages of a database, auto-paginating. */
 export async function queryAll(db: DbKey, body: Record<string, unknown> = {}): Promise<any[]> {
   const ds = await dataSourceId(db)
   const results: any[] = []
@@ -120,8 +120,8 @@ export async function queryAll(db: DbKey, body: Record<string, unknown> = {}): P
   return results
 }
 
-/** Lấy toàn bộ block con của một page/block, đệ quy, tự phân trang.
- *  Block có con được gắn thêm mảng `children`. */
+/** Fetch every child block of a page/block, recursively, auto-paginating.
+ *  Blocks with children get an extra `children` array. */
 export async function getBlocks(blockId: string): Promise<any[]> {
   const blocks: any[] = []
   let cursor: string | undefined

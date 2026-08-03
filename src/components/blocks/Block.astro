@@ -1,0 +1,129 @@
+---
+// Notion block → mock CSS classes (docs/notion-cms.md §10).
+// Recursive: children render through <Astro.self>. List items arrive
+// pre-grouped by groupLists() as synthetic bulleted_list/numbered_list nodes.
+import { localizeImage } from '../../lib/images'
+import { groupLists, plainText } from '../../lib/notion/render'
+import RichText from '../RichText.astro'
+
+interface Props {
+  block: any
+  /** first paragraph of a post gets the .lede treatment */
+  lede?: boolean
+}
+const { block, lede = false } = Astro.props
+const type = block.type
+const data = block[type]
+const children = block.children ? groupLists(block.children) : []
+
+// code block metadata for the .code-head bar
+const codeText = type === 'code' ? plainText(data.rich_text) : ''
+const codeCaption = type === 'code' ? plainText(data.caption) : ''
+const codeLines = codeText ? codeText.split('\n').length : 0
+
+// images are copied into public/ at build time (signed URLs expire)
+const imageSrc =
+  type === 'image'
+    ? await localizeImage(data.file?.url ?? data.external?.url ?? '', block.id)
+    : ''
+const imageCaption = type === 'image' ? plainText(data.caption) : ''
+
+const calloutIcon = type === 'callout' ? (data.icon?.emoji ?? '!') : ''
+const bookmarkUrl = type === 'bookmark' || type === 'embed' ? (data.url ?? '') : ''
+---
+
+{type === 'paragraph' && <p class:list={[{ lede }]}><RichText text={data.rich_text} /></p>}
+
+{type === 'heading_2' && <h2 id={block._id}><RichText text={data.rich_text} /></h2>}
+{type === 'heading_3' && <h3 id={block._id}><RichText text={data.rich_text} /></h3>}
+
+{
+  type === 'bulleted_list' && (
+    <ul class="bullets">
+      {block.items.map((item: any) => (
+        <li>
+          <RichText text={item.bulleted_list_item.rich_text} />
+          {item.children && groupLists(item.children).map((c: any) => <Astro.self block={c} />)}
+        </li>
+      ))}
+    </ul>
+  )
+}
+{
+  type === 'numbered_list' && (
+    <ol class="bullets">
+      {block.items.map((item: any) => (
+        <li>
+          <RichText text={item.numbered_list_item.rich_text} />
+          {item.children && groupLists(item.children).map((c: any) => <Astro.self block={c} />)}
+        </li>
+      ))}
+    </ol>
+  )
+}
+
+{
+  type === 'code' && (
+    <div class="code-block">
+      <div class="code-head">
+        <span>{codeCaption || data.language}</span>
+        <span>{data.language} · {codeLines} lines</span>
+      </div>
+      <pre>{codeText}</pre>
+    </div>
+  )
+}
+
+{
+  type === 'callout' && (
+    <div class="callout">
+      <div class="ico">{calloutIcon}</div>
+      <p>
+        <RichText text={data.rich_text} />
+      </p>
+      {children.map((c: any) => <Astro.self block={c} />)}
+    </div>
+  )
+}
+
+{
+  type === 'quote' && (
+    <blockquote class="quote-block">
+      <p>
+        <RichText text={data.rich_text} />
+      </p>
+      {children.map((c: any) => <Astro.self block={c} />)}
+    </blockquote>
+  )
+}
+
+{
+  type === 'image' && (
+    <figure>
+      <img src={imageSrc} alt={imageCaption} loading="lazy" />
+      {imageCaption && <figcaption>{imageCaption}</figcaption>}
+    </figure>
+  )
+}
+
+{type === 'divider' && <hr />}
+
+{
+  /* bookmarks/embeds render as plain links on purpose — iframes break the letterpress layout */
+  (type === 'bookmark' || type === 'embed') && (
+    <p>
+      <a class="link" href={bookmarkUrl}>{plainText(data.caption) || bookmarkUrl}</a>
+    </p>
+  )
+}
+
+{
+  type === 'toggle' && (
+    <details>
+      <summary>
+        <RichText text={data.rich_text} />
+      </summary>
+      {children.map((c: any) => <Astro.self block={c} />)}
+    </details>
+  )
+}

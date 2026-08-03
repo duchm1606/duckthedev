@@ -1,15 +1,11 @@
 #!/usr/bin/env node
 /**
- * Dựng toàn bộ CMS mock trên Notion: 1 page chứa 7 database + data khớp với mock/*.html
+ * Seeds the whole mock CMS into Notion: 1 page holding 7 databases + data matching mock/*.html
  *
  *   NOTION_TOKEN=ntn_xxx NOTION_PARENT_PAGE_ID=xxxxxxxx node scripts/seed-notion.mjs
  *
- * Xem docs/notion-cms.md cho schema. Script này KHÔNG idempotent —
- * chạy lần hai tạo một page mới, xoá page cũ bằng tay.
- *
- * LƯU Ý: workspace "Duc's Notion" ĐÃ được seed qua Notion MCP rồi —
- * ID nằm trong scripts/notion-ids.json. Script này để dựng lại từ đầu
- * hoặc dựng ở một workspace khác.
+ * See docs/notion-cms.md for the schema. This script is NOT idempotent —
+ * a second run creates a new page; delete the old one by hand.
  */
 
 const TOKEN = process.env.NOTION_TOKEN
@@ -17,11 +13,11 @@ const PARENT = (process.env.NOTION_PARENT_PAGE_ID || '').replace(/-/g, '')
 
 if (!TOKEN || !PARENT) {
   console.error(`
-Thiếu env.
+Missing env.
 
   NOTION_TOKEN           https://www.notion.so/my-integrations → New integration → copy Internal Secret
-  NOTION_PARENT_PAGE_ID  mở page cha trong Notion → Share → Connect → chọn integration vừa tạo,
-                         rồi lấy 32 ký tự hex cuối trong URL
+  NOTION_PARENT_PAGE_ID  open the parent page in Notion → Share → Connect → pick your integration,
+                         then take the trailing 32 hex chars from the URL
 
   NOTION_TOKEN=ntn_xxx NOTION_PARENT_PAGE_ID=1a2b... node scripts/seed-notion.mjs
 `)
@@ -38,7 +34,7 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
 const THROTTLE = Number(process.env.NOTION_THROTTLE_MS ?? 340)
 
 async function notion(path, body, method = 'POST') {
-  // rate limit thật của Notion ~3 req/s
+  // Notion's real rate limit is ~3 req/s
   await sleep(THROTTLE)
   const res = await fetch(API + path, {
     method,
@@ -109,7 +105,7 @@ const code = (content, language, caption) => ({
   code: { rich_text: txt(content), language, caption: caption ? txt(caption) : [] },
 })
 
-/** body chung cho các bài chưa cần nội dung thật — vẫn đủ heading để test TOC cấp 2 */
+/** shared body for posts that don't need real content yet — still has enough headings to test the level-2 TOC */
 const genericBody = (lede) => [
   p(lede),
   h2('The shape of the problem'),
@@ -121,7 +117,7 @@ const genericBody = (lede) => [
   p('Đoạn cuối. Bên dưới build sẽ tự chèn "Filed under" từ relation Topics và khối prev/next.'),
 ]
 
-/** body đầy đủ cho chapter 05 — copy từ mock/chapter.html để so pixel */
+/** full body for chapter 05 — copied from mock/chapter.html for pixel comparison */
 const chapter05Body = [
   p('Adding one cache node should invalidate roughly one node\'s worth of keys. Ours invalidated ninety-four percent of them, at 11:40 on a Thursday, while a marketing campaign was running.'),
   p('The mechanism is not subtle once you see it. With four nodes, key user:9021 lands on 9021 % 4 = 1. Add a fifth node and the same key lands on 9021 % 5 = 1 — by luck. Almost every other key moves. The modulus is part of the address, so changing the modulus rewrites every address at once.'),
@@ -213,10 +209,10 @@ const TOPICS = [
 ]
 
 /**
- * Logo topic: link công khai, không tự host. Simple Icons trả SVG một màu đúng
- * brand color. AWS + gRPC không có trên Simple Icons nên lấy devicon.
- * [url, iconClass] — iconClass 'invert' cho logo đen tuyền (mất tiêu ở dark theme).
- * Topic không có brand thì không nằm ở đây và rơi về Glyph.
+ * Topic logos: public links, nothing self-hosted. Simple Icons returns one-color SVGs in the right
+ * brand color. AWS + gRPC are missing from Simple Icons, so they come from devicon.
+ * [url, iconClass] — iconClass 'invert' marks pure-black logos (invisible on the dark theme).
+ * Topics without a brand are not listed here and fall back to Glyph.
  */
 const si = (slug) => `https://cdn.simpleicons.org/${slug}`
 const dev = (p) => `https://cdn.jsdelivr.net/gh/devicons/devicon/icons/${p}.svg`
@@ -266,7 +262,7 @@ const SKILLS = [
   ['on-call', 'Practices', true, ''],
   ['react', 'Front-end', true, ''], ['nextjs', 'Front-end', true, ''],
   ['tailwind', 'Front-end', true, ''], ['htmx', 'Front-end', true, ''],
-  // chỉ dùng ở CV, không lên lưới Skills
+  // used only on the CV, never on the Skills grid
   ['grpc', 'Infrastructure', false, ''], ['debezium', 'Data', false, ''],
   ['gitlab-ci', 'Infrastructure', false, ''], ['nodejs', 'Languages', false, ''],
   ['mysql', 'Data', false, ''], ['nginx', 'Infrastructure', false, ''],
@@ -295,7 +291,7 @@ const SERIES = [
     'Alerts that mean something, runbooks nobody hates writing, incident reviews without blame, and how to hand a rotation over to a new team.'],
 ]
 
-// series index 0 only — đủ để dựng reader 3 cột
+// series index 0 only — enough to build the 3-column reader
 const PARTS = [
   ['One box, and what breaks it', 1, ''],
   ['Spreading the load', 2, ''],
@@ -434,7 +430,7 @@ async function main() {
     return d.id
   }
 
-  // 1 — không phụ thuộc ai
+  // 1 — depends on nothing
   const topicsDb = await db('Topics', '🏷️', {
     Name: { title: {} },
     Slug: { rich_text: {} },
@@ -455,7 +451,7 @@ async function main() {
     Note: { rich_text: {} },
   })
 
-  // 2 — Series phụ thuộc Topics
+  // 2 — Series depends on Topics
   const seriesDb = await db('Series', '📚', {
     Name: { title: {} },
     Slug: { rich_text: {} },
@@ -476,7 +472,7 @@ async function main() {
     Note: { rich_text: {} },
   })
 
-  // 3 — Posts phụ thuộc tất cả
+  // 3 — Posts depends on everything
   const postsDb = await db('Posts', '📝', {
     Title: { title: {} },
     Slug: { rich_text: {} },
@@ -495,7 +491,7 @@ async function main() {
     Lang: { select: options('en', 'vi') },
   })
 
-  // self-relation phải thêm sau khi DB tồn tại
+  // self-relations can only be added once the DB exists
   log('▸ Posts.Related (self-relation)… ')
   await notion(`/databases/${postsDb}`, {
     properties: { Related: relation(postsDb, false) },
@@ -635,9 +631,9 @@ async function main() {
   writeFileSync(out, JSON.stringify(ids, null, 2) + '\n')
 
   console.log(`
-✓ Xong trong ${((Date.now() - t0) / 1000).toFixed(0)}s — ${calls} API calls
+✓ Done in ${((Date.now() - t0) / 1000).toFixed(0)}s — ${calls} API calls
   Page:  https://notion.so/${PAGE.replace(/-/g, '')}
-  IDs:   scripts/notion-ids.json  (block dưới đây paste vào .env)
+  IDs:   scripts/notion-ids.json  (paste the block below into .env)
 
   NOTION_DB_POSTS=${postsDb}
   NOTION_DB_SERIES=${seriesDb}

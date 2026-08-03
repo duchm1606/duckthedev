@@ -1,0 +1,156 @@
+---
+// Standalone post page (posts without a Series) — layout ported from mock/post.html.
+import Block from '../../components/blocks/Block.astro'
+import { getSiteData } from '../../lib/fetcher'
+import { getBlocks } from '../../lib/notion/client'
+import {
+  annotateHeadings,
+  extractHeadings,
+  formatDate,
+  groupLists,
+  readingMinutes,
+  wordCount,
+} from '../../lib/notion/render'
+import Base from '../../layouts/Base.astro'
+import type { Post } from '../../lib/types'
+
+export async function getStaticPaths() {
+  const { posts } = await getSiteData()
+  // newest-first list of standalone posts; prev = older, next = newer
+  const standalone = posts.filter((p) => !p.series)
+  return standalone.map((post, i) => ({
+    params: { slug: post.slug },
+    props: { post, older: standalone[i + 1], newer: standalone[i - 1] },
+  }))
+}
+
+interface Props {
+  post: Post
+  older?: Post
+  newer?: Post
+}
+const { post, older, newer } = Astro.props
+const { posts } = await getSiteData()
+
+const blocks = await getBlocks(post.id)
+annotateHeadings(blocks)
+const grouped = groupLists(blocks)
+const headings = extractHeadings(blocks)
+const words = wordCount(blocks)
+const minutes = readingMinutes(words)
+const ledeIndex = grouped.findIndex((b) => b.type === 'paragraph')
+
+// Related: hand-picked via the Related relation, else fall back to shared topics
+const byId = new Map(posts.map((p) => [p.id, p]))
+const related = (
+  post.relatedIds.length
+    ? post.relatedIds.map((id) => byId.get(id)).filter((p): p is Post => !!p)
+    : posts.filter(
+        (p) =>
+          p.id !== post.id &&
+          p.published &&
+          p.topics.some((t) => post.topics.some((x) => x.slug === t.slug)),
+      )
+).slice(0, 3)
+
+const eyebrow = [post.type === 'article' ? 'Essay' : 'Note', ...post.topics.map((t) => t.name)]
+  .slice(0, 3)
+  .join(' · ')
+const crumbTitle = post.title.length > 32 ? post.title.slice(0, 32).trimEnd() + '…' : post.title
+---
+
+<Base title={`${post.title} — duckthedev`} description={post.description} active="blog" progress>
+  <div class="wrap">
+    <div class="breadcrumb">
+      <a href="/">Home</a><span class="sep">/</span>
+      <a href="/blog">Blog</a><span class="sep">/</span>
+      {
+        post.topics[0] && (
+          <>
+            <a href={`/topics/${post.topics[0].slug}`}>{post.topics[0].name}</a>
+            <span class="sep">/</span>
+          </>
+        )
+      }
+      <span>{crumbTitle}</span>
+    </div>
+  </div>
+
+  <section class="wrap">
+    <div class="page-head">
+      <div class="page-eyebrow">{eyebrow}</div>
+      <h1 class="page-title">{post.title}</h1>
+      <p class="page-deck">{post.description}</p>
+      <div class="page-stats">
+        <span>Published <strong>{formatDate(post.date)}</strong></span>
+        {post.updated && <span>Updated <strong>{formatDate(post.updated)}</strong></span>}
+        <span><strong>{words.toLocaleString('en-US')}</strong> words</span>
+        <span><strong>{minutes}</strong> min read</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="wrap">
+    <div class="post-grid">
+      <article class="post-body">
+        {grouped.map((block, i) => <Block block={block} lede={i === ledeIndex} />)}
+
+        <div
+          class="post-meta"
+          style="margin-top:34px;padding-top:18px;border-top:1px solid var(--rule);"
+        >
+          <span>Filed under</span>
+          {post.topics.map((t) => <a class="chip" href={`/topics/${t.slug}`}>{t.name}</a>)}
+          <span class="dot">·</span>
+          <span>Last edited {formatDate(post.updated ?? post.date)}</span>
+        </div>
+
+        {
+          (older || newer) && (
+            <div class="post-nav" style="margin-top:44px;">
+              {older && (
+                <a href={older.url}>
+                  <span class="dir">← Previous</span>
+                  <span class="t">{older.title}</span>
+                </a>
+              )}
+              {newer && (
+                <a href={newer.url}>
+                  <span class="dir">Next →</span>
+                  <span class="t">{newer.title}</span>
+                </a>
+              )}
+            </div>
+          )
+        }
+      </article>
+
+      <aside class="post-aside">
+        {
+          headings.length > 0 && (
+            <>
+              <div class="toc-title">On this page</div>
+              <nav class="toc">
+                {headings.map((h) => (
+                  <a href={`#${h.id}`} class:list={[{ sub: h.level === 3 }]}>
+                    {h.text}
+                  </a>
+                ))}
+              </nav>
+            </>
+          )
+        }
+        {
+          related.length > 0 && (
+            <>
+              <div class="toc-title" style="margin-top:30px;">Related</div>
+              <nav class="toc">
+                {related.map((p) => <a href={p.url}>{p.title}</a>)}
+              </nav>
+            </>
+          )
+        }
+      </aside>
+    </div>
+  </section>
+</Base>

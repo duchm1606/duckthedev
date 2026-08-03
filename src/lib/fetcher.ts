@@ -1,11 +1,11 @@
-// Map Notion pages → domain types (docs/notion-cms.md §12) và join quan hệ.
-// Mọi con số derive (đếm bài, latest/next date…) tính ở đây, không lưu ở Notion.
+// Maps Notion pages → domain types (docs/notion-cms.md §12) and joins relations.
+// Every derived number (post counts, latest/next dates…) is computed here, never stored in Notion.
 
 import { isProd } from './env'
 import { queryAll } from './notion/client'
 import type { CvEntry, Post, Series, SeriesPart, SiteData, Skill, Topic } from './types'
 
-// ── property pickers (official API, đọc theo tên property thật) ──
+// ── property pickers (official API, addressed by real property names) ──
 const text = (p: any): string =>
   ((p?.rich_text ?? p?.title ?? []) as any[]).map((t) => t.plain_text).join('')
 const sel = (p: any): string | undefined => p?.select?.name
@@ -29,7 +29,7 @@ function assertUniqueSlugs(items: { slug: string }[], label: string) {
   const seen = new Map<string, number>()
   for (const { slug } of items) seen.set(slug, (seen.get(slug) ?? 0) + 1)
   const dupes = [...seen].filter(([, n]) => n > 1).map(([s]) => s)
-  if (dupes.length) throw new Error(`Slug trùng trong ${label}: ${dupes.join(', ')}`)
+  if (dupes.length) throw new Error(`Duplicate slugs in ${label}: ${dupes.join(', ')}`)
 }
 
 async function load(): Promise<SiteData> {
@@ -151,13 +151,13 @@ async function load(): Promise<SiteData> {
       post.url = postUrl(post)
       return post
     })
-    // chapter chưa published vẫn giữ (render "chap-row locked" trong series map);
-    // bài lẻ chưa published chỉ hiện ở dev để xem trước
+    // unpublished chapters are kept (rendered as locked rows in the series map);
+    // unpublished standalone posts only show up in dev for previewing
     .filter((post) => post.published || !isProd() || post.series !== undefined)
     .sort((a, b) => b.date.localeCompare(a.date))
   assertUniqueSlugs(posts, 'Posts')
 
-  // ── derive: đếm theo topic (chỉ tính bài published) ──
+  // ── derive: per-topic counts (published posts only) ──
   for (const post of posts.filter((x) => x.published)) {
     for (const t of post.topics) {
       if (post.type === 'article') t.articleCount++
@@ -166,7 +166,7 @@ async function load(): Promise<SiteData> {
     }
   }
 
-  // ── derive: gắn topics + parts/chapters vào series ──
+  // ── derive: attach topics + parts/chapters to series ──
   for (const s of seriesList) {
     s.topics = s.topicIds.map((id) => topicById.get(id)).filter((t): t is Topic => !!t)
     const chapters = posts
@@ -185,7 +185,7 @@ async function load(): Promise<SiteData> {
       note: part.note,
       chapters: chapters.filter((c) => c.part?.order === part.order && c.part?.name === part.name),
     }))
-    // chapter không thuộc part nào (series không chia part) gom vào một nhóm ẩn danh
+    // chapters without a part (series not split into parts) go into one anonymous group
     const orphans = chapters.filter((c) => !c.part)
     if (orphans.length) s.parts.push({ order: 99, name: '', chapters: orphans })
   }
@@ -219,7 +219,7 @@ async function load(): Promise<SiteData> {
   return { posts, series: seriesList, topics, skills, cv, site }
 }
 
-// Một lần fetch cho cả lượt build — mọi trang gọi getSiteData() dùng chung.
+// One fetch per build — every page shares the same getSiteData() promise.
 let cached: Promise<SiteData> | null = null
 export function getSiteData(): Promise<SiteData> {
   cached ??= load()
