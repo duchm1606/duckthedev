@@ -1,0 +1,67 @@
+---
+// Trang tạm chứng minh data layer Notion → HTML hoạt động.
+// Sẽ được thay bằng bản port từ mock/index.html ở phase giao diện.
+import { getSiteData } from '../lib/fetcher'
+
+const { posts, series, topics, site } = await getSiteData()
+const published = posts.filter((p) => p.published)
+const featured = published
+  .filter((p) => p.featuredOrder !== undefined)
+  .sort((a, b) => (a.featuredOrder ?? 0) - (b.featuredOrder ?? 0))
+---
+
+<html lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>duckthedev — data layer OK</title>
+    <style>
+      body { font-family: ui-monospace, monospace; max-width: 720px; margin: 3rem auto; padding: 0 1rem; line-height: 1.6; }
+      h2 { margin-top: 2.5rem; border-bottom: 1px solid #ccc; padding-bottom: 4px; }
+      .meta { color: #777; font-size: 0.85em; }
+      li { margin-bottom: 0.4rem; }
+    </style>
+  </head>
+  <body>
+    <h1>duckthedev</h1>
+    <p class="meta">{site.availability ?? ''}</p>
+    <p>
+      {published.length} bài published · {series.length} series · {topics.length} topics
+    </p>
+
+    <h2>Featured</h2>
+    <ul>
+      {featured.map((p) => (
+        <li>
+          <a href={p.url}>{p.title}</a>
+          <span class="meta"> — {p.type} · {p.date}</span>
+        </li>
+      ))}
+    </ul>
+
+    <h2>Bài mới</h2>
+    <ul>
+      {published.slice(0, 10).map((p) => (
+        <li>
+          <a href={p.url}>{p.title}</a>
+          <span class="meta">
+            — {p.date} · {p.topics.map((t) => t.name).join(', ')}
+          </span>
+        </li>
+      ))}
+    </ul>
+
+    <h2>Series</h2>
+    <ul>
+      {series.map((s) => (
+        <li>
+          <a href={`/series/${s.slug}`}>{s.name}</a>
+          <span class="meta">
+            — {s.state} · {s.publishedCount}/{s.chapterCount || s.plannedChapters || '?'} chapters
+            {s.nextDate ? ` · next ${s.nextDate}` : ''}
+          </span>
+        </li>
+      ))}
+    </ul>
+  </body>
+</html>
