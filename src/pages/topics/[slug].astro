@@ -1,0 +1,96 @@
+---
+// One topic shelf — modeled on the mock's shelf-preview section: the topic's
+// articles as rows (chapters included), then its notes as a grid.
+import ArticleRow from '../../components/ArticleRow.astro'
+import Base from '../../layouts/Base.astro'
+import { getSiteData } from '../../lib/fetcher'
+import { formatDayMonth } from '../../lib/notion/render'
+import { getManyStats } from '../../lib/stats'
+import type { Topic } from '../../lib/types'
+
+export async function getStaticPaths() {
+  const { topics } = await getSiteData()
+  return topics.map((t) => ({ params: { slug: t.slug }, props: { topic: t } }))
+}
+
+interface Props {
+  topic: Topic
+}
+const { topic } = Astro.props
+const { posts } = await getSiteData()
+
+const shelf = posts.filter((p) => p.published && p.topics.some((t) => t.slug === topic.slug))
+const articles = shelf.filter((p) => p.type === 'article')
+const notes = shelf.filter((p) => p.type === 'note')
+const stats = await getManyStats(articles.map((p) => p.id))
+---
+
+<Base title={`${topic.name} — duckthedev`} description={topic.description ?? `Everything filed under ${topic.name}.`} active="topics">
+  <div class="wrap">
+    <div class="breadcrumb">
+      <a href="/">Home</a><span class="sep">/</span>
+      <a href="/topics">Topics</a><span class="sep">/</span>
+      <span>{topic.name}</span>
+    </div>
+  </div>
+
+  <section class="wrap">
+    <div class="page-head">
+      <div class="page-eyebrow">Shelf · {topic.name}</div>
+      <h1 class="page-title">{topic.name}</h1>
+      {topic.description && <p class="page-deck">{topic.description}</p>}
+      <div class="page-stats">
+        <span><strong>{articles.length}</strong> articles</span>
+        <span><strong>{notes.length}</strong> notes</span>
+        {topic.updated && <span>Updated <strong>{formatDayMonth(topic.updated)}</strong></span>}
+      </div>
+    </div>
+  </section>
+
+  <section class="section" style="border-bottom:none;">
+    <div class="wrap">
+      {
+        articles.length > 0 && (
+          <>
+            <div class="section-head">
+              <div>
+                <div class="section-eyebrow">I. Articles</div>
+              </div>
+            </div>
+            <div class="article-list">
+              {articles.map((p) => (
+                <ArticleRow post={p} minutes={stats.get(p.id)?.minutes} />
+              ))}
+            </div>
+          </>
+        )
+      }
+
+      {
+        notes.length > 0 && (
+          <>
+            <div class="section-head" style="margin-top:34px;">
+              <div>
+                <div class="section-eyebrow">II. Notes</div>
+              </div>
+            </div>
+            <div class="notes-grid">
+              {notes.map((p) => (
+                <a class="note-row" href={p.url}>
+                  <span class="note-icon">§</span>
+                  <span class="note-title">{p.title}</span>
+                  <span class="note-date">{formatDayMonth(p.date)}</span>
+                </a>
+              ))}
+            </div>
+          </>
+        )
+      }
+
+      <div class="list-foot">
+        <span>{shelf.length} entries filed under {topic.name}.</span>
+        <a class="section-link" href="/topics">All topics →</a>
+      </div>
+    </div>
+  </section>
+</Base>

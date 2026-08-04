@@ -1,4 +1,5 @@
 // @ts-check
+import sitemap from '@astrojs/sitemap'
 import { defineConfig } from 'astro/config'
 import { loadEnv } from 'vite'
 
@@ -8,4 +9,10 @@ export default defineConfig({
   site: PUBLIC_SITE_URL || 'https://duckthedev.com',
   // Full SSG — fresh content means a rebuild (cron/manual), no runtime server
   output: 'static',
+  integrations: [
+    sitemap({
+      // OG images are assets, not pages
+      filter: (page) => !page.includes('/og/'),
+    }),
+  ],
 })

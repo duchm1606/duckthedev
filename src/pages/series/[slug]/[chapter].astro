@@ -63,7 +63,13 @@ const elsewhere = posts
   .slice(0, 2)
 ---
 
-<Base title={`Ch. ${post.order} · ${post.title} — ${s.name} — duckthedev`} description={post.description} active="series" progress>
+<Base
+  title={`Ch. ${post.order} · ${post.title} — ${s.name} — duckthedev`}
+  description={post.description}
+  active="series"
+  progress
+  ogImage={`/og/${post.slug}.png`}
+>
   <div class="wrap">
     <div class="breadcrumb">
       <a href="/">Home</a><span class="sep">/</span>

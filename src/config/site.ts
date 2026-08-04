@@ -38,6 +38,29 @@ export const site = {
     linkedin: '#',
     email: 'mailto:vyquoccuong0210@gmail.com',
   },
+  about: {
+    eyebrow: 'About me · Curriculum vitæ',
+    // raw HTML — rendered with set:html
+    title: 'Duc Hoang, <em>engineer</em><br />and reluctant writer.',
+    deck:
+      'Seven years building backends that other teams depend on: payment flows, event pipelines, ' +
+      'internal platforms. I like systems small enough to hold in my head, databases that tell the ' +
+      'truth, and documentation written by the person who fixed the bug.',
+    portrait: 'DH',
+    quote:
+      "I'd rather ship a boring system that three people fully understand than a clever one " +
+      'that only its author can debug at 3 a.m.',
+    quoteCite: '— my one strong opinion',
+    coords: [
+      { k: 'From', v: 'Đà Nẵng, VN' },
+      { k: 'Based', v: 'Ho Chi Minh City' },
+      { k: 'Languages', v: 'Vietnamese, English' },
+    ],
+    sayHello:
+      'I read every email, and I answer most of them. Good reasons to write: you found a mistake ' +
+      "in an article, you're stuck on something I've written about, or you have a system that " +
+      'keeps you up at night and want a second opinion.',
+  },
   colophonTech: ['Fraunces & Newsreader', 'JetBrains Mono', 'Notion as CMS', 'Astro on Vercel'],
 } as const
 

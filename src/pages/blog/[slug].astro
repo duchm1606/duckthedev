@@ -59,7 +59,13 @@ const eyebrow = [post.type === 'article' ? 'Essay' : 'Note', ...post.topics.map(
 const crumbTitle = post.title.length > 32 ? post.title.slice(0, 32).trimEnd() + '…' : post.title
 ---
 
-<Base title={`${post.title} — duckthedev`} description={post.description} active="blog" progress>
+<Base
+  title={`${post.title} — duckthedev`}
+  description={post.description}
+  active="blog"
+  progress
+  ogImage={`/og/${post.slug}.png`}
+>
   <div class="wrap">
     <div class="breadcrumb">
       <a href="/">Home</a><span class="sep">/</span>

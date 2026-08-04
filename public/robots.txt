@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://duckthedev.com/sitemap-index.xml
