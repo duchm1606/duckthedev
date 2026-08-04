@@ -10,6 +10,7 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
+    "sync": "node scripts/sync-notion.mjs",
     "notion:check": "node scripts/check-notion.mjs",
     "notion:seed": "node scripts/seed-notion.mjs",
     "cache:clear": "rm -rf .cache/notion"

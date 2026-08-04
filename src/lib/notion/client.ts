@@ -9,6 +9,12 @@ import { createHash } from 'node:crypto'
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { env, isProd, requireEnv } from '../env'
+// Bumped by `npm run sync`. Importing it here — at the root of the data
+// layer — makes Vite reload this module and everything that imports it,
+// which drops every in-memory memo (data sources, blocks, site data, stats).
+import syncStamp from './sync-stamp.json'
+
+export const lastSyncedAt = syncStamp.syncedAt
 
 const API = 'https://api.notion.com/v1'
 const VERSION = '2025-09-03'
