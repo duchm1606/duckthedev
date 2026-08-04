@@ -1,0 +1,78 @@
+---
+// One series row (series index and home §II). The state tag prefers the
+// free-text cadence line ("publishing weekly") over the bare state name.
+import { approxHours, formatDayMonth, roman } from '../lib/notion/render'
+import type { Series } from '../lib/types'
+
+interface Props {
+  series: Series
+  index: number
+  totalMinutes?: number
+}
+const { series: s, index, totalMinutes } = Astro.props
+
+const stateClass =
+  s.state === 'complete' ? 'state-done' : s.state === 'planned' ? 'state-planned' : 'state-ongoing'
+const stateLabel =
+  s.state === 'complete' ? 'complete' : s.state === 'planned' ? 'planned' : (s.cadence ?? 'ongoing')
+const note =
+  s.state === 'complete'
+    ? `all ${s.chapterCount} chapters out`
+    : s.publishedCount > 0
+      ? `${s.publishedCount} of ${s.chapterCount} out · latest ${formatDayMonth(s.latestDate)}`
+      : 'outline published'
+// filter values used by the series index page
+const filterTag = s.state === 'complete' ? 'done' : s.state === 'planned' ? 'planned' : 'ongoing'
+---
+
+<a class="series-item" href={`/series/${s.slug}`} data-tags={filterTag}>
+  <div class="ser-num">{roman(index)}.</div>
+  <div>
+    <h3 class="ser-title">{s.name}</h3>
+    <p class="ser-desc">{s.description}</p>
+    <div class="ser-tags">
+      {s.topics.map((t, i) => <span class:list={['chip', { solid: i === 0 }]}>{t.name}</span>)}
+    </div>
+    <div class="post-meta">
+      {
+        s.state === 'planned' && s.chapterCount === 0 ? (
+          <>
+            <span>{s.plannedChapters ?? '?'} chapters planned</span>
+            {s.cadence && (
+              <>
+                <span class="dot">·</span>
+                <span>{s.cadence}</span>
+              </>
+            )}
+          </>
+        ) : (
+          <>
+            <span>{s.chapterCount} chapters</span>
+            {s.parts.filter((p) => p.name).length > 0 && (
+              <>
+                <span class="dot">·</span>
+                <span>{s.parts.filter((p) => p.name).length} parts</span>
+              </>
+            )}
+            {s.level && (
+              <>
+                <span class="dot">·</span>
+                <span>{s.level[0].toUpperCase() + s.level.slice(1)}</span>
+              </>
+            )}
+            {totalMinutes !== undefined && totalMinutes > 0 && (
+              <>
+                <span class="dot">·</span>
+                <span>{approxHours(totalMinutes)} reading</span>
+              </>
+            )}
+          </>
+        )
+      }
+    </div>
+  </div>
+  <div class="ser-side">
+    <span class:list={['state-tag', stateClass]}>{stateLabel}</span>
+    <div class="ser-note">{note}</div>
+  </div>
+</a>

@@ -1,67 +1,270 @@
 ---
-// Temporary page proving the Notion data layer works end to end.
-// Will be replaced by the mock/index.html port in the home-page phase.
+// Home page ported from mock/index.html: hero + desk log, featured grid,
+// series, latest articles with topic filters, notes, pinned topics.
+import ArticleRow from '../components/ArticleRow.astro'
+import SeriesItem from '../components/SeriesItem.astro'
+import Base from '../layouts/Base.astro'
+import { site } from '../config/site'
 import { getSiteData } from '../lib/fetcher'
+import {
+  formatDate,
+  formatDayMonth,
+  formatMonthDay,
+  roman,
+} from '../lib/notion/render'
+import { getManyStats } from '../lib/stats'
 
-const { posts, series, topics, site } = await getSiteData()
+const { posts, series, topics, site: kv } = await getSiteData()
 const published = posts.filter((p) => p.published)
+
+// hero deco: "Now writing / Jul — Sep 2026"
+const now = new Date()
+const plusTwo = new Date(now.getFullYear(), now.getMonth() + 2, 1)
+const mon = (d: Date) => d.toLocaleDateString('en-GB', { month: 'short' })
+const writingWindow = `${mon(now)} — ${mon(plusTwo)} ${plusTwo.getFullYear()}`
+
+// desk log: five most recent entries by date, future chapters included
+const deskLog = [...posts]
+  .sort((a, b) => b.date.localeCompare(a.date))
+  .slice(0, 5)
+  .map((p) => ({
+    post: p,
+    tag: p.published ? 'out' : p.date > now.toISOString().slice(0, 10) ? 'scheduled' : 'draft',
+  }))
+
+const latestEssay = published.find((p) => p.type === 'article')
+
+// featured: ordered by the Featured order property
 const featured = published
   .filter((p) => p.featuredOrder !== undefined)
   .sort((a, b) => (a.featuredOrder ?? 0) - (b.featuredOrder ?? 0))
+const featLead = featured[0]
+const featSide = featured.slice(1, 4)
+
+const articles = published.filter((p) => p.type === 'article' && !p.series)
+const latestArticles = articles.slice(0, 6)
+const notes = published.filter((p) => p.type === 'note' && !p.series).slice(0, 8)
+const filterTopics = [...topics]
+  .filter((t) => t.articleCount > 0)
+  .sort((a, b) => b.articleCount - a.articleCount)
+  .slice(0, 3)
+
+const pinnedTopics = topics.filter((t) => t.pinned)
+const homeSeries = series.slice(0, 3)
+
+const statIds = [...featured, ...latestArticles].map((p) => p.id)
+const stats = await getManyStats(statIds)
 ---
 
-<html lang="vi">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>duckthedev — data layer OK</title>
-    <style>
-      body { font-family: ui-monospace, monospace; max-width: 720px; margin: 3rem auto; padding: 0 1rem; line-height: 1.6; }
-      h2 { margin-top: 2.5rem; border-bottom: 1px solid #ccc; padding-bottom: 4px; }
-      .meta { color: #777; font-size: 0.85em; }
-      li { margin-bottom: 0.4rem; }
-    </style>
-  </head>
-  <body>
-    <h1>duckthedev</h1>
-    <p class="meta">{site.availability ?? ''}</p>
-    <p>
-      {published.length} bài published · {series.length} series · {topics.length} topics
-    </p>
+<Base title="duckthedev — notes & essays of a working engineer" description={site.coloNote} active="home" progress>
+  <section class="hero">
+    <div class="hero-deco">Now writing<br />{writingWindow}</div>
+    <div class="wrap">
+      <div class="hero-grid">
+        <div class="hero-main">
+          <div class="hero-eyebrow">
+            <span class="hero-label">{site.hero.label}</span>
+            <span class="hero-marker">{site.hero.marker}</span>
+          </div>
+          <h1 class="hero-title" set:html={site.hero.title} />
+          <p class="hero-deck" set:html={site.hero.deck} />
+          <div class="hero-actions">
+            {
+              latestEssay && (
+                <a class="btn-primary" href={latestEssay.url}>
+                  Read the latest essay <span class="arrow">→</span>
+                </a>
+              )
+            }
+            <a class="btn-ghost" href="/about">About me / CV</a>
+          </div>
+          <div class="hero-ornament">
+            <span>{site.hero.ornament}</span>
+            <svg class="hero-ornament-svg" viewBox="0 0 80 24" fill="none">
+              <path d="M0 12 Q 20 0, 40 12 T 80 12" stroke="var(--accent)" stroke-width="1" fill="none"></path>
+              <circle cx="40" cy="12" r="2" fill="var(--accent)"></circle>
+            </svg>
+          </div>
+        </div>
 
-    <h2>Featured</h2>
-    <ul>
-      {featured.map((p) => (
-        <li>
-          <a href={p.url}>{p.title}</a>
-          <span class="meta"> — {p.type} · {p.date}</span>
-        </li>
-      ))}
-    </ul>
+        <aside class="hero-aside">
+          <div class="aside-head">
+            <span>{site.hero.deskLogTitle}</span>
+            <em>{site.hero.deskLogSub}</em>
+          </div>
+          <ul class="aside-list">
+            {
+              deskLog.map(({ post: p, tag }) => (
+                <li>
+                  <span class="aside-date">{formatMonthDay(p.date)}</span>
+                  <span class="aside-title">
+                    {tag === 'out' ? <a href={p.url}>{p.title}</a> : p.title}
+                    {!p.series && <em> ({p.type === 'note' ? 'note' : 'essay'})</em>}
+                  </span>
+                  <span class:list={['aside-tag', tag === 'out' ? 'published' : tag]}>{tag}</span>
+                </li>
+              ))
+            }
+          </ul>
+          {kv.availability && <div class="aside-foot">{kv.availability}</div>}
+        </aside>
+      </div>
+    </div>
+  </section>
 
-    <h2>Bài mới</h2>
-    <ul>
-      {published.slice(0, 10).map((p) => (
-        <li>
-          <a href={p.url}>{p.title}</a>
-          <span class="meta">
-            — {p.date} · {p.topics.map((t) => t.name).join(', ')}
-          </span>
-        </li>
-      ))}
-    </ul>
+  {
+    featLead && (
+      <section class="section">
+        <div class="wrap">
+          <div class="section-head">
+            <div>
+              <div class="section-eyebrow">I. Featured</div>
+            </div>
+            <a class="section-link" href="/blog">All articles →</a>
+          </div>
 
-    <h2>Series</h2>
-    <ul>
-      {series.map((s) => (
-        <li>
-          <a href={`/series/${s.slug}`}>{s.name}</a>
-          <span class="meta">
-            — {s.state} · {s.publishedCount}/{s.chapterCount || s.plannedChapters || '?'} chapters
-            {s.nextDate ? ` · next ${s.nextDate}` : ''}
-          </span>
-        </li>
-      ))}
-    </ul>
-  </body>
-</html>
+          <div class="featured-grid">
+            <a class="feat-lead" href={featLead.url}>
+              <div class="feat-kicker">
+                {featLead.type === 'article' ? 'Essay' : 'Note'} · {stats.get(featLead.id)?.minutes}
+                min · {featLead.topics[0]?.name}
+              </div>
+              <h3 class="feat-title">{featLead.title}</h3>
+              <p class="feat-deck">{featLead.description}</p>
+              {featLead.cover && (
+                <div class="feat-figure">
+                  <img src={featLead.cover} alt="" loading="lazy" style="width:100%;display:block;" />
+                </div>
+              )}
+              <div class="post-meta">
+                <span>{formatDate(featLead.date)}</span>
+                {featLead.topics.slice(0, 2).map((t) => (
+                  <>
+                    <span class="dot">·</span>
+                    <span>{t.name}</span>
+                  </>
+                ))}
+                <span class="dot">·</span>
+                <span>{stats.get(featLead.id)?.words.toLocaleString('en-US')} words</span>
+              </div>
+            </a>
+
+            <div class="feat-side">
+              {featSide.map((p, i) => (
+                <a class="feat-item" href={p.url}>
+                  <div class="feat-num">{roman(i + 2)}.</div>
+                  <div>
+                    <h4>{p.title}</h4>
+                    <p>{p.description}</p>
+                    <div class="post-meta">
+                      <span>{formatDate(p.date)}</span>
+                      <span class="dot">·</span>
+                      <span>{p.topics[0]?.name}</span>
+                      <span class="dot">·</span>
+                      <span>{stats.get(p.id)?.minutes} min</span>
+                    </div>
+                  </div>
+                </a>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  <section class="section">
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <div class="section-eyebrow">II. Series</div>
+        </div>
+        <a class="section-link" href="/series">All {series.length} series →</a>
+      </div>
+      <div class="series-list">
+        {homeSeries.map((s, i) => <SeriesItem series={s} index={i + 1} />)}
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <div class="section-eyebrow">III. Latest articles</div>
+        </div>
+        <div class="filter-row" data-target="#latest-list">
+          <button class="filter active" data-filter="all">All <span>{articles.length}</span></button>
+          {
+            filterTopics.map((t) => (
+              <button class="filter" data-filter={t.slug}>{t.name} <span>{t.articleCount}</span></button>
+            ))
+          }
+        </div>
+      </div>
+
+      <div class="article-list" id="latest-list">
+        {
+          latestArticles.map((p) => (
+            <ArticleRow
+              post={p}
+              minutes={stats.get(p.id)?.minutes}
+              tags={p.topics.map((t) => t.slug)}
+            />
+          ))
+        }
+      </div>
+
+      <div class="list-foot">
+        <span>Showing {latestArticles.length} of {articles.length} articles.</span>
+        <a class="section-link" href="/blog">Browse the archive →</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <div class="section-eyebrow">IV. Notes</div>
+        </div>
+        <a class="section-link" href="/blog">All notes →</a>
+      </div>
+      <div class="notes-grid">
+        {
+          notes.map((p) => (
+            <a class="note-row" href={p.url}>
+              <span class="note-icon">§</span>
+              <span class="note-title">{p.title}</span>
+              <span class="note-date">{formatDayMonth(p.date)}</span>
+            </a>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <div class="section-eyebrow">V. Topics</div>
+        </div>
+        <a class="section-link" href="/topics">All {topics.length} topics →</a>
+      </div>
+      <div class="topics-flow">
+        {
+          pinnedTopics.map((t) => (
+            <a class="topic-pill" href={`/topics/${t.slug}`}>
+              <span class:list={['glyph', t.iconClass]}>
+                {t.icon ? <img src={t.icon} alt="" loading="lazy" /> : t.glyph}
+              </span>
+              <span class="name">{t.name}</span>
+              <span class="count">— {t.articleCount + t.noteCount}</span>
+            </a>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+</Base>

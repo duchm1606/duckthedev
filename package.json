@@ -15,6 +15,7 @@
     "cache:clear": "rm -rf .cache/notion"
   },
   "dependencies": {
-    "astro": "^7.1.6"
+    "astro": "^7.1.6",
+    "shiki": "^4.4.1"
   }
 }

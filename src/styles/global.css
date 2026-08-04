@@ -1189,3 +1189,9 @@ a:hover .feat-title, .feat-lead:hover .feat-title { color: var(--accent); }
 .post-body ol.bullets li::marker { color: var(--accent); font-family: var(--mono); font-size: 0.85em; }
 .post-body details { margin-bottom: 18px; }
 .post-body details summary { cursor: pointer; font-weight: 500; }
+.art-title a { color: inherit; text-decoration: none; }
+.art-title a:hover { color: var(--accent); }
+a.note-row { color: inherit; text-decoration: none; }
+a.note-row:hover .note-title { color: var(--accent); }
+/* Shiki emits <pre class="shiki"><code> — undo the inline-code treatment inside code blocks */
+.code-block pre code { background: transparent; padding: 0; color: inherit; font-size: inherit; border-radius: 0; }

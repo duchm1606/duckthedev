@@ -19,6 +19,20 @@ export const site = {
     { key: 'topics', label: 'Topics', href: '/topics' },
     { key: 'about', label: 'About', href: '/about' },
   ],
+  hero: {
+    label: "Hi, I'm Duc",
+    marker: 'Backend & platform engineer · 7 yrs shipping',
+    // raw HTML — rendered with set:html
+    title: 'I write down<br />what I <em>break.</em>',
+    deck:
+      'A personal notebook that grew into a publication. I work on <strong>distributed backends, ' +
+      'developer tooling and the boring infrastructure</strong> that keeps them alive. Everything here is ' +
+      'a note first and an article second — written while the bug was still fresh, then edited ' +
+      'until it would survive a code review.',
+    ornament: 'Set in Fraunces, Newsreader & JetBrains Mono',
+    deskLogTitle: 'Desk log',
+    deskLogSub: 'what I touched this week',
+  },
   social: {
     github: 'https://github.com/duckthedev',
     linkedin: '#',

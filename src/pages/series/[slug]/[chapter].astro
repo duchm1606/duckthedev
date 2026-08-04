@@ -1,0 +1,177 @@
+---
+// Chapter reader ported from mock/chapter.html — three columns:
+// series outline (level-1 TOC from the database) · chapter body ·
+// heading TOC (level 2, from the block tree).
+import Block from '../../../components/blocks/Block.astro'
+import Base from '../../../layouts/Base.astro'
+import { getSiteData } from '../../../lib/fetcher'
+import { getBlocks } from '../../../lib/notion/client'
+import {
+  annotateHeadings,
+  extractHeadings,
+  formatDate,
+  formatDayMonth,
+  groupLists,
+  roman,
+} from '../../../lib/notion/render'
+import { getPostStats } from '../../../lib/stats'
+import { isProd } from '../../../lib/env'
+import type { Post, Series } from '../../../lib/types'
+
+export async function getStaticPaths() {
+  const { series } = await getSiteData()
+  return series.flatMap((s) =>
+    s.parts
+      .flatMap((p) => p.chapters)
+      // draft chapters get preview pages in dev but stay locked in prod
+      .filter((c) => c.published || !isProd())
+      .map((c) => ({
+        params: { slug: s.slug, chapter: `${String(c.order ?? 0).padStart(2, '0')}-${c.slug}` },
+        props: { series: s, post: c },
+      })),
+  )
+}
+
+interface Props {
+  series: Series
+  post: Post
+}
+const { series: s, post } = Astro.props
+const { posts } = await getSiteData()
+
+const blocks = await getBlocks(post.id)
+annotateHeadings(blocks)
+const grouped = groupLists(blocks)
+const headings = extractHeadings(blocks)
+const { minutes } = await getPostStats(post.id)
+const ledeIndex = grouped.findIndex((b) => b.type === 'paragraph')
+
+const chapters = s.parts.flatMap((p) => p.chapters)
+const idx = chapters.findIndex((c) => c.id === post.id)
+const prev = idx > 0 ? chapters[idx - 1] : undefined
+const next = idx < chapters.length - 1 ? chapters[idx + 1] : undefined
+const currentPartOrder = post.part?.order ?? 99
+
+// "Elsewhere": shared-topic posts outside this series + a topic link
+const elsewhere = posts
+  .filter(
+    (p) =>
+      p.published &&
+      p.series?.slug !== s.slug &&
+      p.topics.some((t) => post.topics.some((x) => x.slug === t.slug)),
+  )
+  .slice(0, 2)
+---
+
+<Base title={`Ch. ${post.order} · ${post.title} — ${s.name} — duckthedev`} description={post.description} active="series" progress>
+  <div class="wrap">
+    <div class="breadcrumb">
+      <a href="/">Home</a><span class="sep">/</span>
+      <a href="/series">Series</a><span class="sep">/</span>
+      <a href={`/series/${s.slug}`}>{s.name}</a><span class="sep">/</span>
+      <span>Ch. {post.order}</span>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="reader-grid">
+      <aside class="outline">
+        <div class="outline-head">
+          <div class="outline-kicker">Series · {s.chapterCount} chapters</div>
+          <a class="outline-title" href={`/series/${s.slug}`}>{s.name}</a>
+          <div class="outline-note">
+            {s.publishedCount} published{s.chapterCount > s.publishedCount && ` · ${s.chapterCount - s.publishedCount} to come`}
+          </div>
+        </div>
+
+        {
+          s.parts.map((part) => (
+            <details open={part.order <= currentPartOrder}>
+              <summary>
+                {part.name ? `Part ${roman(part.order).toUpperCase()} · ${part.name}` : 'Chapters'}
+              </summary>
+              {part.chapters.map((c) =>
+                c.published || !isProd() ? (
+                  <a class:list={['chap-link', { active: c.id === post.id }]} href={c.url}>
+                    <span class="n">{String(c.order ?? 0).padStart(2, '0')}</span>
+                    <span>{c.title}</span>
+                  </a>
+                ) : (
+                  <span class="chap-link locked">
+                    <span class="n">{String(c.order ?? 0).padStart(2, '0')}</span>
+                    <span>{c.title}</span>
+                  </span>
+                ),
+              )}
+            </details>
+          ))
+        }
+
+        {s.nextDate && <div class="outline-foot">Next chapter out {formatDayMonth(s.nextDate)}</div>}
+      </aside>
+
+      <article class="post-body">
+        <div class="chapter-head">
+          <div class="chapter-kicker">
+            {post.part && <><span>Part {roman(post.part.order).toUpperCase()}</span><span class="dot">·</span></>}
+            <span>Chapter {post.order} of {s.chapterCount}</span><span class="dot">·</span>
+            <span>{minutes} min</span>
+          </div>
+          <h1 class="chapter-title">{post.title}</h1>
+          <p class="chapter-deck">{post.description}</p>
+        </div>
+
+        {grouped.map((block, i) => <Block block={block} lede={i === ledeIndex} />)}
+
+        <div
+          class="post-meta"
+          style="margin-top:34px;padding-top:18px;border-top:1px solid var(--rule);"
+        >
+          <span>Filed under</span>
+          {post.topics.map((t) => <a class="chip" href={`/topics/${t.slug}`}>{t.name}</a>)}
+          <span class="dot">·</span>
+          <span>Published {formatDate(post.date)}</span>
+        </div>
+
+        {
+          (prev || next) && (
+            <div class="post-nav" style="margin-top:44px;">
+              {prev && (prev.published || !isProd()) && (
+                <a href={prev.url}>
+                  <span class="dir">← Ch. {prev.order}</span>
+                  <span class="t">{prev.title}</span>
+                </a>
+              )}
+              {next && (next.published || !isProd()) && (
+                <a href={next.url}>
+                  <span class="dir">Ch. {next.order} →</span>
+                  <span class="t">{next.title}</span>
+                </a>
+              )}
+            </div>
+          )
+        }
+      </article>
+
+      <aside class="post-aside">
+        {
+          headings.length > 0 && (
+            <>
+              <div class="toc-title">On this page</div>
+              <nav class="toc">
+                {headings.map((h) => (
+                  <a href={`#${h.id}`} class:list={[{ sub: h.level === 3 }]}>{h.text}</a>
+                ))}
+              </nav>
+            </>
+          )
+        }
+        <div class="toc-title" style="margin-top:30px;">Elsewhere</div>
+        <nav class="toc">
+          {elsewhere.map((p) => <a href={p.url}>{p.title}</a>)}
+          {post.topics[0] && <a href={`/topics/${post.topics[0].slug}`}>More on {post.topics[0].name}</a>}
+        </nav>
+      </aside>
+    </div>
+  </div>
+</Base>

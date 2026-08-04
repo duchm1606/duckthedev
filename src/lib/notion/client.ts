@@ -121,8 +121,19 @@ export async function queryAll(db: DbKey, body: Record<string, unknown> = {}): P
 }
 
 /** Fetch every child block of a page/block, recursively, auto-paginating.
- *  Blocks with children get an extra `children` array. */
-export async function getBlocks(blockId: string): Promise<any[]> {
+ *  Blocks with children get an extra `children` array.
+ *  Memoized per id — list pages (reading time) and detail pages share one fetch. */
+const blocksMemo = new Map<string, Promise<any[]>>()
+export function getBlocks(blockId: string): Promise<any[]> {
+  let hit = blocksMemo.get(blockId)
+  if (!hit) {
+    hit = fetchBlocks(blockId)
+    blocksMemo.set(blockId, hit)
+  }
+  return hit
+}
+
+async function fetchBlocks(blockId: string): Promise<any[]> {
   const blocks: any[] = []
   let cursor: string | undefined
   do {

@@ -87,3 +87,32 @@ export function formatDate(iso: string | undefined): string {
     year: 'numeric',
   })
 }
+
+/** "24 Jul" — chapter stats, ser-note, next-out dates */
+export function formatDayMonth(iso: string | undefined): string {
+  if (!iso) return ''
+  return new Date(iso).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })
+}
+
+/** "Jul 30" — desk-log dates on the home hero */
+export function formatMonthDay(iso: string | undefined): string {
+  if (!iso) return ''
+  return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: '2-digit' })
+}
+
+const ROMANS = ['i', 'ii', 'iii', 'iv', 'v', 'vi', 'vii', 'viii', 'ix', 'x', 'xi', 'xii', 'xiii', 'xiv', 'xv']
+export const roman = (n: number): string => ROMANS[n - 1] ?? String(n)
+
+/** "1 h 20" / "45 min" — part-meta durations */
+export function durationLabel(minutes: number): string {
+  if (minutes < 60) return `${minutes} min`
+  const h = Math.floor(minutes / 60)
+  const m = minutes % 60
+  return m ? `${h} h ${String(m).padStart(2, '0')}` : `${h} h`
+}
+
+/** "≈ 5 h" — series total reading time */
+export function approxHours(minutes: number): string {
+  if (minutes < 60) return `≈ ${minutes} min`
+  return `≈ ${Math.round(minutes / 60)} h`
+}

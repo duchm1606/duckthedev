@@ -1,0 +1,73 @@
+---
+// Series index ported from mock/series.html.
+import Base from '../../layouts/Base.astro'
+import SeriesItem from '../../components/SeriesItem.astro'
+import { getSiteData } from '../../lib/fetcher'
+import { getManyStats } from '../../lib/stats'
+
+const { series } = await getSiteData()
+const stats = await getManyStats(
+  series.flatMap((s) => s.parts.flatMap((p) => p.chapters.filter((c) => c.published))).map((c) => c.id),
+)
+const totalMinutes = (s: (typeof series)[number]) =>
+  s.parts
+    .flatMap((p) => p.chapters)
+    .reduce((sum, c) => sum + (stats.get(c.id)?.minutes ?? 0), 0)
+
+const chapterTotal = series.reduce((n, s) => n + s.chapterCount, 0)
+const finished = series.filter((s) => s.state === 'complete').length
+const ongoing = series.filter((s) => s.state === 'ongoing').length
+const planned = series.filter((s) => s.state === 'planned').length
+const weekly = series.find((s) => s.cadence?.includes('weekly'))
+---
+
+<Base title="Series — duckthedev" description="Long-form subjects, taken in order." active="series">
+  <div class="wrap">
+    <div class="breadcrumb">
+      <a href="/">Home</a><span class="sep">/</span><span>Series</span>
+    </div>
+  </div>
+
+  <section class="wrap">
+    <div class="page-head">
+      <div class="page-eyebrow">Long-form · Series</div>
+      <h1 class="page-title">Subjects too big<br />for <em>one post.</em></h1>
+      <p class="page-deck">
+        A series is one subject, taken in order: a system-design curriculum, a book read chapter by
+        chapter, a deep dive into one piece of software. Each chapter still carries its own topics,
+        so you'll meet them again in the topic index.
+      </p>
+      <div class="page-stats">
+        <span><strong>{series.length}</strong> series</span>
+        <span><strong>{chapterTotal}</strong> chapters</span>
+        <span><strong>{finished}</strong> finished</span>
+        {weekly && <span><strong>1</strong> {weekly.cadence}</span>}
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <div class="section-eyebrow">I. In progress &amp; finished</div>
+        </div>
+        <div class="filter-row" data-target="#series-list">
+          <button class="filter active" data-filter="all">All <span>{series.length}</span></button>
+          <button class="filter" data-filter="ongoing">Ongoing <span>{ongoing}</span></button>
+          <button class="filter" data-filter="done">Finished <span>{finished}</span></button>
+          <button class="filter" data-filter="planned">Planned <span>{planned}</span></button>
+        </div>
+      </div>
+
+      <div class="series-list" id="series-list">
+        {series.map((s, i) => <SeriesItem series={s} index={i + 1} totalMinutes={totalMinutes(s)} />)}
+      </div>
+
+      <div class="list-foot">
+        <span>Every chapter is also filed under its topics.</span>
+        <a class="section-link" href="/topics">Browse by topic instead →</a>
+      </div>
+    </div>
+  </section>
+</Base>

@@ -2,6 +2,7 @@
 // Notion block → mock CSS classes (docs/notion-cms.md §10).
 // Recursive: children render through <Astro.self>. List items arrive
 // pre-grouped by groupLists() as synthetic bulleted_list/numbered_list nodes.
+import { highlight } from '../../lib/highlight'
 import { localizeImage } from '../../lib/images'
 import { groupLists, plainText } from '../../lib/notion/render'
 import RichText from '../RichText.astro'
@@ -16,10 +17,11 @@ const type = block.type
 const data = block[type]
 const children = block.children ? groupLists(block.children) : []
 
-// code block metadata for the .code-head bar
+// code block metadata for the .code-head bar + Shiki highlighting
 const codeText = type === 'code' ? plainText(data.rich_text) : ''
 const codeCaption = type === 'code' ? plainText(data.caption) : ''
 const codeLines = codeText ? codeText.split('\n').length : 0
+const codeHtml = codeText ? await highlight(codeText, data.language ?? 'text') : ''
 
 // images are copied into public/ at build time (signed URLs expire)
 const imageSrc =
@@ -69,7 +71,7 @@ const bookmarkUrl = type === 'bookmark' || type === 'embed' ? (data.url ?? '') :
         <span>{codeCaption || data.language}</span>
         <span>{data.language} · {codeLines} lines</span>
       </div>
-      <pre>{codeText}</pre>
+      <Fragment set:html={codeHtml} />
     </div>
   )
 }
