@@ -29,14 +29,13 @@ const stats = await getManyStats(articles.map((p) => p.id))
   <div class="wrap">
     <div class="breadcrumb">
       <a href="/">Home</a><span class="sep">/</span>
-      <a href="/topics">Topics</a><span class="sep">/</span>
-      <span>{topic.name}</span>
+      <a href="/topics">Topics</a>
     </div>
   </div>
 
   <section class="wrap">
     <div class="page-head">
-      <div class="page-eyebrow">Shelf · {topic.name}</div>
+      <div class="page-eyebrow">Topic shelf · {shelf.length} {shelf.length === 1 ? 'entry' : 'entries'}</div>
       <h1 class="page-title">{topic.name}</h1>
       {topic.description && <p class="page-deck">{topic.description}</p>}
       <div class="page-stats">

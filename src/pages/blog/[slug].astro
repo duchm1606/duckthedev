@@ -56,7 +56,6 @@ const related = (
 const eyebrow = [post.type === 'article' ? 'Essay' : 'Note', ...post.topics.map((t) => t.name)]
   .slice(0, 3)
   .join(' · ')
-const crumbTitle = post.title.length > 32 ? post.title.slice(0, 32).trimEnd() + '…' : post.title
 ---
 
 <Base
@@ -66,19 +65,12 @@ const crumbTitle = post.title.length > 32 ? post.title.slice(0, 32).trimEnd() + 
   progress
   ogImage={`/og/${post.slug}.png`}
 >
+  {/* breadcrumb is a path back up, nothing more — type/topics live in the
+      eyebrow and the title is the h1 right below */}
   <div class="wrap">
     <div class="breadcrumb">
       <a href="/">Home</a><span class="sep">/</span>
-      <a href="/blog">Blog</a><span class="sep">/</span>
-      {
-        post.topics[0] && (
-          <>
-            <a href={`/topics/${post.topics[0].slug}`}>{post.topics[0].name}</a>
-            <span class="sep">/</span>
-          </>
-        )
-      }
-      <span>{crumbTitle}</span>
+      <a href="/blog">Blog</a>
     </div>
   </div>
 
