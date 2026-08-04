@@ -1,0 +1,130 @@
+---
+// A Notion `code` block written in HTML renders as a live, sandboxed preview
+// instead of a wall of markup — the visualizer pattern from the CS149 notes.
+// The markup goes into an iframe via srcdoc, so the demo's CSS can never leak
+// into the letterpress layout (and vice versa). Escape hatch: give the code
+// block a caption starting with `raw` to get the plain code block back.
+import { highlight } from '../../lib/highlight'
+
+interface Props {
+  /** raw HTML document (or fragment) authored in the Notion code block */
+  html: string
+  /** Notion caption, minus the `demo` keyword — used as the chrome label */
+  label?: string
+}
+const { html, label } = Astro.props
+
+// Appended, never prepended: putting anything before <!DOCTYPE html> would
+// drop the demo into quirks mode. Trailing scripts get parsed into <body>.
+const SHIM = `
+<script>
+(function () {
+  var last = 0
+  function send() {
+    var b = document.body
+    if (!b) return
+    // Measure <body>'s own box, not documentElement.scrollHeight: the latter
+    // never drops below the frame's current height, so a short demo could
+    // grow the iframe but never shrink it back.
+    var r = b.getBoundingClientRect()
+    var h = Math.ceil(r.height + r.top * 2) // top offset mirrored as bottom margin
+    if (h === last) return
+    last = h
+    parent.postMessage({ __dtdDemo: 'height', height: h }, '*')
+  }
+  addEventListener('load', send)
+  addEventListener('resize', send)
+  addEventListener('message', function (e) {
+    var d = e.data
+    if (!d || d.__dtdDemo !== 'theme') return
+    document.documentElement.setAttribute('data-theme', d.theme)
+    document.documentElement.style.colorScheme = d.theme === 'dim' ? 'dark' : 'light'
+  })
+  if (window.ResizeObserver && document.body) new ResizeObserver(send).observe(document.body)
+  // demos that animate into place still settle within a second
+  var t = setInterval(send, 250)
+  setTimeout(function () { clearInterval(t) }, 4000)
+  send()
+})()
+<\/script>`
+
+const srcdoc = html + SHIM
+const codeHtml = await highlight(html, 'html')
+const lines = html.split('\n').length
+---
+
+<figure class="html-demo">
+  <div class="code-head">
+    <span>{label || 'interactive'}</span>
+    <span class="demo-actions">
+      <button type="button" data-demo-source aria-expanded="false">source</button>
+      <button type="button" data-demo-full>full screen</button>
+    </span>
+  </div>
+
+  <iframe
+    title={label || 'Interactive demo'}
+    sandbox="allow-scripts"
+    loading="lazy"
+    srcdoc={srcdoc}
+  ></iframe>
+
+  <div class="demo-source" hidden>
+    <div class="code-block">
+      <div class="code-head"><span>html</span><span>{lines} lines</span></div>
+      <Fragment set:html={codeHtml} />
+    </div>
+  </div>
+</figure>
+
+<script>
+  // One listener for every demo on the page (Astro dedupes this bundle).
+  const demos = () => document.querySelectorAll<HTMLElement>('.html-demo')
+
+  window.addEventListener('message', (e) => {
+    const data = e.data
+    if (!data || data.__dtdDemo !== 'height') return
+    for (const fig of demos()) {
+      const frame = fig.querySelector('iframe')
+      if (frame && frame.contentWindow === e.source) {
+        // clamp: a runaway demo should not push the article off the screen
+        frame.style.height = Math.min(Math.max(data.height, 160), 2000) + 'px'
+        // first contact from a lazily-loaded frame — hand it the current theme
+        const theme = document.documentElement.getAttribute('data-theme') || 'light'
+        frame.contentWindow.postMessage({ __dtdDemo: 'theme', theme }, '*')
+      }
+    }
+  })
+
+  // The iframe is a separate document — the theme has to be handed over.
+  const pushTheme = () => {
+    const theme = document.documentElement.getAttribute('data-theme') || 'light'
+    for (const fig of demos()) {
+      fig.querySelector('iframe')?.contentWindow?.postMessage({ __dtdDemo: 'theme', theme }, '*')
+    }
+  }
+  new MutationObserver(pushTheme).observe(document.documentElement, {
+    attributeFilter: ['data-theme'],
+  })
+  window.addEventListener('load', pushTheme)
+
+  document.addEventListener('click', (e) => {
+    const target = e.target as HTMLElement
+    const fig = target.closest<HTMLElement>('.html-demo')
+    if (!fig) return
+
+    if (target.closest('[data-demo-source]')) {
+      const btn = target.closest('[data-demo-source]') as HTMLButtonElement
+      const panel = fig.querySelector<HTMLElement>('.demo-source')!
+      const open = panel.hidden
+      panel.hidden = !open
+      btn.setAttribute('aria-expanded', String(open))
+      btn.textContent = open ? 'hide source' : 'source'
+    }
+
+    if (target.closest('[data-demo-full]')) {
+      if (document.fullscreenElement) document.exitFullscreen()
+      else fig.requestFullscreen?.()
+    }
+  })
+</script>

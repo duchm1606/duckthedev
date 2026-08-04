@@ -6,6 +6,7 @@ import { highlight } from '../../lib/highlight'
 import { localizeImage } from '../../lib/images'
 import { groupLists, plainText } from '../../lib/notion/render'
 import RichText from '../RichText.astro'
+import HtmlDemo from './HtmlDemo.astro'
 
 interface Props {
   block: any
@@ -21,7 +22,15 @@ const children = block.children ? groupLists(block.children) : []
 const codeText = type === 'code' ? plainText(data.rich_text) : ''
 const codeCaption = type === 'code' ? plainText(data.caption) : ''
 const codeLines = codeText ? codeText.split('\n').length : 0
-const codeHtml = codeText ? await highlight(codeText, data.language ?? 'text') : ''
+
+// An HTML code block is an interactive illustration, so it renders as a
+// sandboxed live preview. Prefix the caption with `raw` to opt out and get
+// the ordinary highlighted code block instead.
+const isDemo = type === 'code' && data.language === 'html' && !/^raw\b/i.test(codeCaption)
+const demoLabel = codeCaption.replace(/^demo\s*[·:—–-]?\s*/i, '')
+const rawCaption = codeCaption.replace(/^raw\s*[·:—–-]?\s*/i, '')
+
+const codeHtml = codeText && !isDemo ? await highlight(codeText, data.language ?? 'text') : ''
 
 // images are copied into public/ at build time (signed URLs expire)
 const imageSrc =
@@ -64,11 +73,13 @@ const bookmarkUrl = type === 'bookmark' || type === 'embed' ? (data.url ?? '') :
   )
 }
 
+{type === 'code' && isDemo && <HtmlDemo html={codeText} label={demoLabel} />}
+
 {
-  type === 'code' && (
+  type === 'code' && !isDemo && (
     <div class="code-block">
       <div class="code-head">
-        <span>{codeCaption || data.language}</span>
+        <span>{rawCaption || data.language}</span>
         <span>{data.language} · {codeLines} lines</span>
       </div>
       <Fragment set:html={codeHtml} />

@@ -242,6 +242,7 @@ thành bài lẻ (hoặc ngược lại) mà không đụng gì khác. Đổi ro
 | `heading_2` / `heading_3` | `<h2 id>` / `<h3 id>` + là nguồn của TOC cấp 2 (`post-aside`) |
 | `paragraph` (đầu tiên) | `p.lede` — đoạn mở có chữ to |
 | `code` (có caption) | `.code-block` với `.code-head` = caption + `<ngôn ngữ> · N lines` |
+| `code` ngôn ngữ **HTML** | `.html-demo` — preview sống trong iframe sandbox (xem §10.1) |
 | `callout` | `.callout`, icon Notion → `.ico` |
 | `quote` | `.quote-block` (dùng ở `/about`) |
 | `bulleted_list` | `ul.bullets` |
@@ -252,6 +253,27 @@ thành bài lẻ (hoặc ngược lại) mà không đụng gì khác. Đổi ro
 TOC cấp 1 (outline series) lấy từ DB: `Parts` sort theo `Order`, mỗi part chứa `Posts`
 sort theo `Order`. TOC cấp 2 lấy từ heading. Hai nguồn khác nhau, đó là lý do chúng
 tách thành hai cột trong `chapter.html`.
+
+### 10.1. Illustration tương tác — code block HTML
+
+Một code block đặt ngôn ngữ **HTML** không hiển thị dưới dạng markup, nó chạy thật
+trong `<iframe srcdoc sandbox="allow-scripts">` (`src/components/blocks/HtmlDemo.astro`).
+Đây là pattern visualizer trong ghi chú CS149: mỗi demo là một tài liệu HTML tự chứa,
+CSS của nó không rò rỉ ra layout letterpress và ngược lại.
+
+- **Caption = nhãn.** Tiền tố `demo` (nếu có) bị cắt: `demo · the ring` → nhãn `the ring`.
+- **Muốn giữ nguyên code**, cho caption bắt đầu bằng `raw` — ví dụ `raw · dashboard row`.
+- **Chiều cao tự động.** Frame tự đo `<body>` rồi `postMessage` chiều cao ra ngoài
+  (kẹp trong khoảng 160–2000px). Đừng đo `documentElement.scrollHeight`: nó không bao
+  giờ nhỏ hơn chiều cao hiện tại của iframe nên demo ngắn sẽ không co lại được.
+- **Theme.** Iframe là document riêng nên không thừa hưởng `data-theme`; trang cha
+  postMessage theme vào, shim set lại `data-theme` trên `<html>` của frame. Demo nào
+  muốn theo sáng/tối thì khai báo biến màu dưới `:root` và `[data-theme="dim"]`.
+- **Sandbox không có `allow-same-origin`** → `localStorage`, cookie và fetch cùng origin
+  đều không dùng được trong demo. Cố tình như vậy: nội dung từ Notion là code chạy được.
+
+`scripts/seed-showcase.mjs` chứa hai demo mẫu (ring consistent hashing, reconcile loop)
+dùng đúng bộ token màu của site.
 
 ---
 
