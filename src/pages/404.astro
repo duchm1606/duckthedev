@@ -23,10 +23,11 @@ const pinned = topics.filter((t) => t.pinned).slice(0, 9)
   <section class="wrap">
     <div class="page-head">
       <div class="page-eyebrow">Error · 404</div>
-      <h1 class="page-title">That page<br /><em>isn't here.</em></h1>
+      {/* short enough to sit on one line — no <br> like the longer page titles */}
+      <h1 class="page-title">That page <em>isn't here.</em></h1>
       <p class="page-deck">
-        Either the slug changed, or it never existed. Nothing is deleted on purpose here — if a
-        post moved, it moved to a topic below. Otherwise start from the newest entries.
+        Either the slug changed or it never existed. Nothing gets deleted here on purpose, so
+        start from the newest entries or the topic it was filed under.
       </p>
       <div class="hero-actions">
         <a class="btn-primary" href="/blog">Browse the archive <span class="arrow">→</span></a>
