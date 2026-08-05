@@ -36,7 +36,18 @@ const SHIM = `
   addEventListener('resize', send)
   addEventListener('message', function (e) {
     var d = e.data
-    if (!d || d.__dtdDemo !== 'theme') return
+    if (!d) return
+    // The frame is a srcdoc document with nothing to fetch, so it can finish
+    // parsing before the parent's module script has attached its listener —
+    // and since send() dedupes against the last height it sent, that first
+    // message would be the only one. The parent asks again once it is ready.
+    // (No backticks in here — this shim is itself a template literal.)
+    if (d.__dtdDemo === 'measure') {
+      last = 0
+      send()
+      return
+    }
+    if (d.__dtdDemo !== 'theme') return
     document.documentElement.setAttribute('data-theme', d.theme)
     document.documentElement.style.colorScheme = d.theme === 'dim' ? 'dark' : 'light'
   })
@@ -95,6 +106,24 @@ const lines = html.split('\n').length
       }
     }
   })
+
+  // Ask every frame for its height. Frames that already finished parsing
+  // posted theirs before this listener existed, and they will not repeat
+  // themselves unless asked — without this a demo keeps the CSS fallback
+  // height and shows a scrollbar until the first interaction resizes it.
+  const measure = (frame: HTMLIFrameElement | null | undefined) =>
+    frame?.contentWindow?.postMessage({ __dtdDemo: 'measure' }, '*')
+
+  const measureAll = () => {
+    for (const fig of demos()) measure(fig.querySelector('iframe'))
+  }
+
+  measureAll()
+  window.addEventListener('load', measureAll)
+  // lazily-loaded frames only mount once scrolled into view
+  for (const fig of demos()) {
+    fig.querySelector('iframe')?.addEventListener('load', (e) => measure(e.target as HTMLIFrameElement))
+  }
 
   // The iframe is a separate document — the theme has to be handed over.
   const pushTheme = () => {
