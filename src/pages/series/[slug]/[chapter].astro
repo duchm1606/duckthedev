@@ -98,7 +98,13 @@ const elsewhere = posts
               </summary>
               {part.chapters.map((c) =>
                 c.published || !isProd() ? (
-                  <a class:list={['chap-link', { active: c.id === post.id }]} href={c.url}>
+                  // Unpublished chapters stay clickable outside production so a
+                  // draft can be previewed — but they keep the locked styling,
+                  // otherwise the outline claims the whole series is out.
+                  <a
+                    class:list={['chap-link', { active: c.id === post.id, locked: !c.published }]}
+                    href={c.url}
+                  >
                     <span class="n">{String(c.order ?? 0).padStart(2, '0')}</span>
                     <span>{c.title}</span>
                   </a>
