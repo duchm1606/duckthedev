@@ -767,8 +767,18 @@ a:hover .feat-title, .feat-lead:hover .feat-title { color: var(--accent); }
   overflow-y: auto;
   padding-right: 16px;
   border-right: 1px solid var(--rule);
+  /* Left to `auto`, macOS draws an overlay scrollbar that fades out entirely —
+     the column looks like it simply cannot scroll. Naming a colour opts into a
+     classic, always-visible bar, and picks up the theme's own rule colour. */
   scrollbar-width: thin;
+  scrollbar-color: var(--rule) transparent;
 }
+/* Safari before 18.2 ignores the two properties above; modern engines ignore
+   these in turn once `scrollbar-width` is set, so the two never fight. */
+.outline::-webkit-scrollbar { width: 6px; }
+.outline::-webkit-scrollbar-track { background: transparent; }
+.outline::-webkit-scrollbar-thumb { background: var(--rule); }
+.outline::-webkit-scrollbar-thumb:hover { background: var(--ink-3); }
 @media (max-width: 900px) {
   .outline { position: static; max-height: none; border-right: none; border-bottom: 1px solid var(--rule); padding: 0 0 20px; }
 }
