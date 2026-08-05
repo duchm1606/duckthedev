@@ -1,6 +1,6 @@
 // Notion official API client (2025-09-03), shared by Astro builds and node scripts.
 // - throttles to ~3 req/s (Notion's real rate limit)
-// - retries 408/429/5xx with backoff, honoring Retry-After
+// - retries 408/429/5xx and transport failures with backoff, honoring Retry-After
 // - auto-paginates (database queries, block children)
 // - dev cache in .cache/notion/ so a file save doesn't trigger an API burst
 // - .env only holds database_id; data_source_id (new API) is resolved here
@@ -66,17 +66,28 @@ async function request(path: string, body?: unknown, method?: string): Promise<a
   const token = requireEnv('NOTION_TOKEN')
   let lastError = ''
   for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
-    const res = await throttled(() =>
-      fetch(API + path, {
-        method: method ?? (body ? 'POST' : 'GET'),
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Notion-Version': VERSION,
-          'Content-Type': 'application/json',
-        },
-        body: body ? JSON.stringify(body) : undefined,
-      }),
-    )
+    let res: Response
+    try {
+      res = await throttled(() =>
+        fetch(API + path, {
+          method: method ?? (body ? 'POST' : 'GET'),
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Notion-Version': VERSION,
+            'Content-Type': 'application/json',
+          },
+          body: body ? JSON.stringify(body) : undefined,
+        }),
+      )
+    } catch (err) {
+      // A rejected fetch is a transport failure — DNS, connect timeout, socket
+      // reset — and it never produces a Response, so it would otherwise skip the
+      // status-based retry below entirely. One blip would fail a whole build.
+      lastError = `network — ${err instanceof Error ? err.message : String(err)}`
+      if (attempt === MAX_RETRIES) break
+      await new Promise((r) => setTimeout(r, 500 * 2 ** attempt))
+      continue
+    }
     if (res.ok) {
       const json = await res.json()
       if (cacheEnabled()) {
