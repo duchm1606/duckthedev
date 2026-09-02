@@ -1,0 +1,50 @@
+---
+// The chapter list of a series, grouped by Part. Rendered twice on a chapter
+// page: as the sticky left column on wide screens and inside a collapsed
+// <details> above the chapter on narrow ones (CSS shows one or the other).
+import { formatDayMonth, roman } from '../lib/notion/render'
+import { isProd } from '../lib/env'
+import type { Series } from '../lib/types'
+
+interface Props {
+  series: Series
+  currentId: string
+  currentPartOrder: number
+}
+const { series: s, currentId, currentPartOrder } = Astro.props
+const pad = (n?: number) => String(n ?? 0).padStart(2, '0')
+---
+
+<div class="outline-body">
+  <a class="outline-title" href={`/series/${s.slug}`}>{s.name}</a>
+  <span class="outline-note">
+    {s.publishedCount} of {s.chapterCount} published{s.nextDate && ` · next ${formatDayMonth(s.nextDate)}`}
+  </span>
+
+  {
+    s.parts.map((part) => (
+      <details open={part.order <= currentPartOrder}>
+        <summary>{part.name ? `Part ${roman(part.order).toUpperCase()} · ${part.name}` : 'Chapters'}</summary>
+        {part.chapters.map((c) =>
+          c.published || !isProd() ? (
+            // Unpublished chapters stay clickable outside production so a
+            // draft can be previewed, but keep the locked styling.
+            <a
+              class:list={['chap-link', { active: c.id === currentId, locked: !c.published }]}
+              href={c.url}
+              aria-current={c.id === currentId ? 'page' : undefined}
+            >
+              <span class="n">{pad(c.order)}</span>
+              <span>{c.title}</span>
+            </a>
+          ) : (
+            <span class="chap-link locked">
+              <span class="n">{pad(c.order)}</span>
+              <span>{c.title}</span>
+            </span>
+          ),
+        )}
+      </details>
+    ))
+  }
+</div>

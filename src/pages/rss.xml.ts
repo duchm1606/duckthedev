@@ -11,7 +11,7 @@ export async function GET(context: APIContext) {
     .sort((a, b) => b.date.localeCompare(a.date))
   return rss({
     title: site.name,
-    description: site.coloNote,
+    description: site.description,
     site: context.site!,
     items: published.map((p) => ({
       title: p.series ? `${p.series.name} · Ch. ${p.order}: ${p.title}` : p.title,

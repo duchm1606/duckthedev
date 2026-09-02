@@ -1,33 +1,27 @@
 ---
-// One row in an article list (blog archive, home "Latest articles").
-// data-tags feeds the client-side filter buttons in app.js.
+// One row in a post list: date · title + one-line description · meta.
+// The meta column carries at most three facts (type, first topic, length).
 import { formatDate } from '../lib/notion/render'
 import type { Post } from '../lib/types'
 
 interface Props {
   post: Post
   minutes?: number
-  /** values for the data-tags filter attribute; defaults to the post type */
-  tags?: string[]
 }
-const { post, minutes, tags } = Astro.props
+const { post, minutes } = Astro.props
+const topic = post.topics[0]
 ---
 
-<article class="article-row" data-tags={(tags ?? [post.type]).join(' ')}>
-  <div class="art-date">{formatDate(post.date)}</div>
+<article class="row">
+  <div class="row-date">{formatDate(post.date)}</div>
   <div>
-    <h3 class="art-title">
-      <a href={post.url}>{post.title}</a>
-      {post.type === 'note' && <span class="badge-pin badge-new">note</span>}
-      {post.pinned && <span class="badge-pin">pinned</span>}
-      {!post.published && <span class="badge-pin">draft</span>}
-    </h3>
-    <p class="art-desc">{post.description}</p>
+    <h3 class="row-title"><a href={post.url}>{post.title}</a></h3>
+    {post.description && <p class="row-desc">{post.description}</p>}
   </div>
-  <div class="art-side">
-    <div class="tag-chips">
-      {post.topics.slice(0, 2).map((t) => <a class="chip" href={`/topics/${t.slug}`}>{t.name}</a>)}
-    </div>
-    {minutes !== undefined && <div class="art-read">{minutes} min read</div>}
+  <div class="row-meta">
+    {post.type === 'note' && <span>Note</span>}
+    {!post.published && <span>Draft</span>}
+    {topic && <a href={`/topics/${topic.slug}`}>{topic.name}</a>}
+    {minutes !== undefined && <span>{minutes} min</span>}
   </div>
 </article>

@@ -23,3 +23,9 @@ scripts/notion-ids.json
 .playwright-mcp/
 *.png
 !public/**/*.png
+
+# UX research screenshots (evidence only)
+docs/ux-research/
+
+# vercel
+.vercel/

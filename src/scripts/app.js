@@ -1,4 +1,4 @@
-/* duckthedev — mock interactions (theme, progress bar, filters, toc) */
+/* duckthedev — client behaviour (theme, reading progress, toc scroll spy) */
 
 // ---- Theme ----
 (function () {
@@ -37,33 +37,16 @@
   onScroll();
 })();
 
-// ---- Filter buttons (mock: filters by data-tag on rows) ----
-document.addEventListener('click', e => {
-  const btn = e.target.closest('.filter');
-  if (!btn) return;
-  const row = btn.closest('.filter-row');
-  row.querySelectorAll('.filter').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-
-  const target = document.querySelector(row.dataset.target || '.article-list');
-  if (!target) return;
-  const want = btn.dataset.filter;
-  target.querySelectorAll('[data-tags]').forEach(item => {
-    const tags = item.dataset.tags.split(/\s+/);
-    item.style.display = !want || want === 'all' || tags.includes(want) ? '' : 'none';
-  });
-});
-
 // ---- TOC scroll spy ----
 (function () {
-  // only anchor links take part in scroll spy — the Related nav reuses
-  // the .toc class but points at other pages
+  // The sidebar and the inline <details> both carry a .toc — only one is
+  // visible at a time, so every link with a matching hash gets the class.
   const links = [...document.querySelectorAll('.toc a')].filter(a =>
     a.getAttribute('href')?.startsWith('#')
   );
   if (!links.length) return;
-  const targets = links
-    .map(a => document.querySelector(a.getAttribute('href')))
+  const targets = [...new Set(links.map(a => a.getAttribute('href')))]
+    .map(h => document.querySelector(h))
     .filter(Boolean);
   const io = new IntersectionObserver(
     entries => {
@@ -72,7 +55,7 @@ document.addEventListener('click', e => {
         links.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + en.target.id));
       });
     },
-    { rootMargin: '-110px 0px -70% 0px' }
+    { rootMargin: '-90px 0px -70% 0px' }
   );
   targets.forEach(t => io.observe(t));
 })();

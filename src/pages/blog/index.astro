@@ -1,13 +1,12 @@
 ---
-// Blog archive ported from mock/blog.html — standalone posts grouped by
-// year, newest first, with per-year Articles/Notes filter chips.
+// Blog archive — standalone posts grouped by year, newest first.
 import ArticleRow from '../../components/ArticleRow.astro'
 import Base from '../../layouts/Base.astro'
 import { getSiteData } from '../../lib/fetcher'
 import { getManyStats } from '../../lib/stats'
 
-const { posts, topics } = await getSiteData()
-const standalone = posts.filter((p) => !p.series)
+const { posts } = await getSiteData()
+const standalone = [...posts.filter((p) => !p.series)].sort((a, b) => b.date.localeCompare(a.date))
 const stats = await getManyStats(standalone.map((p) => p.id))
 
 const byYear = new Map<string, typeof standalone>()
@@ -16,58 +15,29 @@ for (const post of standalone) {
   byYear.set(year, [...(byYear.get(year) ?? []), post])
 }
 const years = [...byYear.keys()].sort().reverse()
-
-const articleTotal = standalone.filter((p) => p.type === 'article').length
-const noteTotal = standalone.filter((p) => p.type === 'note').length
 ---
 
 <Base title="Blog — duckthedev" description="Archive of all articles and notes." active="blog">
   <section class="wrap">
     <div class="page-head">
-      <div class="page-eyebrow">Archive</div>
+      <p class="kicker">Archive</p>
       <h1 class="page-title">Everything I've<br /><em>published.</em></h1>
-      <p class="page-deck">
-        Articles are finished pieces; notes are working material that gets edited in place. Both
-        are listed here, newest first, and both are searchable by topic.
-      </p>
-      <div class="page-stats">
-        <span><strong>{articleTotal}</strong> articles</span>
-        <span><strong>{noteTotal}</strong> notes</span>
-        <span><strong>{topics.length}</strong> topics</span>
-        <span><strong>{years.length}</strong> {years.length === 1 ? 'year' : 'years'}</span>
-      </div>
+      <p class="page-deck">Articles and notes, newest first.</p>
     </div>
   </section>
 
   {
-    years.map((year) => {
-      const list = byYear.get(year)!
-      const articles = list.filter((p) => p.type === 'article').length
-      const notes = list.filter((p) => p.type === 'note').length
-      return (
-        <section class="section">
-          <div class="wrap">
-            <div class="section-head">
-              <div>
-                <div class="section-eyebrow">{year}</div>
-              </div>
-              <div class="filter-row" data-target={`#archive-${year}`}>
-                <button class="filter active" data-filter="all">All <span>{list.length}</span></button>
-                <button class="filter" data-filter="article">Articles <span>{articles}</span></button>
-                <button class="filter" data-filter="note">Notes <span>{notes}</span></button>
-              </div>
-            </div>
-            <div class="article-list" id={`archive-${year}`}>
-              {list.map((post) => (
-                <ArticleRow post={post} minutes={stats.get(post.id)?.minutes} />
-              ))}
-            </div>
-            <div class="list-foot">
-              <span>Showing {list.length} entries from {year}.</span>
-            </div>
-          </div>
-        </section>
-      )
-    })
+    years.map((year) => (
+      <section class="section wrap">
+        <div class="section-head">
+          <h2 class="section-title">{year}</h2>
+        </div>
+        <div class="list">
+          {byYear.get(year)!.map((post) => (
+            <ArticleRow post={post} minutes={stats.get(post.id)?.minutes} />
+          ))}
+        </div>
+      </section>
+    ))
   }
 </Base>

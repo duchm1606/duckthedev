@@ -1,118 +1,35 @@
 ---
-// Topic index ported from mock/topics.html: pinned topic cards with group
-// filters, then the full A–Z index as pills. (The mock's "shelf preview"
-// section is replaced by real /topics/[slug] pages.)
+// Topic index — one list: pinned topics first (bold), then the rest A–Z.
 import Base from '../../layouts/Base.astro'
 import { getSiteData } from '../../lib/fetcher'
-import { formatDayMonth } from '../../lib/notion/render'
 import type { Topic } from '../../lib/types'
 
 const { topics } = await getSiteData()
 const entries = (t: Topic) => t.articleCount + t.noteCount
-const entryLabel = (n: number) => `${n} ${n === 1 ? 'entry' : 'entries'}`
 const pinned = topics.filter((t) => t.pinned)
 const rest = [...topics.filter((t) => !t.pinned)].sort((a, b) => a.name.localeCompare(b.name))
-const totalEntries = topics.reduce((n, t) => n + entries(t), 0)
-const biggest = [...topics].sort((a, b) => entries(b) - entries(a))[0]
-
-const GROUP_LABELS: Record<string, string> = {
-  lang: 'Languages',
-  data: 'Data',
-  infra: 'Infra',
-  practice: 'Practice',
-}
-const groups = [...new Set(pinned.map((t) => t.group).filter(Boolean))] as string[]
-
-const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('')
-const usedLetters = new Set(topics.map((t) => t.name[0]?.toUpperCase()))
+const ordered = [...pinned, ...rest]
 ---
 
 <Base title="Topics — duckthedev" description="Every article and note, filed by topic." active="topics">
   <section class="wrap">
     <div class="page-head">
-      <div class="page-eyebrow">Index · Topics</div>
+      <p class="kicker">Index</p>
       <h1 class="page-title">{topics.length} shelves,<br /><em>one notebook.</em></h1>
-      <p class="page-deck">
-        Every article and note is filed under at least one topic. Pinned topics are the ones I
-        write about on purpose; the rest accumulated on their own.
-      </p>
-      <div class="page-stats">
-        <span><strong>{topics.length}</strong> topics</span>
-        <span><strong>{pinned.length}</strong> pinned</span>
-        <span><strong>{totalEntries}</strong> entries</span>
-        {biggest && <span><strong>{biggest.name}</strong> is the biggest shelf</span>}
-      </div>
+      <p class="page-deck">Everything, filed by topic. Bold ones are the main shelves.</p>
     </div>
   </section>
 
-  <section class="section">
-    <div class="wrap">
-      <div class="section-head">
-        <div>
-          <div class="section-eyebrow">I. Pinned</div>
-        </div>
-        <div class="filter-row" data-target="#topic-grid">
-          <button class="filter active" data-filter="all">All <span>{pinned.length}</span></button>
-          {
-            groups.map((g) => (
-              <button class="filter" data-filter={g}>
-                {GROUP_LABELS[g] ?? g} <span>{pinned.filter((t) => t.group === g).length}</span>
-              </button>
-            ))
-          }
-        </div>
-      </div>
-
-      <div class="topic-grid" id="topic-grid">
-        {
-          pinned.map((t) => (
-            <a class="topic-card" href={`/topics/${t.slug}`} data-tags={t.group}>
-              <div class="topic-card-head">
-                <div class:list={['topic-card-glyph', t.iconClass]}>
-                  {t.icon ? <img src={t.icon} alt="" loading="lazy" /> : t.glyph}
-                </div>
-                <div>
-                  <h3>{t.name}</h3>
-                  <div class="topic-count">{entryLabel(entries(t))}</div>
-                </div>
-              </div>
-              {t.description && <p>{t.description}</p>}
-              <div class="topic-card-foot">
-                <span>{t.articleCount} articles · {t.noteCount} notes</span>
-                {t.updated && <span>Updated {formatDayMonth(t.updated)}</span>}
-              </div>
-            </a>
-          ))
-        }
-      </div>
-    </div>
-  </section>
-
-  <section class="section">
-    <div class="wrap">
-      <div class="section-head">
-        <div>
-          <div class="section-eyebrow">II. Full index</div>
-        </div>
-      </div>
-
-      <div class="alpha-nav">
-        {alphabet.map((l) => <button class:list={[{ off: !usedLetters.has(l) }]}>{l}</button>)}
-      </div>
-
-      <div class="topics-flow">
-        {
-          rest.map((t) => (
-            <a class="topic-pill" href={`/topics/${t.slug}`}>
-              <span class:list={['glyph', t.iconClass]}>
-                {t.icon ? <img src={t.icon} alt="" loading="lazy" /> : t.glyph}
-              </span>
-              <span class="name">{t.name}</span>
-              <span class="count">— {entries(t)}</span>
-            </a>
-          ))
-        }
-      </div>
+  <section class="section wrap">
+    <div class="topic-list">
+      {
+        ordered.map((t) => (
+          <a class:list={['topic-row', { pinned: t.pinned, empty: entries(t) === 0 }]} href={`/topics/${t.slug}`}>
+            <span>{t.name}</span>
+            <span class="count">{entries(t)}</span>
+          </a>
+        ))
+      }
     </div>
   </section>
 </Base>

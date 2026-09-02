@@ -1,7 +1,8 @@
 ---
-// Base shell ported from mock/*.html: masthead + nav, optional reading
-// progress line, colophon footer. Page content goes into the default slot.
+// Base shell: masthead + nav, optional reading-progress line, one-row footer.
+// Page content goes into the default slot.
 import { site, type NavKey } from '../config/site'
+import '../styles/fonts.css'
 import '../styles/global.css'
 
 interface Props {
@@ -36,12 +37,6 @@ const ogImageUrl = new URL(ogImage, Astro.site)
     <meta property="og:image" content={ogImageUrl} />
     <meta property="og:type" content="website" />
     <meta name="twitter:card" content="summary_large_image" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,700;0,9..144,800;1,9..144,400;1,9..144,500;1,9..144,700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&family=JetBrains+Mono:wght@400;500;600&display=swap"
-      rel="stylesheet"
-    />
     <script is:inline>
       // apply the saved theme before first paint to avoid a light-theme flash
       document.documentElement.setAttribute(
@@ -54,12 +49,11 @@ const ogImageUrl = new URL(ogImage, Astro.site)
     <header class="masthead">
       <div class="wrap">
         <div class="masthead-row">
-          <a class="brand" href="/">
+          <a class="brand" href="/" aria-label={`${site.name} — home`}>
             <span class="brand-mark">{site.mark}</span>
             <span class="brand-name">{site.name}</span>
-            <span class="brand-tag">{site.tagline}</span>
           </a>
-          <nav class="primary-nav">
+          <nav class="primary-nav" aria-label="Primary">
             {
               site.nav.map((item) => (
                 <a class:list={['nav-link', { active: item.key === active }]} href={item.href}>
@@ -80,40 +74,19 @@ const ogImageUrl = new URL(ogImage, Astro.site)
 
     <footer class="colophon">
       <div class="wrap">
-        <div class="colo-grid">
-          <div>
-            <div class="colo-brand">{site.name}<span>.</span></div>
-            <p class="colo-note">{site.coloNote}</p>
-          </div>
-          <div class="colo-col">
-            <h5>Read</h5>
-            <ul>
-              <li><a href="/series">Series</a></li>
-              <li><a href="/blog">All articles</a></li>
-              <li><a href="/topics">Topics</a></li>
-              <li><a href="/rss.xml">RSS feed</a></li>
-            </ul>
-          </div>
-          <div class="colo-col">
-            <h5>Me</h5>
-            <ul>
-              <li><a href="/about">About / CV</a></li>
-              <li><a href={site.social.github}>GitHub</a></li>
-              <li><a href={site.social.linkedin}>LinkedIn</a></li>
-              <li><a href={site.social.email}>Email</a></li>
-            </ul>
-          </div>
-          <div class="colo-col">
-            <h5>Colophon</h5>
-            <ul>
-              {site.colophonTech.map((t) => <li>{t}</li>)}
-            </ul>
-          </div>
+        <div class="colo-row">
+          <a class="colo-brand" href="/">{site.name}<span>.</span></a>
+          <nav class="colo-links" aria-label="Footer">
+            <a href="/series">Series</a>
+            <a href="/blog">Blog</a>
+            <a href="/topics">Topics</a>
+            <a href="/about">About</a>
+            <a href="/rss.xml">RSS</a>
+            <a href={site.social.github}>GitHub</a>
+            <a href={site.social.email}>Email</a>
+          </nav>
         </div>
-        <div class="colo-foot">
-          <span>© {site.copyrightFrom}—{year} {site.author}</span>
-          <span>{site.coloFoot}</span>
-        </div>
+        <p class="colo-note">© {site.copyrightFrom}–{year} {site.author} · {site.footerNote}</p>
       </div>
     </footer>
 

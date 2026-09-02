@@ -1,137 +1,92 @@
 ---
-// Series map ported from mock/series-detail.html: page head with derived
-// stats, then Parts → chapter rows (locked rows for unpublished chapters).
+// Series map: page head with one meta line, then Parts → chapter rows
+// (locked rows for unpublished chapters).
 import Base from '../../../layouts/Base.astro'
 import { getSiteData } from '../../../lib/fetcher'
-import {
-  approxHours,
-  durationLabel,
-  formatDayMonth,
-  roman,
-} from '../../../lib/notion/render'
+import { approxHours, formatDayMonth, roman } from '../../../lib/notion/render'
 import { getManyStats } from '../../../lib/stats'
 import type { Series } from '../../../lib/types'
 
 export async function getStaticPaths() {
   const { series } = await getSiteData()
-  return series.map((s, i) => ({ params: { slug: s.slug }, props: { series: s, number: i + 1 } }))
+  return series.map((s) => ({ params: { slug: s.slug }, props: { series: s } }))
 }
 
 interface Props {
   series: Series
-  number: number
 }
-const { series: s, number } = Astro.props
+const { series: s } = Astro.props
 
 const chapters = s.parts.flatMap((p) => p.chapters)
 const stats = await getManyStats(chapters.filter((c) => c.published).map((c) => c.id))
 const minutesOf = (id: string) => stats.get(id)?.minutes ?? 0
 const totalMinutes = chapters.reduce((sum, c) => sum + minutesOf(c.id), 0)
 const firstPublished = chapters.find((c) => c.published)
+const namedParts = s.parts.filter((p) => p.name).length
+const pad = (n?: number) => String(n ?? 0).padStart(2, '0')
 
-const eyebrow = `Series № ${number}${s.cadence ? ` · ${s.cadence}` : s.state === 'complete' ? ' · complete' : ''}`
+const state = s.state === 'complete' ? 'Complete' : (s.cadence ?? (s.state === 'planned' ? 'Planned' : 'Ongoing'))
 ---
 
 <Base title={`${s.name} — duckthedev`} description={s.description} active="series">
   <div class="wrap">
-    <div class="breadcrumb">
-      <a href="/">Home</a><span class="sep">/</span>
-      <a href="/series">Series</a><span class="sep">/</span>
-      <span>{s.name}</span>
-    </div>
-  </div>
-
-  <section class="wrap">
-    <div class="page-head">
-      <div class="page-eyebrow">{eyebrow}</div>
+    <header class="page-head">
+      <p class="kicker">
+        <span>{state}</span>
+        {s.topics.slice(0, 3).map((t) => <> · <a href={`/topics/${t.slug}`}>{t.name}</a></>)}
+      </p>
       <h1 class="page-title">{s.name}</h1>
       <p class="page-deck">{s.description}</p>
-      <div class="ser-tags" style="margin-top:18px;">
-        {
-          s.topics.map((t, i) => (
-            <a class:list={['chip', { solid: i === 0 }]} href={`/topics/${t.slug}`}>{t.name}</a>
-          ))
-        }
-      </div>
-      <div class="page-stats">
-        <span><strong>{s.chapterCount || s.plannedChapters || 0}</strong> chapters</span>
-        {
-          s.parts.filter((p) => p.name).length > 0 && (
-            <span><strong>{s.parts.filter((p) => p.name).length}</strong> parts</span>
-          )
-        }
-        <span><strong>{s.publishedCount}</strong> published</span>
-        {totalMinutes > 0 && <span><strong>{approxHours(totalMinutes)}</strong> total</span>}
-        {s.level && <span>Level <strong>{s.level}</strong></span>}
-        {s.nextDate && <span>Next out <strong>{formatDayMonth(s.nextDate)}</strong></span>}
-      </div>
-    </div>
-  </section>
+      <p class="meta">
+        <span>{s.chapterCount || s.plannedChapters || 0} chapters</span>
+        {namedParts > 0 && <span>{namedParts} parts</span>}
+        <span>{s.publishedCount} published</span>
+        {totalMinutes > 0 && <span>{approxHours(totalMinutes)} of reading</span>}
+        {s.nextDate && <span>next {formatDayMonth(s.nextDate)}</span>}
+      </p>
+    </header>
 
-  <section class="section" style="border-bottom:none;">
-    <div class="wrap">
-      <div class="series-map">
-        <div>
-          {
-            s.parts.map((part) => {
-              const partMinutes = part.chapters.reduce((sum, c) => sum + minutesOf(c.id), 0)
-              const publishing = part.chapters.some((c) => !c.published)
-              return (
-                <div class="part-block">
-                  {part.name && (
-                    <div class="part-head">
-                      <div>
-                        <div class="part-kicker">Part {roman(part.order).toUpperCase()}</div>
-                        <div class="part-name">{part.name}</div>
-                      </div>
-                      <div class="part-meta">
-                        {part.chapters.length} chapters
-                        {partMinutes > 0 && ` · ${durationLabel(partMinutes)}`}
-                        {publishing && ' · publishing'}
-                        {part.note && ` · ${part.note}`}
-                      </div>
-                    </div>
-                  )}
-                  {part.chapters.map((c) =>
-                    c.published ? (
-                      <a class="chap-row" href={c.url}>
-                        <div class="chap-no">{String(c.order ?? 0).padStart(2, '0')}</div>
-                        <div>
-                          <div class="chap-title">{c.title}</div>
-                          <div class="chap-sub">{c.description}</div>
-                        </div>
-                        <div class="chap-stat">
-                          {minutesOf(c.id)} min · {formatDayMonth(c.date)}
-                        </div>
-                      </a>
-                    ) : (
-                      <div class="chap-row locked">
-                        <div class="chap-no">{String(c.order ?? 0).padStart(2, '0')}</div>
-                        <div>
-                          <div class="chap-title">{c.title}</div>
-                          <div class="chap-sub">{c.description}</div>
-                        </div>
-                        <div class="chap-stat">due {formatDayMonth(c.date)}</div>
-                      </div>
-                    ),
-                  )}
+    <section class="narrow">
+      {
+        s.parts.map((part) => (
+          <div class="part">
+            {part.name && (
+              <h2 class="part-title">
+                <span class="n">{roman(part.order).toUpperCase()}.</span>{part.name}
+              </h2>
+            )}
+            {part.chapters.map((c) =>
+              c.published ? (
+                <a class="chap" href={c.url}>
+                  <span class="chap-no">{pad(c.order)}</span>
+                  <span>
+                    <span class="chap-title">{c.title}</span>
+                    {c.description && <span class="chap-desc" style="display:block">{c.description}</span>}
+                  </span>
+                  <span class="chap-meta">{minutesOf(c.id)} min · {formatDayMonth(c.date)}</span>
+                </a>
+              ) : (
+                <div class="chap locked">
+                  <span class="chap-no">{pad(c.order)}</span>
+                  <span>
+                    <span class="chap-title">{c.title}</span>
+                    {c.description && <span class="chap-desc" style="display:block">{c.description}</span>}
+                  </span>
+                  <span class="chap-meta">due {formatDayMonth(c.date)}</span>
                 </div>
-              )
-            })
-          }
-        </div>
-      </div>
+              ),
+            )}
+          </div>
+        ))
+      }
 
-      <div class="hero-actions" style="margin-top:8px;">
-        {
-          firstPublished && (
-            <a class="btn-primary" href={firstPublished.url}>
-              Start from chapter {firstPublished.order} <span class="arrow">→</span>
-            </a>
-          )
-        }
-        <a class="btn-ghost" href="/series">All series</a>
-      </div>
-    </div>
-  </section>
+      {
+        firstPublished && (
+          <p style="margin-top:28px;">
+            <a class="btn" href={firstPublished.url}>Start from chapter {firstPublished.order} →</a>
+          </p>
+        )
+      }
+    </section>
+  </div>
 </Base>

@@ -1,75 +1,38 @@
 ---
 // A missing URL is usually a moved post or a mistyped slug, so this page is a
-// way back in rather than an apology: the newest entries plus the pinned
-// shelves. Built statically like everything else — hosts serve /404.html for
-// unmatched paths.
+// way back in rather than an apology: the newest entries. Built statically
+// like everything else — hosts serve /404.html for unmatched paths.
 import ArticleRow from '../components/ArticleRow.astro'
 import Base from '../layouts/Base.astro'
 import { getSiteData } from '../lib/fetcher'
 import { getManyStats } from '../lib/stats'
 
-const { posts, topics } = await getSiteData()
+const { posts } = await getSiteData()
 // `posts` keeps unpublished chapters so the series map can show them as locked
 // rows — a "most recent" list must not, in any environment.
 const recent = posts.filter((p) => p.published).slice(0, 5)
 const stats = await getManyStats(recent.map((p) => p.id))
-const pinned = topics.filter((t) => t.pinned).slice(0, 9)
 ---
 
-<Base
-  title="Not found — duckthedev"
-  description="That page isn't here. The newest entries and the main topics are."
->
+<Base title="Not found — duckthedev" description="That page isn't here. The newest entries are.">
   <section class="wrap">
     <div class="page-head">
-      <div class="page-eyebrow">Error · 404</div>
-      {/* short enough to sit on one line — no <br> like the longer page titles */}
+      <p class="kicker">404</p>
       <h1 class="page-title">That page <em>isn't here.</em></h1>
       <p class="page-deck">
-        Either the slug changed or it never existed. Nothing gets deleted here on purpose, so
-        start from the newest entries or the topic it was filed under.
+        The slug changed or never existed. Try the newest entries below, or
+        <a class="btn" href="/topics">browse by topic →</a>
       </p>
-      <div class="hero-actions">
-        <a class="btn-primary" href="/blog">Browse the archive <span class="arrow">→</span></a>
-        <a class="btn-ghost" href="/">Home</a>
-      </div>
     </div>
   </section>
 
-  <section class="section">
-    <div class="wrap">
-      <div class="section-head">
-        <div>
-          <div class="section-eyebrow">Most recent</div>
-        </div>
-      </div>
-      <div class="article-list">
-        {recent.map((post) => <ArticleRow post={post} minutes={stats.get(post.id)?.minutes} />)}
-      </div>
+  <section class="section wrap">
+    <div class="section-head">
+      <h2 class="section-title">Most recent</h2>
+      <a class="section-link" href="/blog">Archive →</a>
     </div>
-  </section>
-
-  <section class="section">
-    <div class="wrap">
-      <div class="section-head">
-        <div>
-          <div class="section-eyebrow">Or by topic</div>
-        </div>
-      </div>
-      <div class="topics-flow">
-        {
-          pinned.map((t) => (
-            <a class="topic-pill" href={`/topics/${t.slug}`}>
-              <span class:list={['glyph', t.iconClass]}>
-                {t.icon ? <img src={t.icon} alt="" loading="lazy" /> : t.glyph}
-              </span>
-              <span class="name">{t.name}</span>
-              <span class="count">— {t.articleCount + t.noteCount}</span>
-            </a>
-          ))
-        }
-        <a class="topic-pill" href="/topics"><span class="name">All topics →</span></a>
-      </div>
+    <div class="list">
+      {recent.map((post) => <ArticleRow post={post} minutes={stats.get(post.id)?.minutes} />)}
     </div>
   </section>
 </Base>

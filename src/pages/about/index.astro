@@ -1,203 +1,85 @@
 ---
-// About / CV ported from mock/about.html. Entry bullets are the Notion page
-// body of each CV entry (block children), not a property.
+// About / CV — one column, data from src/config/cv.ts. The Notion `Site`
+// database still supplies the two things edited away from the laptop:
+// availability and the CV PDF link.
 import Base from '../../layouts/Base.astro'
-import RichText from '../../components/RichText.astro'
+import { cv, type CvItem } from '../../config/cv'
 import { site } from '../../config/site'
 import { getSiteData } from '../../lib/fetcher'
-import { getBlocks } from '../../lib/notion/client'
-import type { CvEntry } from '../../lib/types'
 
-const { cv, skills, posts, site: kv } = await getSiteData()
+const { site: kv } = await getSiteData()
+// contact address is repo config, not the Notion `Site` KV — the KV still
+// carries the seed placeholder and would silently win otherwise
+const emailAddr = site.social.email.replace('mailto:', '')
 
-const experience = cv.filter((e) => e.kind === 'experience')
-const education = cv.filter((e) => e.kind === 'education')
-const projects = cv.filter((e) => e.kind === 'project')
-
-// bullets: bulleted_list_item blocks from each entry's page body
-const bullets = new Map<string, any[]>()
-for (const entry of cv) {
-  const blocks = await getBlocks(entry.id)
-  bullets.set(
-    entry.id,
-    blocks.filter((b) => b.type === 'bulleted_list_item').map((b) => b.bulleted_list_item.rich_text),
-  )
-}
-
-const skillGroups = [...new Set(skills.filter((s) => s.showInSkills).map((s) => s.group))].filter(
-  (g): g is string => !!g,
-)
-
-const year = (iso?: string) => iso?.slice(0, 4)
-const range = (e: CvEntry) => `${year(e.start) ?? ''} — ${year(e.end) ?? 'present'}`
-
-const firstYear = Math.min(...experience.map((e) => Number(year(e.start) ?? 9999)))
-const yearsExp = new Date().getFullYear() - firstYear
-const noteCount = posts.filter((p) => p.published && p.type === 'note').length
-const emailAddr = kv.email ?? site.social.email.replace('mailto:', '')
+const groups: { title: string; items: CvItem[] }[] = [
+  { title: 'Experience', items: cv.experience },
+  { title: 'Things I made', items: cv.projects },
+  { title: 'Education', items: cv.education },
+]
 ---
 
 <Base title="About me — duckthedev" description={site.about.deck} active="about">
-  <section class="wrap">
-    <div class="page-head">
-      <div class="page-eyebrow">{site.about.eyebrow}</div>
+  <div class="wrap narrow">
+    <header class="page-head">
+      <p class="kicker">{site.about.kicker}</p>
       <h1 class="page-title" set:html={site.about.title} />
       <p class="page-deck">{site.about.deck}</p>
-      <div class="page-stats">
-        <span><strong>{yearsExp}</strong> years of experience</span>
-        <span><strong>{experience.length}</strong> companies</span>
-        <span><strong>{noteCount}</strong> published notes</span>
-        <span><strong>{projects.length}</strong> open-source tools</span>
-      </div>
-    </div>
-  </section>
+      <dl class="facts">
+        {site.about.coords.map(({ k, v }) => <><dt>{k}</dt><dd>{v}</dd></>)}
+        <dt>Email</dt><dd><a href={`mailto:${emailAddr}`}>{emailAddr}</a></dd>
+        <dt>GitHub</dt><dd><a href={site.social.github}>{site.social.github.replace('https://', '')}</a></dd>
+        <dt>LinkedIn</dt><dd><a href={site.social.linkedin}>{site.social.linkedin.replace('https://www.', '')}</a></dd>
+        {kv.availability && <><dt>Now</dt><dd>{kv.availability}</dd></>}
+        {kv.cv_pdf_url && <><dt>CV</dt><dd><a href={kv.cv_pdf_url}>Download as PDF</a></dd></>}
+      </dl>
+    </header>
 
-  <section class="section" style="border-bottom:none;">
-    <div class="wrap">
-      <div class="cv-grid">
-        <aside class="cv-aside">
-          <div class="portrait">{site.about.portrait}</div>
-          {kv.availability && <div class="availability">{kv.availability}</div>}
-          <ul class="coord-list">
-            {
-              site.about.coords.map(({ k, v }) => (
-                <li><span class="k">{k}</span><span class="v">{v}</span></li>
-              ))
-            }
-            <li><span class="k">Email</span><a class="v" href={`mailto:${emailAddr}`}>{emailAddr}</a></li>
-            <li>
-              <span class="k">GitHub</span>
-              <a class="v" href={site.social.github}>{site.social.github.replace('https://', '')}</a>
-            </li>
-          </ul>
-          {
-            kv.cv_pdf_url && (
-              <a class="btn-ghost" href={kv.cv_pdf_url} style="justify-content:center;">
-                Download CV (PDF)
-              </a>
-            )
-          }
-        </aside>
-
-        <div class="cv-main">
-          <div class="quote-block">
-            {site.about.quote}
-            <cite>{site.about.quoteCite}</cite>
-          </div>
-
-          {
-            [
-              { title: 'I. Experience', items: experience },
-              { title: 'II. Education', items: education },
-            ].map(({ title, items }) => (
-              <div class="cv-group">
-                <div class="cv-group-title">{title}</div>
-                {items.map((e) => (
-                  <article class="cv-item">
-                    <div class="cv-logo">{e.logo}</div>
-                    <div>
-                      <div class="cv-head">
-                        <div>
-                          <div class="cv-role">{e.role}</div>
-                          <div class="cv-where">
-                            {e.orgUrl ? <a href={e.orgUrl}>{e.org}</a> : e.org}
-                            {e.location && ` · ${e.location}`}
-                          </div>
-                        </div>
-                        <div class="cv-date">{range(e)}</div>
-                      </div>
-                      {(bullets.get(e.id) ?? []).length > 0 && (
-                        <ul class="cv-activity">
-                          {bullets.get(e.id)!.map((rt) => (
-                            <li><RichText text={rt} /></li>
-                          ))}
-                        </ul>
-                      )}
-                      {e.tech.length > 0 && (
-                        <div class="tech-row">
-                          {e.tech.map((s) => <span class="tech">{s.name}</span>)}
-                        </div>
-                      )}
+    {
+      groups.map(({ title, items }) => (
+        <section class="section">
+          <div class="section-head"><h2 class="section-title">{title}</h2></div>
+          <div class="cv">
+            {items.map((e) => (
+              <article class="cv-row">
+                <div class="cv-date">{e.when}</div>
+                <div>
+                  <h3 class="cv-role">{e.role}</h3>
+                  <p class="cv-where">
+                    {e.orgUrl ? <a href={e.orgUrl}>{e.org}</a> : e.org}
+                    {e.where && ` · ${e.where}`}
+                  </p>
+                  {e.blurb && <p class="cv-blurb">{e.blurb}</p>}
+                  {e.bullets && e.bullets.length > 0 && (
+                    <ul class="cv-bullets">
+                      {e.bullets.map((b) => <li>{b}</li>)}
+                    </ul>
+                  )}
+                  {e.parts?.map((part) => (
+                    <div class="cv-part">
+                      <h4 class="cv-part-name">{part.name}</h4>
+                      {part.blurb && <p class="cv-blurb">{part.blurb}</p>}
+                      <ul class="cv-bullets">
+                        {part.bullets.map((b) => <li>{b}</li>)}
+                      </ul>
                     </div>
-                  </article>
-                ))}
-              </div>
-            ))
-          }
-
-          <div class="cv-group">
-            <div class="cv-group-title">III. Skills</div>
-            <div class="skill-grid">
-              {
-                skillGroups.map((g) => (
-                  <div class="skill-block">
-                    <h4>{g}</h4>
-                    <div class="tech-row">
-                      {skills
-                        .filter((s) => s.showInSkills && s.group === g)
-                        .map((s) => (
-                          <span class="tech">{s.name}{s.note && ` ${s.note}`}</span>
-                        ))}
-                    </div>
-                  </div>
-                ))
-              }
-            </div>
+                  ))}
+                </div>
+              </article>
+            ))}
           </div>
+        </section>
+      ))
+    }
 
-          {
-            projects.length > 0 && (
-              <div class="cv-group">
-                <div class="cv-group-title">IV. Things I made</div>
-                {projects.map((e) => (
-                  <article class="cv-item">
-                    <div class="cv-logo">{e.logo}</div>
-                    <div>
-                      <div class="cv-head">
-                        <div>
-                          <div class="cv-role">{e.role}</div>
-                          <div class="cv-where">
-                            {e.org}
-                            {e.orgUrl && (
-                              <>
-                                {' · '}
-                                <a href={e.orgUrl}>{e.orgUrl.replace('https://', '')}</a>
-                              </>
-                            )}
-                          </div>
-                        </div>
-                        <div class="cv-date">{range(e)}</div>
-                      </div>
-                      {(bullets.get(e.id) ?? []).length > 0 && (
-                        <ul class="cv-activity">
-                          {bullets.get(e.id)!.map((rt) => (
-                            <li><RichText text={rt} /></li>
-                          ))}
-                        </ul>
-                      )}
-                      {e.tech.length > 0 && (
-                        <div class="tech-row">
-                          {e.tech.map((s) => <span class="tech">{s.name}</span>)}
-                        </div>
-                      )}
-                    </div>
-                  </article>
-                ))}
-              </div>
-            )
-          }
-
-          <div class="cv-group" style="margin-bottom:0;">
-            <div class="cv-group-title">V. Say hello</div>
-            <p style="color:var(--ink-2);max-width:60ch;">{site.about.sayHello}</p>
-            <div class="hero-actions" style="margin-top:22px;">
-              <a class="btn-primary" href={`mailto:${emailAddr}`}>{emailAddr} <span class="arrow">→</span></a>
-              <a class="btn-ghost" href={site.social.github}>GitHub</a>
-              <a class="btn-ghost" href={site.social.linkedin}>LinkedIn</a>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
+    <section class="section">
+      <div class="section-head"><h2 class="section-title">Say hello</h2></div>
+      <p class="page-deck">{site.about.sayHello}</p>
+      <p class="meta" style="margin-top:16px;">
+        <a href={`mailto:${emailAddr}`}>{emailAddr}</a>
+        <a href={site.social.github}>GitHub</a>
+        <a href={site.social.linkedin}>LinkedIn</a>
+      </p>
+    </section>
+  </div>
 </Base>
