@@ -8,14 +8,17 @@ interface Props {
 }
 const { series: s } = Astro.props
 
+// exactly one fact on the right so the column edge stays clean —
+// cadence and state live on the series page itself
+const total = s.chapterCount || s.plannedChapters || 0
 const progress =
-  s.state === 'complete'
-    ? `${s.chapterCount} chapters · complete`
-    : s.state === 'planned' && s.chapterCount === 0
-      ? `${s.plannedChapters ?? '?'} chapters planned`
-      : s.publishedCount > 0
-        ? `${s.publishedCount} of ${s.chapterCount} out`
-        : `${s.chapterCount} chapters · outline`
+  s.publishedCount > 0
+    ? s.publishedCount === total
+      ? `${total} chapters`
+      : `${s.publishedCount} of ${total} out`
+    : total > 0
+      ? `${total} chapters planned`
+      : 'outline'
 ---
 
 <article class="row row-2">
@@ -25,6 +28,5 @@ const progress =
   </div>
   <div class="row-meta">
     <span>{progress}</span>
-    {s.state !== 'complete' && s.cadence && <span>{s.cadence}</span>}
   </div>
 </article>
