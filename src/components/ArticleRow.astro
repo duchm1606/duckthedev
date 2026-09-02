@@ -1,7 +1,6 @@
 ---
-// One row in a post list: date · title + one-line description · topic.
-// The right column carries exactly one fact so its edge stays clean;
-// notes are marked with a § before the title instead of a label.
+// One row in a post list: title with the topic tucked under it, one-line
+// description, and the date alone on the right. Notes hang a § in the margin.
 import { formatDate } from '../lib/notion/render'
 import type { Post } from '../lib/types'
 
@@ -13,15 +12,14 @@ const topic = post.topics[0]
 ---
 
 <article class="row">
-  <div class="row-date">{formatDate(post.date)}</div>
   <div>
     <h3 class="row-title">
       {post.type === 'note' && <span class="note-mark">§</span>}<a href={post.url}>{post.title}</a>
     </h3>
+    {topic && <a class="row-topic" href={`/topics/${topic.slug}`}>{topic.name}</a>}
     {post.description && <p class="row-desc">{post.description}</p>}
   </div>
-  <div class="row-meta">
-    {!post.published && <span>Draft</span>}
-    {topic && <a href={`/topics/${topic.slug}`}>{topic.name}</a>}
+  <div class="row-side">
+    {!post.published && <span>Draft · </span>}<time datetime={post.date}>{formatDate(post.date)}</time>
   </div>
 </article>

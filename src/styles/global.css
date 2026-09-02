@@ -88,7 +88,7 @@ img { max-width: 100%; }
 .narrow { max-width: calc(var(--measure) + 72px); }
 
 /* One voice for every label: 12px mono, tracked, muted. */
-.meta, .kicker, .row-date, .row-meta, .chip, .toc-title, .chap-no, .chap-meta,
+.meta, .kicker, .row-side, .row-topic, .chip, .toc-title, .chap-no, .chap-meta,
 .outline-note, .outline summary, .chap-link .n, .code-head, .cv-date, .facts dt,
 .post-nav .dir, .colo-note, .nav-link, .theme-toggle, .section-link, .topic-row .count {
   font-family: var(--mono);
@@ -195,26 +195,23 @@ img { max-width: 100%; }
 .list { border-top: 1px solid var(--rule); }
 .row {
   display: grid;
-  grid-template-columns: 110px minmax(0, 1fr) 150px;
+  grid-template-columns: minmax(0, 1fr) 150px;
   gap: 8px 28px;
   align-items: baseline;
   padding: 20px 0;
   border-bottom: 1px solid var(--rule-soft);
 }
-.row-2 { grid-template-columns: minmax(0, 1fr) 250px; }
 @media (max-width: 800px) {
-  .row, .row-2 { grid-template-columns: minmax(0, 1fr); gap: 6px; }
-  .row-date { order: -1; }
+  .row { grid-template-columns: minmax(0, 1fr); gap: 6px; }
+  .row-side { order: -1; text-align: left; }
 }
 .row:last-child, .cv-row:last-child, .chap:last-child { border-bottom: none; }
-.row-date { text-transform: uppercase; white-space: nowrap; }
+.row-side { text-transform: uppercase; white-space: nowrap; text-align: right; }
+.row-topic { display: inline-block; margin-top: 6px; text-transform: uppercase; letter-spacing: 0.1em; }
+.row-topic:hover { color: var(--accent); }
 .row-title { font-family: var(--serif-display); font-weight: 600; font-size: var(--t-heading); line-height: 1.25; letter-spacing: -0.01em; }
 .row-title a:hover { color: var(--accent); }
 .row-desc { margin-top: 4px; font-size: var(--t-small); color: var(--ink-2); max-width: var(--measure); }
-.row-meta { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; text-align: right; }
-.row-meta > :not(:first-child)::before { content: '·'; margin-right: 8px; opacity: 0.5; }
-.row-meta a:hover { color: var(--accent); }
-@media (max-width: 800px) { .row-meta { justify-content: flex-start; text-align: left; } }
 
 /* ============ Series — chapter map ============ */
 .part { margin-top: 36px; }

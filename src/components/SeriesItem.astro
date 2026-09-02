@@ -1,7 +1,6 @@
 ---
-// One series row. Same anatomy as a post row — a mono fact in the left
-// rail (progress instead of a date) — so titles line up across the
-// Recent and Series sections.
+// One series row. Same anatomy as a post row: title and description on
+// the left, one mono fact (progress instead of a date) on the right.
 import type { Series } from '../lib/types'
 
 interface Props {
@@ -10,14 +9,14 @@ interface Props {
 const { series: s } = Astro.props
 
 const total = s.chapterCount || s.plannedChapters || 0
-const rail =
-  s.publishedCount > 0 ? `${s.publishedCount} of ${total}` : total > 0 ? 'planned' : 'outline'
+const progress =
+  s.publishedCount > 0 ? `${s.publishedCount} of ${total} out` : total > 0 ? 'planned' : 'outline'
 ---
 
 <article class="row">
-  <div class="row-date">{rail}</div>
   <div>
     <h3 class="row-title"><a href={`/series/${s.slug}`}>{s.name}</a></h3>
     <p class="row-desc">{s.description}</p>
   </div>
+  <div class="row-side">{progress}</div>
 </article>
