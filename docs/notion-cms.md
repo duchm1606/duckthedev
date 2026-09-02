@@ -1,6 +1,6 @@
 # Notion CMS — kiến trúc DB cho duckthedev
 
-Suy ra trực tiếp từ mock trong `mock/`. Mọi property dưới đây đều có ít nhất một chỗ hiển thị
+Suy ra trực tiếp từ mock tĩnh ban đầu (đã gỡ khỏi repo sau khi port xong — xem lịch sử git nếu cần). Mọi property dưới đây đều có ít nhất một chỗ hiển thị
 thật trên giao diện; cái gì không hiển thị thì không tồn tại.
 
 ## 0. Ba nguyên tắc
@@ -34,7 +34,7 @@ Skills ──< CV entries          Skills ──< (skill groups on /about)
 
 Body bài viết = chính nội dung page Notion. Các property chỉ là metadata.
 
-| Property | Notion type | Bắt buộc | Hiển thị ở đâu trong mock |
+| Property | Notion type | Bắt buộc | Hiển thị ở đâu trên site |
 |---|---|---|---|
 | `Title` | Title | ✔ | `art-title`, `chapter-title`, `feat-title` |
 | `Slug` | Rich text | ✔ | URL. Unique toàn site (kể cả chapter) |
@@ -235,7 +235,7 @@ thành bài lẻ (hoặc ngược lại) mà không đụng gì khác. Đổi ro
 
 ---
 
-## 10. Notion block → class trong mock
+## 10. Notion block → class CSS
 
 | Notion block | Render thành |
 |---|---|

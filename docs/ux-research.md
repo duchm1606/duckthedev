@@ -3,7 +3,7 @@
 Ngày: 2026-08-25. Phạm vi: 5 trang chính (home, blog post, series index, chapter reader, topics, about) + shell chung (masthead, footer).
 Phương pháp: đọc source (`src/styles/global.css`, `src/layouts/Base.astro`, `src/pages/**`), đo bằng Playwright trên bản `dist` (desktop 1440 / mobile 390), đối chiếu pattern trên Mobbin.
 
-Ảnh chứng cứ: `docs/ux-research/mobile-home.png`, `docs/ux-research/mobile-chapter.png`. Ảnh desktop có sẵn ở root (`home.png`, `post-page.png`, `chapter.png`, `series.png`, `topics.png`, `about.png`).
+Ảnh chứng cứ (trước/sau, local — thư mục này nằm trong .gitignore): `docs/ux-research/` — mobile-*.png là bản trước refactor, after-*.png là bản sau, home.png/post-page.png/… là desktop trước refactor.
 
 ---
 

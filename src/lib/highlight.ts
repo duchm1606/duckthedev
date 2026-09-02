@@ -26,7 +26,7 @@ const letterpress = {
   ],
 }
 
-// mock/style.css tokens: .kw → accent, .str → sage, .cm → ink-3
+// token classes: .kw → accent, .str → sage, .cm → ink-3
 const colorReplacements: Record<string, string> = {
   [PLACEHOLDER.foreground]: 'var(--ink)',
   [PLACEHOLDER.background]: 'transparent',
