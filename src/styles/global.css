@@ -195,7 +195,7 @@ img { max-width: 100%; }
 .list { border-top: 1px solid var(--rule); }
 .row {
   display: grid;
-  grid-template-columns: 110px minmax(0, 1fr) 230px;
+  grid-template-columns: 110px minmax(0, 1fr) 150px;
   gap: 8px 28px;
   align-items: baseline;
   padding: 20px 0;
@@ -464,3 +464,6 @@ a.chap:hover .chap-title { color: var(--accent); }
 .cv-blurb { margin-top: 6px; font-size: var(--t-small); font-style: italic; color: var(--ink-3); max-width: var(--measure); }
 .cv-part { margin-top: 18px; }
 .cv-part-name { font-family: var(--serif-display); font-weight: 600; font-size: var(--t-small); letter-spacing: -0.005em; }
+
+/* notes are marked inline instead of taking a slot in the meta column */
+.note-mark { font-family: var(--mono); font-size: var(--t-small); color: var(--accent); margin-right: 8px; }

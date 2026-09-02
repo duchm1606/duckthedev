@@ -3,11 +3,9 @@
 import ArticleRow from '../../components/ArticleRow.astro'
 import Base from '../../layouts/Base.astro'
 import { getSiteData } from '../../lib/fetcher'
-import { getManyStats } from '../../lib/stats'
 
 const { posts } = await getSiteData()
 const standalone = [...posts.filter((p) => !p.series)].sort((a, b) => b.date.localeCompare(a.date))
-const stats = await getManyStats(standalone.map((p) => p.id))
 
 const byYear = new Map<string, typeof standalone>()
 for (const post of standalone) {
@@ -34,7 +32,7 @@ const years = [...byYear.keys()].sort().reverse()
         </div>
         <div class="list">
           {byYear.get(year)!.map((post) => (
-            <ArticleRow post={post} minutes={stats.get(post.id)?.minutes} />
+            <ArticleRow post={post} />
           ))}
         </div>
       </section>

@@ -3,7 +3,6 @@
 import ArticleRow from '../../components/ArticleRow.astro'
 import Base from '../../layouts/Base.astro'
 import { getSiteData } from '../../lib/fetcher'
-import { getManyStats } from '../../lib/stats'
 import type { Topic } from '../../lib/types'
 
 export async function getStaticPaths() {
@@ -22,7 +21,6 @@ const shelf = posts
   .sort((a, b) => b.date.localeCompare(a.date))
 const articles = shelf.filter((p) => p.type === 'article').length
 const notes = shelf.length - articles
-const stats = await getManyStats(shelf.map((p) => p.id))
 ---
 
 <Base title={`${topic.name} — duckthedev`} description={topic.description ?? `Everything filed under ${topic.name}.`} active="topics">
@@ -43,7 +41,7 @@ const stats = await getManyStats(shelf.map((p) => p.id))
       shelf.length > 0 ? (
         <div class="list">
           {shelf.map((p) => (
-            <ArticleRow post={p} minutes={stats.get(p.id)?.minutes} />
+            <ArticleRow post={p} />
           ))}
         </div>
       ) : (

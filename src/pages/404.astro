@@ -5,13 +5,11 @@
 import ArticleRow from '../components/ArticleRow.astro'
 import Base from '../layouts/Base.astro'
 import { getSiteData } from '../lib/fetcher'
-import { getManyStats } from '../lib/stats'
 
 const { posts } = await getSiteData()
 // `posts` keeps unpublished chapters so the series map can show them as locked
 // rows — a "most recent" list must not, in any environment.
 const recent = posts.filter((p) => p.published).slice(0, 5)
-const stats = await getManyStats(recent.map((p) => p.id))
 ---
 
 <Base title="Not found — duckthedev" description="That page isn't here. The newest entries are.">
@@ -32,7 +30,7 @@ const stats = await getManyStats(recent.map((p) => p.id))
       <a class="section-link" href="/blog">Archive →</a>
     </div>
     <div class="list">
-      {recent.map((post) => <ArticleRow post={post} minutes={stats.get(post.id)?.minutes} />)}
+      {recent.map((post) => <ArticleRow post={post} />)}
     </div>
   </section>
 </Base>

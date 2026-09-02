@@ -1,27 +1,27 @@
 ---
-// One row in a post list: date · title + one-line description · meta.
-// The meta column carries at most three facts (type, first topic, length).
+// One row in a post list: date · title + one-line description · topic.
+// The right column carries exactly one fact so its edge stays clean;
+// notes are marked with a § before the title instead of a label.
 import { formatDate } from '../lib/notion/render'
 import type { Post } from '../lib/types'
 
 interface Props {
   post: Post
-  minutes?: number
 }
-const { post, minutes } = Astro.props
+const { post } = Astro.props
 const topic = post.topics[0]
 ---
 
 <article class="row">
   <div class="row-date">{formatDate(post.date)}</div>
   <div>
-    <h3 class="row-title"><a href={post.url}>{post.title}</a></h3>
+    <h3 class="row-title">
+      {post.type === 'note' && <span class="note-mark">§</span>}<a href={post.url}>{post.title}</a>
+    </h3>
     {post.description && <p class="row-desc">{post.description}</p>}
   </div>
   <div class="row-meta">
-    {post.type === 'note' && <span>Note</span>}
     {!post.published && <span>Draft</span>}
     {topic && <a href={`/topics/${topic.slug}`}>{topic.name}</a>}
-    {minutes !== undefined && <span>{minutes} min</span>}
   </div>
 </article>
