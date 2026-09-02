@@ -465,5 +465,8 @@ a.chap:hover .chap-title { color: var(--accent); }
 .cv-part { margin-top: 18px; }
 .cv-part-name { font-family: var(--serif-display); font-weight: 600; font-size: var(--t-small); letter-spacing: -0.005em; }
 
-/* notes are marked inline instead of taking a slot in the meta column */
-.note-mark { font-family: var(--mono); font-size: var(--t-small); color: var(--accent); margin-right: 8px; }
+/* the note mark hangs in the gutter so all titles share one left edge;
+   the single-column mobile layout has no gutter, so it disappears there */
+.row-title { position: relative; }
+.note-mark { position: absolute; left: -22px; top: 1px; font-family: var(--mono); font-size: var(--t-small); color: var(--accent); }
+@media (max-width: 800px) { .note-mark { display: none; } }
