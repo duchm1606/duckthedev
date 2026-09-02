@@ -46,7 +46,7 @@ const groups: { title: string; items: CvItem[] }[] = [
                   {e.blurb && <p class="cv-blurb">{e.blurb}</p>}
                   {e.bullets && e.bullets.length > 0 && (
                     <ul class="cv-bullets">
-                      {e.bullets.map((b) => <li>{b}</li>)}
+                      {e.bullets.map((b) => <li set:html={b} />)}
                     </ul>
                   )}
                   {e.parts?.map((part) => (
@@ -54,7 +54,7 @@ const groups: { title: string; items: CvItem[] }[] = [
                       <h4 class="cv-part-name">{part.name}</h4>
                       {part.blurb && <p class="cv-blurb">{part.blurb}</p>}
                       <ul class="cv-bullets">
-                        {part.bullets.map((b) => <li>{b}</li>)}
+                        {part.bullets.map((b) => <li set:html={b} />)}
                       </ul>
                     </div>
                   ))}

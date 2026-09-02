@@ -433,8 +433,7 @@ a.chap:hover .chap-title { color: var(--accent); }
 
 .cv { border-top: 1px solid var(--rule); }
 .cv-row { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 6px 28px; padding: 20px 0; border-bottom: 1px solid var(--rule-soft); }
-/* rails and rules span the page; the prose inside stays at reading measure */
-.cv-row > :last-child { max-width: var(--measure); }
+.cv-bullets strong { color: var(--ink); font-weight: 600; }
 @media (max-width: 640px) { .cv-row { grid-template-columns: minmax(0, 1fr); } }
 .cv-date { text-transform: uppercase; white-space: nowrap; padding-top: 4px; }
 .cv-role { font-family: var(--serif-display); font-weight: 600; font-size: var(--t-heading); line-height: 1.25; }
@@ -460,7 +459,7 @@ a.chap:hover .chap-title { color: var(--accent); }
 }
 
 /* CV rows that span several products (one role, two sub-blocks) */
-.cv-blurb { margin-top: 6px; font-size: var(--t-small); font-style: italic; color: var(--ink-3); max-width: var(--measure); }
+.cv-blurb { margin-top: 6px; font-size: var(--t-small); font-style: italic; color: var(--ink-3); }
 .cv-part { margin-top: 18px; }
 .cv-part-name { font-family: var(--serif-display); font-weight: 600; font-size: var(--t-small); letter-spacing: -0.005em; }
 
