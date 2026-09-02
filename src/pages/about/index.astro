@@ -5,11 +5,7 @@
 import Base from '../../layouts/Base.astro'
 import { cv, type CvItem } from '../../config/cv'
 import { site } from '../../config/site'
-import { getSiteData } from '../../lib/fetcher'
 
-const { site: kv } = await getSiteData()
-// contact address is repo config, not the Notion `Site` KV — the KV still
-// carries the seed placeholder and would silently win otherwise
 const emailAddr = site.social.email.replace('mailto:', '')
 
 const groups: { title: string; items: CvItem[] }[] = [
@@ -30,8 +26,6 @@ const groups: { title: string; items: CvItem[] }[] = [
         <dt>Email</dt><dd><a href={`mailto:${emailAddr}`}>{emailAddr}</a></dd>
         <dt>GitHub</dt><dd><a href={site.social.github}>{site.social.github.replace('https://', '')}</a></dd>
         <dt>LinkedIn</dt><dd><a href={site.social.linkedin}>{site.social.linkedin.replace('https://www.', '')}</a></dd>
-        {kv.availability && <><dt>Now</dt><dd>{kv.availability}</dd></>}
-        {kv.cv_pdf_url && <><dt>CV</dt><dd><a href={kv.cv_pdf_url}>Download as PDF</a></dd></>}
       </dl>
     </header>
 

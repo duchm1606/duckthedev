@@ -9,12 +9,22 @@ import { getManyStats } from '../lib/stats'
 
 const { posts, series, topics } = await getSiteData()
 
-// standalone writing, pinned first, then newest first
 const standalone = posts.filter((p) => p.published && !p.series)
-const latest = [...standalone]
-  .sort((a, b) => Number(b.pinned) - Number(a.pinned) || b.date.localeCompare(a.date))
-  .slice(0, 8)
-const stats = await getManyStats(latest.map((p) => p.id))
+
+// featured: hand-picked via the Featured order property, pinned posts as fallback
+const featured = [...standalone]
+  .filter((p) => p.featuredOrder !== undefined || p.pinned)
+  .sort((a, b) => (a.featuredOrder ?? 99) - (b.featuredOrder ?? 99) || b.date.localeCompare(a.date))
+  .slice(0, 4)
+const featuredIds = new Set(featured.map((p) => p.id))
+
+// recent: newest first, minus what the featured list already shows —
+// the full archive lives on /blog
+const recent = [...standalone]
+  .sort((a, b) => b.date.localeCompare(a.date))
+  .filter((p) => !featuredIds.has(p.id))
+  .slice(0, 6)
+const stats = await getManyStats([...featured, ...recent].map((p) => p.id))
 
 const topTopics = [...topics]
   .filter((t) => t.articleCount + t.noteCount > 0)
@@ -34,10 +44,23 @@ const homeSeries = series.slice(0, 3)
     </div>
   </section>
 
+  {
+    featured.length > 0 && (
+      <section class="section wrap">
+        <div class="section-head">
+          <h2 class="section-title">Featured</h2>
+        </div>
+        <div class="list">
+          {featured.map((p) => <ArticleRow post={p} minutes={stats.get(p.id)?.minutes} />)}
+        </div>
+      </section>
+    )
+  }
+
   <section class="section wrap">
     <div class="section-head">
-      <h2 class="section-title">Writing</h2>
-      <a class="section-link" href="/blog">Archive →</a>
+      <h2 class="section-title">Recent</h2>
+      <a class="section-link" href="/blog">All articles →</a>
     </div>
     <nav class="chips" aria-label="Topics">
       {
@@ -50,7 +73,7 @@ const homeSeries = series.slice(0, 3)
       <a class="chip" href="/topics">All topics →</a>
     </nav>
     <div class="list">
-      {latest.map((p) => <ArticleRow post={p} minutes={stats.get(p.id)?.minutes} />)}
+      {recent.map((p) => <ArticleRow post={p} minutes={stats.get(p.id)?.minutes} />)}
     </div>
   </section>
 
