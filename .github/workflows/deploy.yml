@@ -1,0 +1,55 @@
+# Build the static site (content comes from Notion at build time) and deploy
+# the prebuilt output to Vercel. Runs on push, on a schedule so Notion edits
+# reach production without a commit, and by hand from the Actions tab.
+#
+# Required repository secrets:
+#   NOTION_TOKEN, NOTION_DB_POSTS, NOTION_DB_SERIES, NOTION_DB_PARTS,
+#   NOTION_DB_TOPICS, NOTION_DB_CV, NOTION_DB_SKILLS, NOTION_DB_SITE
+#   VERCEL_TOKEN, VERCEL_ORG_ID, VERCEL_PROJECT_ID
+name: deploy
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    # every 3 days at 21:00 UTC — picks up content edited only in Notion
+    - cron: '0 21 */3 * *'
+  workflow_dispatch:
+
+concurrency:
+  group: deploy
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      ENV_MODE: prod
+      NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+      NOTION_DB_POSTS: ${{ secrets.NOTION_DB_POSTS }}
+      NOTION_DB_SERIES: ${{ secrets.NOTION_DB_SERIES }}
+      NOTION_DB_PARTS: ${{ secrets.NOTION_DB_PARTS }}
+      NOTION_DB_TOPICS: ${{ secrets.NOTION_DB_TOPICS }}
+      NOTION_DB_CV: ${{ secrets.NOTION_DB_CV }}
+      NOTION_DB_SKILLS: ${{ secrets.NOTION_DB_SKILLS }}
+      NOTION_DB_SITE: ${{ secrets.NOTION_DB_SITE }}
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - run: npm ci
+
+      - name: Pull Vercel project settings
+        run: npx vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Build (vercel build runs `astro build`)
+        run: npx vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Deploy prebuilt output
+        run: npx vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
