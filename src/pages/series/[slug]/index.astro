@@ -3,7 +3,7 @@
 // (locked rows for unpublished chapters).
 import Base from '../../../layouts/Base.astro'
 import { getSiteData } from '../../../lib/fetcher'
-import { approxHours, formatDayMonth, roman } from '../../../lib/notion/render'
+import { formatDayMonth, roman } from '../../../lib/notion/render'
 import { getManyStats } from '../../../lib/stats'
 import type { Series } from '../../../lib/types'
 
@@ -20,9 +20,7 @@ const { series: s } = Astro.props
 const chapters = s.parts.flatMap((p) => p.chapters)
 const stats = await getManyStats(chapters.filter((c) => c.published).map((c) => c.id))
 const minutesOf = (id: string) => stats.get(id)?.minutes ?? 0
-const totalMinutes = chapters.reduce((sum, c) => sum + minutesOf(c.id), 0)
 const firstPublished = chapters.find((c) => c.published)
-const namedParts = s.parts.filter((p) => p.name).length
 const pad = (n?: number) => String(n ?? 0).padStart(2, '0')
 
 const state = s.state === 'complete' ? 'Complete' : (s.cadence ?? (s.state === 'planned' ? 'Planned' : 'Ongoing'))
@@ -37,13 +35,6 @@ const state = s.state === 'complete' ? 'Complete' : (s.cadence ?? (s.state === '
       </p>
       <h1 class="page-title">{s.name}</h1>
       <p class="page-deck">{s.description}</p>
-      <p class="meta">
-        <span>{s.chapterCount || s.plannedChapters || 0} chapters</span>
-        {namedParts > 0 && <span>{namedParts} parts</span>}
-        <span>{s.publishedCount} published</span>
-        {totalMinutes > 0 && <span>{approxHours(totalMinutes)} of reading</span>}
-        {s.nextDate && <span>next {formatDayMonth(s.nextDate)}</span>}
-      </p>
     </header>
 
     <section class="narrow">
