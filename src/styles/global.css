@@ -435,7 +435,9 @@ a.chap:hover .chap-title { color: var(--accent); }
 .facts dd a:hover { border-bottom-color: var(--accent); }
 
 .cv { border-top: 1px solid var(--rule); }
-.cv-row { display: grid; grid-template-columns: 130px minmax(0, 1fr); gap: 6px 28px; padding: 20px 0; border-bottom: 1px solid var(--rule-soft); }
+.cv-row { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 6px 28px; padding: 20px 0; border-bottom: 1px solid var(--rule-soft); }
+/* rails and rules span the page; the prose inside stays at reading measure */
+.cv-row > :last-child { max-width: var(--measure); }
 @media (max-width: 640px) { .cv-row { grid-template-columns: minmax(0, 1fr); } }
 .cv-date { text-transform: uppercase; white-space: nowrap; padding-top: 4px; }
 .cv-role { font-family: var(--serif-display); font-weight: 600; font-size: var(--t-heading); line-height: 1.25; }

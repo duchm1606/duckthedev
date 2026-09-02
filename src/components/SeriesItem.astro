@@ -1,6 +1,7 @@
 ---
-// One series row (series index and home). Progress and cadence share one
-// short line — no badge, no level, no topic chips.
+// One series row. Same anatomy as a post row — a mono fact in the left
+// rail (progress instead of a date) — so titles line up across the
+// Recent and Series sections.
 import type { Series } from '../lib/types'
 
 interface Props {
@@ -8,25 +9,15 @@ interface Props {
 }
 const { series: s } = Astro.props
 
-// exactly one fact on the right so the column edge stays clean —
-// cadence and state live on the series page itself
 const total = s.chapterCount || s.plannedChapters || 0
-const progress =
-  s.publishedCount > 0
-    ? s.publishedCount === total
-      ? `${total} chapters`
-      : `${s.publishedCount} of ${total} out`
-    : total > 0
-      ? `${total} chapters planned`
-      : 'outline'
+const rail =
+  s.publishedCount > 0 ? `${s.publishedCount} of ${total}` : total > 0 ? 'planned' : 'outline'
 ---
 
-<article class="row row-2">
+<article class="row">
+  <div class="row-date">{rail}</div>
   <div>
     <h3 class="row-title"><a href={`/series/${s.slug}`}>{s.name}</a></h3>
     <p class="row-desc">{s.description}</p>
-  </div>
-  <div class="row-meta">
-    <span>{progress}</span>
   </div>
 </article>

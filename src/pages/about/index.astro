@@ -17,7 +17,6 @@ const groups: { title: string; items: CvItem[] }[] = [
 
 <Base title="About me — duckthedev" description={site.about.deck} active="about">
   <div class="wrap">
-    <div class="narrow">
     <header class="page-head">
       <p class="kicker">{site.about.kicker}</p>
       <h1 class="page-title" set:html={site.about.title} />
@@ -76,6 +75,5 @@ const groups: { title: string; items: CvItem[] }[] = [
         <a href={site.social.linkedin}>LinkedIn</a>
       </p>
     </section>
-    </div>
   </div>
 </Base>
