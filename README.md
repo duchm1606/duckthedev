@@ -35,12 +35,12 @@ npm run dev            # http://localhost:4321
 
 ## Deploying
 
-`.github/workflows/deploy.yml` builds with the Notion secrets and ships the prebuilt output to Vercel (`vercel build` + `vercel deploy --prebuilt`). It runs on every push to `main`, every 3 days by cron (so content edited only in Notion reaches production), and manually via *Actions → deploy → Run workflow*.
+Vercel's Git integration builds and deploys on every push to `main` (framework: Astro, with the `NOTION_*` variables and `ENV_MODE=prod` set as project env vars). Content edited only in Notion reaches production via `.github/workflows/deploy.yml`: a cron that fires a Vercel Deploy Hook every 3 days (also runnable by hand from the Actions tab).
 
 One-time setup:
 
-1. Create the Vercel project: `npx vercel link` in a checkout (or import the repo in the Vercel dashboard) — this yields the org and project ids in `.vercel/project.json`.
-2. Add the repository secrets listed at the top of the workflow file: the 8 `NOTION_*` values from `.env`, plus `VERCEL_TOKEN` (vercel.com → Account Settings → Tokens), `VERCEL_ORG_ID` and `VERCEL_PROJECT_ID`.
+1. Import the repo in the Vercel dashboard and add the 8 `NOTION_*` values from `.env` plus `ENV_MODE=prod` as project environment variables.
+2. Create a Deploy Hook (Vercel project → Settings → Git → Deploy Hooks) and store its URL as the `VERCEL_DEPLOY_HOOK` repository secret on GitHub.
 
 ## Content model, briefly
 
