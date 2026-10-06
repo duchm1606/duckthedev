@@ -2,7 +2,7 @@
 // The chapter list of a series, grouped by Part. Rendered twice on a chapter
 // page: as the sticky left column on wide screens and inside a collapsed
 // <details> above the chapter on narrow ones (CSS shows one or the other).
-import { formatDayMonth, roman } from '../lib/notion/render'
+import { roman, upcomingDate } from '../lib/notion/render'
 import { isProd } from '../lib/env'
 import type { Series } from '../lib/types'
 
@@ -18,7 +18,7 @@ const pad = (n?: number) => String(n ?? 0).padStart(2, '0')
 <div class="outline-body">
   <a class="outline-title" href={`/series/${s.slug}`}>{s.name}</a>
   <span class="outline-note">
-    {s.publishedCount} of {s.chapterCount} published{s.nextDate && ` · next ${formatDayMonth(s.nextDate)}`}
+    {s.publishedCount} of {s.chapterCount} published{s.nextDate && ` · next ${upcomingDate(s.nextDate)}`}
   </span>
 
   {

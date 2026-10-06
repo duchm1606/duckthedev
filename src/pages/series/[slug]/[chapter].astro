@@ -1,18 +1,22 @@
 ---
-// Chapter reader — three columns on wide screens (series outline · chapter ·
-// page TOC); the outline and TOC collapse into <details> above the chapter
-// on narrow ones.
+// Chapter reader — a full-width chapter head, then two columns: a sticky
+// aside (this page's TOC, then the series outline) and the chapter. On
+// narrow screens the aside folds into two <details> above the body. A
+// "next up" band closes the page.
 import Block from '../../../components/blocks/Block.astro'
 import SeriesOutline from '../../../components/SeriesOutline.astro'
 import Base from '../../../layouts/Base.astro'
+import { site } from '../../../config/site'
 import { getSiteData } from '../../../lib/fetcher'
 import { getBlocks } from '../../../lib/notion/client'
 import {
   annotateHeadings,
+  dropDuplicateLede,
   extractHeadings,
   formatDate,
   groupLists,
   roman,
+  upcomingDate,
 } from '../../../lib/notion/render'
 import { getPostStats } from '../../../lib/stats'
 import { isProd } from '../../../lib/env'
@@ -42,8 +46,9 @@ const blocks = await getBlocks(post.id)
 annotateHeadings(blocks)
 const grouped = groupLists(blocks)
 const headings = extractHeadings(blocks)
-const { minutes } = await getPostStats(post.id)
-const ledeIndex = grouped.findIndex((b) => b.type === 'paragraph')
+const { words, minutes } = await getPostStats(post.id)
+// the page head already shows the Description as the deck
+dropDuplicateLede(grouped, post.description)
 
 const chapters = s.parts.flatMap((p) => p.chapters)
 const idx = chapters.findIndex((c) => c.id === post.id)
@@ -51,6 +56,7 @@ const prev = idx > 0 ? chapters[idx - 1] : undefined
 const next = idx < chapters.length - 1 ? chapters[idx + 1] : undefined
 const currentPartOrder = post.part?.order ?? 99
 const reachable = (c?: Post) => !!c && (c.published || !isProd())
+const nextMinutes = next?.published ? (await getPostStats(next.id)).minutes : 0
 ---
 
 <Base
@@ -60,79 +66,113 @@ const reachable = (c?: Post) => !!c && (c.published || !isProd())
   progress
   ogImage={`/og/${post.slug}.png`}
 >
-  <div class="wrap reader">
-    <aside class="outline" aria-label="Series outline">
-      <SeriesOutline series={s} currentId={post.id} currentPartOrder={currentPartOrder} />
-    </aside>
-
-    <article class="post-main">
-      <details class="outline-sheet">
-        <summary>{s.name} · ch. {post.order} of {s.chapterCount}</summary>
-        <SeriesOutline series={s} currentId={post.id} currentPartOrder={currentPartOrder} />
-      </details>
-
-      <header class="page-head">
-        <p class="kicker">
-          {post.part && <span>Part {roman(post.part.order).toUpperCase()} · </span>}
-          <span>Chapter {post.order} of {s.chapterCount} · {minutes} min</span>
-        </p>
-        <h1 class="page-title">{post.title}</h1>
-        {post.description && <p class="page-deck">{post.description}</p>}
-      </header>
-
-      {
-        headings.length > 0 && (
-          <details class="toc-inline">
-            <summary>On this page</summary>
-            <nav class="toc">
-              {headings.map((h) => (
-                <a href={`#${h.id}`} class:list={[{ sub: h.level === 3 }]}>{h.text}</a>
-              ))}
-            </nav>
-          </details>
-        )
-      }
-
-      <div class="post-body">
-        {grouped.map((block, i) => <Block block={block} lede={i === ledeIndex} />)}
+  <article class="wrap">
+    <header class="page-head">
+      <div class="eyebrow">
+        <a href={`/series/${s.slug}`}>{s.name}</a>
+        {post.part && <><span class="dot">·</span><span class="quiet">Part {roman(post.part.order).toUpperCase()}</span></>}
+        <span class="dot">·</span><span class="quiet">Chapter {post.order} of {s.chapterCount}</span>
+        <span class="dot">·</span><span class="quiet">{words.toLocaleString('en-US')} words</span>
       </div>
-
-      <p class="meta post-foot">
-        <span>{post.published ? 'Published' : 'Draft'} {formatDate(post.date)}</span>
-        {post.topics.map((t) => <a href={`/topics/${t.slug}`}>{t.name}</a>)}
+      <h1 class="page-title">{post.title}</h1>
+      {post.description && <p class="page-deck">{post.description}</p>}
+      <p class="page-byline">
+        By <em>{site.author}</em> · {post.published ? 'published' : 'draft, due'} {formatDate(post.date)} · {minutes} min read
       </p>
+    </header>
 
-      {
-        (reachable(prev) || reachable(next)) && (
-          <nav class="post-nav" aria-label="Previous and next chapter">
-            {reachable(prev) && (
+    <div class="reader-layout">
+      <aside class="reader-aside" aria-label="On this page and series outline">
+        {
+          headings.length > 0 && (
+            <div class="toc-section">
+              <div class="toc-label">On this page</div>
+              <nav class="toc">
+                {headings.map((h) => (
+                  <a href={`#${h.id}`} class:list={[{ sub: h.level === 3 }]}>{h.text}</a>
+                ))}
+              </nav>
+            </div>
+          )
+        }
+        <div class="toc-section outline">
+          <div class="toc-label">In this series</div>
+          <SeriesOutline series={s} currentId={post.id} currentPartOrder={currentPartOrder} />
+        </div>
+      </aside>
+
+      <div class="reader-main">
+        <details class="outline-sheet">
+          <summary>{s.name} · ch. {post.order} of {s.chapterCount}</summary>
+          <SeriesOutline series={s} currentId={post.id} currentPartOrder={currentPartOrder} />
+        </details>
+        {
+          headings.length > 0 && (
+            <details class="toc-inline">
+              <summary>On this page</summary>
+              <nav class="toc">
+                {headings.map((h) => (
+                  <a href={`#${h.id}`} class:list={[{ sub: h.level === 3 }]}>{h.text}</a>
+                ))}
+              </nav>
+            </details>
+          )
+        }
+
+        <div class="post-body">
+          {grouped.map((block) => <Block block={block} />)}
+        </div>
+
+        <p class="post-foot">
+          {post.topics.length > 0 && <>Filed under {post.topics.map((t, i) => <>{i > 0 && ', '}<a href={`/topics/${t.slug}`}>{t.name}</a></>)} · </>}
+          {post.published ? 'Published' : 'Draft, due'} {formatDate(post.date)}.
+        </p>
+
+        {
+          reachable(prev) && (
+            <nav class="post-nav" aria-label="Previous chapter">
               <a href={prev!.url}>
-                <span class="dir">← Ch. {prev!.order}</span>
+                <span class="dir">← Chapter {prev!.order}</span>
                 <span class="t">{prev!.title}</span>
               </a>
+            </nav>
+          )
+        }
+      </div>
+    </div>
+  </article>
+
+  <section class="next-up">
+    <div class="wrap">
+      {
+        next ? (
+          <div class="next-up-grid">
+            <div>
+              <div class="next-up-label">Next in this series · Chapter {next.order} of {s.chapterCount}</div>
+              <h2 class="next-up-title">{reachable(next) ? <a href={next.url}>{next.title}</a> : next.title}</h2>
+              <div class="next-up-meta">
+                {next.published
+                  ? `Published ${formatDate(next.date)} · ${nextMinutes} min read`
+                  : `Due ${upcomingDate(next.date)} · ${s.name}`}
+              </div>
+            </div>
+            {reachable(next) ? (
+              <a class="next-up-cta text-link" href={next.url}>continue reading →</a>
+            ) : (
+              <a class="next-up-cta text-link" href="/rss.xml">follow via RSS →</a>
             )}
-            {reachable(next) && (
-              <a href={next!.url}>
-                <span class="dir">Ch. {next!.order} →</span>
-                <span class="t">{next!.title}</span>
-              </a>
-            )}
-          </nav>
+          </div>
+        ) : (
+          <div class="next-up-grid">
+            <div>
+              <div class="next-up-label">End of the series</div>
+              <h2 class="next-up-title">{s.name}</h2>
+              <div class="next-up-meta">{s.chapterCount} chapters · {s.publishedCount} out</div>
+            </div>
+            <a class="next-up-cta text-link" href={`/series/${s.slug}`}>back to the series map →</a>
+          </div>
         )
       }
-    </article>
-
-    {
-      headings.length > 0 && (
-        <aside class="post-aside">
-          <div class="toc-title">On this page</div>
-          <nav class="toc">
-            {headings.map((h) => (
-              <a href={`#${h.id}`} class:list={[{ sub: h.level === 3 }]}>{h.text}</a>
-            ))}
-          </nav>
-        </aside>
-      )
-    }
-  </div>
+    </div>
+  </section>
 </Base>

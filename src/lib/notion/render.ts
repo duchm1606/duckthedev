@@ -94,14 +94,59 @@ export function formatDayMonth(iso: string | undefined): string {
   return new Date(iso).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })
 }
 
+/** "24 Jul" for a scheduled chapter; once the date has slipped past (the
+ *  build ran after it), a stale date reads as abandoned, so say "soon" */
+export function upcomingDate(iso: string | undefined): string {
+  if (!iso || new Date(iso) < new Date()) return 'soon'
+  return formatDayMonth(iso)
+}
+
+/** Notion pages often open with the same sentence as the Description
+ *  property, which the page head already shows as the deck. Drop it so the
+ *  reader doesn't see it twice; returns whether it was dropped. */
+export function dropDuplicateLede(grouped: any[], description: string | undefined): boolean {
+  if (!description) return false
+  const i = grouped.findIndex((b) => b.type === 'paragraph')
+  if (i === -1) return false
+  const norm = (s: string) => s.replace(/\s+/g, ' ').trim().toLowerCase()
+  if (norm(plainText(grouped[i].paragraph.rich_text)) !== norm(description)) return false
+  grouped.splice(i, 1)
+  return true
+}
+
 /** "Jul 30" — desk-log dates on the home hero */
 export function formatMonthDay(iso: string | undefined): string {
   if (!iso) return ''
   return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: '2-digit' })
 }
 
-const ROMANS = ['i', 'ii', 'iii', 'iv', 'v', 'vi', 'vii', 'viii', 'ix', 'x', 'xi', 'xii', 'xiii', 'xiv', 'xv']
-export const roman = (n: number): string => ROMANS[n - 1] ?? String(n)
+const ROMAN_STEPS: [number, string][] = [
+  [1000, 'm'], [900, 'cm'], [500, 'd'], [400, 'cd'], [100, 'c'], [90, 'xc'],
+  [50, 'l'], [40, 'xl'], [10, 'x'], [9, 'ix'], [5, 'v'], [4, 'iv'], [1, 'i'],
+]
+/** lower-case roman numeral — list numbers, part numbers, the masthead volume */
+export function roman(n: number): string {
+  if (!Number.isInteger(n) || n < 1) return String(n)
+  let out = ''
+  for (const [value, glyph] of ROMAN_STEPS) {
+    while (n >= value) {
+      out += glyph
+      n -= value
+    }
+  }
+  return out
+}
+
+/** "Tuesday, 6 October 2026" — the masthead's issue date */
+export function formatLongDate(d: Date): string {
+  return d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
+}
+
+/** "CS149" from "CS149 — Stanford parallel computing, lecture by lecture":
+ *  the part of a series name before its subtitle, for tight spots */
+export function shortSeriesName(name: string): string {
+  return name.split(/\s+[—–-]\s+|,\s+/)[0]
+}
 
 /** "1 h 20" / "45 min" — part-meta durations */
 export function durationLabel(minutes: number): string {

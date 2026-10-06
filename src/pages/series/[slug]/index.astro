@@ -1,11 +1,15 @@
 ---
-// Series map: page head with one meta line, then Parts → chapter rows
-// (locked rows for unpublished chapters).
+// Series map: page head, then two columns — Parts → chapter rows on the
+// left (locked rows for unpublished chapters), and a sticky panel on the
+// right: one square per chapter coloured by state, the series facts, and
+// the way in.
 import Base from '../../../layouts/Base.astro'
 import { getSiteData } from '../../../lib/fetcher'
-import { formatDayMonth, roman } from '../../../lib/notion/render'
+import { formatDate, roman, upcomingDate } from '../../../lib/notion/render'
 import { getManyStats } from '../../../lib/stats'
-import type { Series } from '../../../lib/types'
+import { isProd } from '../../../lib/env'
+import { site } from '../../../config/site'
+import type { Post, Series } from '../../../lib/types'
 
 export async function getStaticPaths() {
   const { series } = await getSiteData()
@@ -20,64 +24,134 @@ const { series: s } = Astro.props
 const chapters = s.parts.flatMap((p) => p.chapters)
 const stats = await getManyStats(chapters.filter((c) => c.published).map((c) => c.id))
 const minutesOf = (id: string) => stats.get(id)?.minutes ?? 0
+const totalMinutes = [...stats.values()].reduce((n, x) => n + x.minutes, 0)
 const firstPublished = chapters.find((c) => c.published)
+const nextUp = chapters.find((c) => !c.published)
 const pad = (n?: number) => String(n ?? 0).padStart(2, '0')
+// drafts get preview pages outside production, so they can be linked there
+const reachable = (c: Post) => c.published || !isProd()
+const stateOf = (c: Post) => (c.published ? 'done' : c.id === nextUp?.id ? 'next' : 'locked')
 
-const state = s.state === 'complete' ? 'Complete' : (s.cadence ?? (s.state === 'planned' ? 'Planned' : 'Ongoing'))
+const total = s.chapterCount || s.plannedChapters || 0
+const complete = s.state === 'complete' || (total > 0 && s.publishedCount === total)
+const state = complete ? 'Complete' : s.state === 'planned' ? 'Planned' : 'Ongoing'
 ---
 
 <Base title={`${s.name} — duckthedev`} description={s.description} active="series">
   <div class="wrap">
     <header class="page-head">
-      <p class="kicker">
-        <span>{state}</span>
-        {s.topics.slice(0, 3).map((t) => <> · <a href={`/topics/${t.slug}`}>{t.name}</a></>)}
-      </p>
+      <div class="eyebrow">
+        <a href="/series">Series</a>
+        <span class="dot">·</span><span class="quiet">{state}</span>
+        {s.topics.slice(0, 3).map((t) => <><span class="dot">·</span><a class="quiet" href={`/topics/${t.slug}`}>{t.name}</a></>)}
+      </div>
       <h1 class="page-title">{s.name}</h1>
       <p class="page-deck">{s.description}</p>
+      <p class="page-byline">
+        By <em>{site.author}</em>
+        {total > 0 && <> · {s.publishedCount} of {total} chapters out</>}
+        {s.nextDate && !complete && <> · next due {upcomingDate(s.nextDate)}</>}
+      </p>
     </header>
 
-    <section class="narrow">
-      {
-        s.parts.map((part) => (
-          <div class="part">
-            {part.name && (
-              <h2 class="part-title">
-                <span class="n">{roman(part.order).toUpperCase()}.</span>{part.name}
+    <div class="series-grid">
+      <section aria-label="Chapters">
+        {
+          s.parts.map((part) => (
+            <div class="part">
+              <h2 class="part-head">
+                {part.name ? (
+                  <>
+                    <span class="part-num">Part {roman(part.order).toUpperCase()}</span>
+                    <span class="part-name">{part.name}</span>
+                  </>
+                ) : (
+                  <span class="part-name">Chapters</span>
+                )}
+                <span class="count">{part.chapters.length} ch.</span>
               </h2>
-            )}
-            {part.chapters.map((c) =>
-              c.published ? (
-                <a class="chap" href={c.url}>
-                  <span class="chap-no">{pad(c.order)}</span>
-                  <span>
-                    <span class="chap-title">{c.title}</span>
-                    {c.description && <span class="chap-desc" style="display:block">{c.description}</span>}
-                  </span>
-                  <span class="chap-meta">{minutesOf(c.id)} min · {formatDayMonth(c.date)}</span>
-                </a>
-              ) : (
-                <div class="chap locked">
-                  <span class="chap-no">{pad(c.order)}</span>
-                  <span>
-                    <span class="chap-title">{c.title}</span>
-                    {c.description && <span class="chap-desc" style="display:block">{c.description}</span>}
-                  </span>
-                  <span class="chap-meta">due {formatDayMonth(c.date)}</span>
-                </div>
-              ),
-            )}
-          </div>
-        ))
-      }
+              <ol>
+                {part.chapters.map((c) => {
+                  const body = (
+                    <>
+                      <span class="ch-num">{pad(c.order)}</span>
+                      <span>
+                        <span class="ch-title">{c.title}</span>
+                        {c.description && <span class="ch-desc">{c.description}</span>}
+                      </span>
+                      <span class="ch-state">
+                        {c.published ? `${minutesOf(c.id)} min` : `due ${upcomingDate(c.date)}`}
+                      </span>
+                    </>
+                  )
+                  return (
+                    <li>
+                      {reachable(c) ? (
+                        <a class:list={['ch-row', stateOf(c)]} href={c.url}>{body}</a>
+                      ) : (
+                        <div class:list={['ch-row', stateOf(c)]}>{body}</div>
+                      )}
+                    </li>
+                  )
+                })}
+              </ol>
+            </div>
+          ))
+        }
+      </section>
 
-      {
-        firstPublished && (
-          <p style="margin-top:28px;">
-            <a class="btn" href={firstPublished.url}>Start from chapter {firstPublished.order} →</a>
-          </p>
-        )
-      }
-    </section>
+      <aside class="series-side" aria-label="Series map">
+        {
+          chapters.length > 0 && (
+            <div class="map-panel">
+              <div class="map-head">
+                <span class="map-title">Series map</span>
+                <span class="map-hint">{s.publishedCount} of {chapters.length} out</span>
+              </div>
+              {s.parts.map((part) => (
+                <div class="map-part">
+                  <span class="map-part-num">{part.name ? `${roman(part.order)}.` : ''}</span>
+                  <div class="map-nodes">
+                    {part.chapters.map((c) =>
+                      reachable(c) ? (
+                        <a class:list={['map-node', stateOf(c)]} href={c.url} title={`Ch. ${c.order} · ${c.title}`}>
+                          {pad(c.order)}
+                        </a>
+                      ) : (
+                        <span class:list={['map-node', stateOf(c)]} title={`Ch. ${c.order} · ${c.title} — due ${upcomingDate(c.date)}`}>
+                          {pad(c.order)}
+                        </span>
+                      ),
+                    )}
+                  </div>
+                </div>
+              ))}
+              <div class="map-legend">
+                <span><span class="legend-swatch done" />out</span>
+                <span><span class="legend-swatch next" />due next</span>
+                <span><span class="legend-swatch locked" />scheduled</span>
+              </div>
+            </div>
+          )
+        }
+
+        <dl class="facts">
+          <dt>State</dt><dd>{state}</dd>
+          {s.cadence && <><dt>Cadence</dt><dd>{s.cadence}</dd></>}
+          {s.level && <><dt>Level</dt><dd>{s.level[0].toUpperCase() + s.level.slice(1)}</dd></>}
+          {totalMinutes > 0 && <><dt>Reading</dt><dd>{totalMinutes} min so far</dd></>}
+          {firstPublished && <><dt>Started</dt><dd>{formatDate(firstPublished.date)}</dd></>}
+          {nextUp && <><dt>Next</dt><dd>Ch. {nextUp.order}, due {upcomingDate(nextUp.date)}</dd></>}
+        </dl>
+
+        {
+          firstPublished && (
+            <a class="btn-primary" href={firstPublished.url}>
+              Start from chapter {firstPublished.order} <span class="arrow">→</span>
+            </a>
+          )
+        }
+      </aside>
+    </div>
   </div>
 </Base>

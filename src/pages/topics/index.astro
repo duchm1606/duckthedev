@@ -1,5 +1,5 @@
 ---
-// Topic index — one list: pinned topics first (bold), then the rest A–Z.
+// Topic index — one list: pinned topics first, then the rest A–Z.
 import Base from '../../layouts/Base.astro'
 import { getSiteData } from '../../lib/fetcher'
 import type { Topic } from '../../lib/types'
@@ -13,14 +13,12 @@ const ordered = [...pinned, ...rest]
 
 <Base title="Topics — duckthedev" description="Every article and note, filed by topic." active="topics">
   <section class="wrap">
-    <div class="page-head">
-      <p class="kicker">Index</p>
+    <header class="page-head">
+      <div class="eyebrow">The index</div>
       <h1 class="page-title">{topics.length} shelves,<br /><em>one notebook.</em></h1>
       <p class="page-deck">Everything, filed by topic. Bold ones are the main shelves.</p>
-    </div>
-  </section>
+    </header>
 
-  <section class="section wrap">
     <div class="topic-list">
       {
         ordered.map((t) => (

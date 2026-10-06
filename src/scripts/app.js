@@ -1,19 +1,21 @@
-/* duckthedev — client behaviour (theme, reading progress, toc scroll spy) */
+/* duckthedev — client behaviour (theme, reading progress, toc scroll spy, copy code) */
 
 // ---- Theme ----
+// The inline script in Base already applied the initial theme; this only
+// keeps the toggle's label and the browser-chrome colour in step with it.
 (function () {
   const KEY = 'dtd-theme';
   const root = document.documentElement;
-  const saved = localStorage.getItem(KEY);
-  if (saved) root.setAttribute('data-theme', saved);
+  const chrome = document.querySelector('meta[name="theme-color"]');
 
-  function label() {
+  function sync() {
     const isDim = root.getAttribute('data-theme') === 'dim';
-    document.querySelectorAll('[data-theme-label]').forEach(el => {
-      el.textContent = isDim ? 'light' : 'dim';
+    document.querySelectorAll('.theme-toggle').forEach(el => {
+      el.setAttribute('aria-label', isDim ? 'Switch to light theme' : 'Switch to dark theme');
     });
+    chrome?.setAttribute('content', getComputedStyle(root).getPropertyValue('--bg').trim());
   }
-  label();
+  sync();
 
   document.addEventListener('click', e => {
     const btn = e.target.closest('.theme-toggle');
@@ -21,7 +23,7 @@
     const next = root.getAttribute('data-theme') === 'dim' ? 'light' : 'dim';
     root.setAttribute('data-theme', next);
     localStorage.setItem(KEY, next);
-    label();
+    sync();
   });
 })();
 
@@ -55,7 +57,25 @@
         links.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + en.target.id));
       });
     },
-    { rootMargin: '-90px 0px -70% 0px' }
+    // top margin clears the two-row sticky masthead
+    { rootMargin: '-120px 0px -70% 0px' }
   );
   targets.forEach(t => io.observe(t));
+})();
+
+// ---- Copy button on code blocks ----
+(function () {
+  document.addEventListener('click', async e => {
+    const btn = e.target.closest('.copy-code');
+    if (!btn) return;
+    const code = btn.closest('.code-block')?.querySelector('pre');
+    if (!code) return;
+    try {
+      await navigator.clipboard.writeText(code.innerText);
+      btn.textContent = 'copied';
+    } catch {
+      btn.textContent = 'failed';
+    }
+    setTimeout(() => (btn.textContent = 'copy'), 1600);
+  });
 })();

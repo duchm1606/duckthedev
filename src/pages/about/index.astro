@@ -1,10 +1,12 @@
 ---
-// About / CV — one column, data from src/config/cv.ts. The Notion `Site`
+// About / CV — a page head with the coordinates as a fact row, then one
+// numbered section per CV group. Data from src/config/cv.ts. The Notion `Site`
 // database still supplies the two things edited away from the laptop:
 // availability and the CV PDF link.
 import Base from '../../layouts/Base.astro'
 import { cv, type CvItem } from '../../config/cv'
 import { site } from '../../config/site'
+import { roman } from '../../lib/notion/render'
 
 const emailAddr = site.social.email.replace('mailto:', '')
 
@@ -17,22 +19,38 @@ const groups: { title: string; items: CvItem[] }[] = [
 
 <Base title="About me — duckthedev" description={site.about.deck} active="about">
   <div class="wrap">
-    <header class="page-head">
-      <p class="kicker">{site.about.kicker}</p>
+    <header class="page-head about-head">
+      <div class="eyebrow">{site.about.kicker}</div>
       <h1 class="page-title" set:html={site.about.title} />
       <p class="page-deck">{site.about.deck}</p>
-      <dl class="facts">
-        {site.about.coords.map(({ k, v }) => <><dt>{k}</dt><dd>{v}</dd></>)}
-        <dt>Email</dt><dd><a href={`mailto:${emailAddr}`}>{emailAddr}</a></dd>
-        <dt>GitHub</dt><dd><a href={site.social.github}>{site.social.github.replace('https://', '')}</a></dd>
-        <dt>LinkedIn</dt><dd><a href={site.social.linkedin}>{site.social.linkedin.replace('https://www.', '')}</a></dd>
-      </dl>
+      <div class="hero-meta">
+        {
+          site.about.coords.map(({ k, v }) => (
+            <div class="meta-cell">
+              <span class="meta-label">{k}</span>
+              <span class="meta-value">{v}</span>
+            </div>
+          ))
+        }
+        <div class="meta-cell">
+          <span class="meta-label">Elsewhere</span>
+          <span class="meta-value">
+            <a href={site.social.github}>GitHub</a> · <a href={site.social.linkedin}>LinkedIn</a>
+          </span>
+          <span class="meta-sub"><a href={`mailto:${emailAddr}`}>{emailAddr}</a></span>
+        </div>
+      </div>
     </header>
 
     {
-      groups.map(({ title, items }) => (
-        <section class="section">
-          <div class="section-head"><h2 class="section-title">{title}</h2></div>
+      groups.map(({ title, items }, i) => (
+        <section>
+          <div class="section-head">
+            <div>
+              <div class="section-eyebrow">{roman(i + 1).toUpperCase()}.</div>
+              <h2 class="section-title">{title}</h2>
+            </div>
+          </div>
           <div class="cv">
             {items.map((e) => (
               <article class="cv-row">
@@ -66,14 +84,19 @@ const groups: { title: string; items: CvItem[] }[] = [
       ))
     }
 
-    <section class="section">
-      <div class="section-head"><h2 class="section-title">Say hello</h2></div>
-      <p class="page-deck">{site.about.sayHello}</p>
-      <p class="meta" style="margin-top:16px;">
-        <a href={`mailto:${emailAddr}`}>{emailAddr}</a>
-        <a href={site.social.github}>GitHub</a>
-        <a href={site.social.linkedin}>LinkedIn</a>
-      </p>
+    <section class="say-hello">
+      <div class="section-head">
+        <div>
+          <div class="section-eyebrow">{roman(groups.length + 1).toUpperCase()}.</div>
+          <h2 class="section-title">Say hello</h2>
+          <p class="section-deck">{site.about.sayHello}</p>
+        </div>
+      </div>
+      <div class="hero-actions">
+        <a class="btn-primary" href={`mailto:${emailAddr}`}>{emailAddr} <span class="arrow">→</span></a>
+        <a class="btn-ghost" href={site.social.github}>GitHub</a>
+        <a class="btn-ghost" href={site.social.linkedin}>LinkedIn</a>
+      </div>
     </section>
   </div>
 </Base>

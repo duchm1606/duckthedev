@@ -1,24 +1,25 @@
 ---
-// Series index — one row per series, no filters.
+// Series index — the library: every series with its publishing progress.
 import Base from '../../layouts/Base.astro'
 import SeriesItem from '../../components/SeriesItem.astro'
 import { getSiteData } from '../../lib/fetcher'
 
 const { series } = await getSiteData()
+const chapters = series.reduce((n, s) => n + s.chapterCount, 0)
+const out = series.reduce((n, s) => n + s.publishedCount, 0)
 ---
 
 <Base title="Series — duckthedev" description="Long-form subjects, taken in order." active="series">
-  <section class="wrap">
-    <div class="page-head">
-      <p class="kicker">Series</p>
+  <section class="library wrap">
+    <header class="page-head">
+      <div class="eyebrow">The library</div>
       <h1 class="page-title">Subjects too big<br />for <em>one post.</em></h1>
       <p class="page-deck">One subject, taken in order.</p>
-    </div>
-  </section>
+      <p class="page-byline">{series.length} series · {chapters} chapters · {out} out so far</p>
+    </header>
 
-  <section class="section wrap">
-    <div class="list">
-      {series.map((s) => <SeriesItem series={s} />)}
+    <div class="library-list">
+      {series.map((s, i) => <SeriesItem series={s} index={i + 1} />)}
     </div>
   </section>
 </Base>

@@ -13,29 +13,32 @@ for (const post of standalone) {
   byYear.set(year, [...(byYear.get(year) ?? []), post])
 }
 const years = [...byYear.keys()].sort().reverse()
+const essays = standalone.filter((p) => p.type === 'article').length
 ---
 
 <Base title="Blog — duckthedev" description="Archive of all articles and notes." active="blog">
-  <section class="wrap">
-    <div class="page-head">
-      <p class="kicker">Archive</p>
+  <section class="library wrap">
+    <header class="page-head">
+      <div class="eyebrow">The archive</div>
       <h1 class="page-title">Everything I've<br /><em>published.</em></h1>
       <p class="page-deck">Articles and notes, newest first.</p>
-    </div>
-  </section>
+      <p class="page-byline">{essays} essays · {standalone.length - essays} notes · {years.length} {years.length === 1 ? 'year' : 'years'}</p>
+    </header>
 
-  {
-    years.map((year) => (
-      <section class="section wrap">
-        <div class="section-head">
-          <h2 class="section-title">{year}</h2>
+    {
+      years.map((year) => (
+        <div class="year-group">
+          <div class="year-head">
+            <h2 class="year-title">{year}</h2>
+            <span class="year-count">{byYear.get(year)!.length} entries</span>
+          </div>
+          <div class="library-list">
+            {byYear.get(year)!.map((post, i) => (
+              <ArticleRow post={post} index={i + 1} />
+            ))}
+          </div>
         </div>
-        <div class="list">
-          {byYear.get(year)!.map((post) => (
-            <ArticleRow post={post} />
-          ))}
-        </div>
-      </section>
-    ))
-  }
+      ))
+    }
+  </section>
 </Base>

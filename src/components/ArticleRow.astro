@@ -1,25 +1,33 @@
 ---
-// One row in a post list: title with the topic tucked under it, one-line
-// description, and the date alone on the right. Notes hang a § in the margin.
-import { formatDate } from '../lib/notion/render'
+// One post in a library list: roman numeral, title and description, a
+// small-caps line (kind · topic · reading time), and the date on the right.
+import { formatDate, roman } from '../lib/notion/render'
+import { getPostStats } from '../lib/stats'
 import type { Post } from '../lib/types'
 
 interface Props {
   post: Post
+  /** position in the list, shown as a roman numeral */
+  index: number
 }
-const { post } = Astro.props
+const { post, index } = Astro.props
 const topic = post.topics[0]
+const { minutes } = await getPostStats(post.id)
 ---
 
-<article class="row">
-  <div>
-    <h3 class="row-title">
-      {post.type === 'note' && <span class="note-mark">§</span>}<a href={post.url}>{post.title}</a>
-    </h3>
-    {topic && <a class="row-topic" href={`/topics/${topic.slug}`}>{topic.name}</a>}
-    {post.description && <p class="row-desc">{post.description}</p>}
+<article class="library-item">
+  <div class="lib-num">{roman(index)}.</div>
+  <div class="lib-body">
+    <h3 class="lib-title"><a href={post.url}>{post.title}</a></h3>
+    {post.description && <p class="lib-desc">{post.description}</p>}
+    <div class="lib-meta">
+      <span>{post.type === 'note' ? 'Note' : 'Essay'}</span>
+      {topic && <><span class="dot">·</span><a href={`/topics/${topic.slug}`}>{topic.name}</a></>}
+      <span class="dot">·</span><span>{minutes} min</span>
+      {!post.published && <><span class="dot">·</span><span>Draft</span></>}
+    </div>
   </div>
-  <div class="row-side">
-    {!post.published && <span>Draft · </span>}<time datetime={post.date}>{formatDate(post.date)}</time>
+  <div class="lib-side">
+    <time class="lib-date" datetime={post.date}>{formatDate(post.date)}</time>
   </div>
 </article>

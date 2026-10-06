@@ -10,10 +10,8 @@ import HtmlDemo from './HtmlDemo.astro'
 
 interface Props {
   block: any
-  /** first paragraph of a post gets the .lede treatment */
-  lede?: boolean
 }
-const { block, lede = false } = Astro.props
+const { block } = Astro.props
 const type = block.type
 const data = block[type]
 const children = block.children ? groupLists(block.children) : []
@@ -21,7 +19,6 @@ const children = block.children ? groupLists(block.children) : []
 // code block metadata for the .code-head bar + Shiki highlighting
 const codeText = type === 'code' ? plainText(data.rich_text) : ''
 const codeCaption = type === 'code' ? plainText(data.caption) : ''
-const codeLines = codeText ? codeText.split('\n').length : 0
 
 // An HTML code block is an interactive illustration, so it renders as a
 // sandboxed live preview. Prefix the caption with `raw` to opt out and get
@@ -43,10 +40,22 @@ const calloutIcon = type === 'callout' ? (data.icon?.emoji ?? '!') : ''
 const bookmarkUrl = type === 'bookmark' || type === 'embed' ? (data.url ?? '') : ''
 ---
 
-{type === 'paragraph' && <p class:list={[{ lede }]}><RichText text={data.rich_text} /></p>}
+{type === 'paragraph' && <p><RichText text={data.rich_text} /></p>}
 
-{type === 'heading_2' && <h2 id={block._id}><RichText text={data.rich_text} /></h2>}
-{type === 'heading_3' && <h3 id={block._id}><RichText text={data.rich_text} /></h3>}
+{
+  type === 'heading_2' && (
+    <h2 id={block._id}>
+      <RichText text={data.rich_text} /><a class="h-anchor" href={`#${block._id}`} aria-label="Link to this section">#</a>
+    </h2>
+  )
+}
+{
+  type === 'heading_3' && (
+    <h3 id={block._id}>
+      <RichText text={data.rich_text} /><a class="h-anchor" href={`#${block._id}`} aria-label="Link to this section">#</a>
+    </h3>
+  )
+}
 
 {
   type === 'bulleted_list' && (
@@ -79,8 +88,8 @@ const bookmarkUrl = type === 'bookmark' || type === 'embed' ? (data.url ?? '') :
   type === 'code' && !isDemo && (
     <div class="code-block">
       <div class="code-head">
-        <span>{rawCaption || data.language}</span>
-        <span>{data.language} · {codeLines} lines</span>
+        <span>{rawCaption ? `${rawCaption} · ${data.language}` : data.language}</span>
+        <button class="copy-code" type="button">copy</button>
       </div>
       <Fragment set:html={codeHtml} />
     </div>
@@ -101,7 +110,7 @@ const bookmarkUrl = type === 'bookmark' || type === 'embed' ? (data.url ?? '') :
 
 {
   type === 'quote' && (
-    <blockquote class="quote-block">
+    <blockquote class="pull-quote">
       <p>
         <RichText text={data.rich_text} />
       </p>

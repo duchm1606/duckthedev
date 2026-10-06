@@ -24,24 +24,21 @@ const notes = shelf.length - articles
 ---
 
 <Base title={`${topic.name} — duckthedev`} description={topic.description ?? `Everything filed under ${topic.name}.`} active="topics">
-  <section class="wrap">
-    <div class="page-head">
-      <p class="kicker"><a href="/topics">Topics</a> · {topic.name}</p>
+  <section class="library wrap">
+    <header class="page-head">
+      <div class="eyebrow"><a href="/topics">Topics</a><span class="dot">·</span><span class="quiet">a shelf</span></div>
       <h1 class="page-title">{topic.name}</h1>
       {topic.description && <p class="page-deck">{topic.description}</p>}
-      <p class="meta">
-        <span>{articles} {articles === 1 ? 'article' : 'articles'}</span>
-        <span>{notes} {notes === 1 ? 'note' : 'notes'}</span>
+      <p class="page-byline">
+        {articles} {articles === 1 ? 'article' : 'articles'} · {notes} {notes === 1 ? 'note' : 'notes'}
       </p>
-    </div>
-  </section>
+    </header>
 
-  <section class="section wrap">
     {
       shelf.length > 0 ? (
-        <div class="list">
-          {shelf.map((p) => (
-            <ArticleRow post={p} />
+        <div class="library-list">
+          {shelf.map((p, i) => (
+            <ArticleRow post={p} index={i + 1} />
           ))}
         </div>
       ) : (

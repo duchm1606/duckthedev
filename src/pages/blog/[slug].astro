@@ -1,10 +1,13 @@
 ---
-// Standalone post page (posts without a Series).
+// Standalone post page (posts without a Series). Same anatomy as a chapter:
+// full-width head, sticky TOC aside beside the body, and a
+// "read next" band of related posts at the end.
 import Block from '../../components/blocks/Block.astro'
 import { getSiteData } from '../../lib/fetcher'
 import { getBlocks } from '../../lib/notion/client'
 import {
   annotateHeadings,
+  dropDuplicateLede,
   extractHeadings,
   formatDate,
   groupLists,
@@ -12,6 +15,7 @@ import {
   wordCount,
 } from '../../lib/notion/render'
 import Base from '../../layouts/Base.astro'
+import { site } from '../../config/site'
 import type { Post } from '../../lib/types'
 
 export async function getStaticPaths() {
@@ -36,8 +40,10 @@ const blocks = await getBlocks(post.id)
 annotateHeadings(blocks)
 const grouped = groupLists(blocks)
 const headings = extractHeadings(blocks)
-const minutes = readingMinutes(wordCount(blocks))
-const ledeIndex = grouped.findIndex((b) => b.type === 'paragraph')
+const words = wordCount(blocks)
+const minutes = readingMinutes(words)
+// the page head already shows the Description as the deck
+dropDuplicateLede(grouped, post.description)
 
 // Related: hand-picked via the Related relation, else fall back to shared topics
 const byId = new Map(posts.map((p) => [p.id, p]))
@@ -62,83 +68,108 @@ const updated = post.updated && post.updated !== post.date ? post.updated : unde
   progress
   ogImage={`/og/${post.slug}.png`}
 >
-  <div class="wrap post">
-    <article class="post-main">
-      <header class="page-head">
-        <p class="kicker">
-          <span>{post.type === 'article' ? 'Essay' : 'Note'}</span>
-          {post.topics.slice(0, 3).map((t) => <> · <a href={`/topics/${t.slug}`}>{t.name}</a></>)}
-        </p>
-        <h1 class="page-title">{post.title}</h1>
-        {post.description && <p class="page-deck">{post.description}</p>}
-        <p class="meta">
-          <time datetime={post.date}>{formatDate(post.date)}</time>
-          <span>{minutes} min</span>
-          {!post.published && <span>Draft</span>}
-        </p>
-      </header>
-
-      {
-        headings.length > 0 && (
-          <details class="toc-inline">
-            <summary>On this page</summary>
-            <nav class="toc">
-              {headings.map((h) => (
-                <a href={`#${h.id}`} class:list={[{ sub: h.level === 3 }]}>{h.text}</a>
-              ))}
-            </nav>
-          </details>
-        )
-      }
-
-      <div class="post-body">
-        {grouped.map((block, i) => <Block block={block} lede={i === ledeIndex} />)}
+  <article class="wrap">
+    <header class="page-head">
+      <div class="eyebrow">
+        <a href="/blog">{post.type === 'article' ? 'Essay' : 'Note'}</a>
+        {post.topics.slice(0, 3).map((t) => <><span class="dot">·</span><a class="quiet" href={`/topics/${t.slug}`}>{t.name}</a></>)}
+        <span class="dot">·</span><span class="quiet">{words.toLocaleString('en-US')} words</span>
       </div>
+      <h1 class="page-title">{post.title}</h1>
+      {post.description && <p class="page-deck">{post.description}</p>}
+      <p class="page-byline">
+        By <em>{site.author}</em> · {post.published ? 'published' : 'draft,'} {formatDate(post.date)}
+        {updated && <> · updated {formatDate(updated)}</>} · {minutes} min read
+      </p>
+    </header>
 
-      {updated && <p class="meta post-foot">Updated {formatDate(updated)}</p>}
+    <div class="reader-layout">
+      <aside class="reader-aside" aria-label="On this page">
+        {
+          headings.length > 0 && (
+            <div class="toc-section">
+              <div class="toc-label">On this page</div>
+              <nav class="toc">
+                {headings.map((h) => (
+                  <a href={`#${h.id}`} class:list={[{ sub: h.level === 3 }]}>{h.text}</a>
+                ))}
+              </nav>
+            </div>
+          )
+        }
+      </aside>
 
-      {
-        (older || newer) && (
-          <nav class="post-nav" aria-label="Previous and next">
-            {older && (
-              <a href={older.url}>
-                <span class="dir">← Previous</span>
-                <span class="t">{older.title}</span>
-              </a>
-            )}
-            {newer && (
-              <a href={newer.url}>
-                <span class="dir">Next →</span>
-                <span class="t">{newer.title}</span>
-              </a>
-            )}
-          </nav>
-        )
-      }
+      <div class="reader-main">
+        {
+          headings.length > 0 && (
+            <details class="toc-inline">
+              <summary>On this page</summary>
+              <nav class="toc">
+                {headings.map((h) => (
+                  <a href={`#${h.id}`} class:list={[{ sub: h.level === 3 }]}>{h.text}</a>
+                ))}
+              </nav>
+            </details>
+          )
+        }
 
-      {
-        related.length > 0 && (
-          <section class="related">
-            <h2 class="toc-title">Related</h2>
-            <ul>
-              {related.map((p) => <li><a href={p.url}>{p.title}</a></li>)}
-            </ul>
-          </section>
-        )
-      }
-    </article>
+        <div class="post-body">
+          {grouped.map((block) => <Block block={block} />)}
+        </div>
 
-    {
-      headings.length > 0 && (
-        <aside class="post-aside">
-          <div class="toc-title">On this page</div>
-          <nav class="toc">
-            {headings.map((h) => (
-              <a href={`#${h.id}`} class:list={[{ sub: h.level === 3 }]}>{h.text}</a>
-            ))}
-          </nav>
-        </aside>
-      )
-    }
-  </div>
+        <p class="post-foot">
+          {post.topics.length > 0 && <>Filed under {post.topics.map((t, i) => <>{i > 0 && ', '}<a href={`/topics/${t.slug}`}>{t.name}</a></>)} · </>}
+          {post.published ? 'Published' : 'Draft,'} {formatDate(post.date)}{updated && <>, updated {formatDate(updated)}</>}.
+        </p>
+
+        {
+          (older || newer) && (
+            <nav class="post-nav" aria-label="Older and newer">
+              {older && (
+                <a href={older.url}>
+                  <span class="dir">← Older</span>
+                  <span class="t">{older.title}</span>
+                </a>
+              )}
+              {newer && (
+                <a href={newer.url}>
+                  <span class="dir">Newer →</span>
+                  <span class="t">{newer.title}</span>
+                </a>
+              )}
+            </nav>
+          )
+        }
+      </div>
+    </div>
+  </article>
+
+  {
+    related.length > 0 && (
+      <section class="next-up">
+        <div class="wrap">
+          <div class="next-up-grid">
+            <div>
+              <div class="next-up-label">Read next · related</div>
+              <h2 class="next-up-title"><a href={related[0].url}>{related[0].title}</a></h2>
+              <div class="next-up-meta">
+                {formatDate(related[0].date)}
+                {related[0].topics[0] && <> · {related[0].topics[0].name}</>}
+                {related[0].description && <> · {related[0].description}</>}
+              </div>
+            </div>
+            <a class="next-up-cta text-link" href={related[0].url}>read it →</a>
+          </div>
+          {
+            related.length > 1 && (
+              <p class="next-up-more">
+                Also related:{' '}
+                {related.slice(1).map((p, i) => <>{i > 0 && ' · '}<a href={p.url}>{p.title}</a></>)}
+              </p>
+            )
+          }
+        </div>
+      </section>
+    )
+  }
 </Base>

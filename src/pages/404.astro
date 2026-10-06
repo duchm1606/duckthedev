@@ -13,24 +13,19 @@ const recent = posts.filter((p) => p.published).slice(0, 5)
 ---
 
 <Base title="Not found — duckthedev" description="That page isn't here. The newest entries are.">
-  <section class="wrap">
-    <div class="page-head">
-      <p class="kicker">404</p>
+  <section class="library wrap">
+    <header class="page-head">
+      <div class="eyebrow">404</div>
       <h1 class="page-title">That page <em>isn't here.</em></h1>
-      <p class="page-deck">
-        The slug changed or never existed. Try the newest entries below, or
-        <a class="btn" href="/topics">browse by topic →</a>
-      </p>
-    </div>
-  </section>
+      <p class="page-deck">The slug changed or never existed. Try the newest entries below.</p>
+      <div class="hero-actions" style="margin-top:28px;">
+        <a class="btn-primary" href="/blog">The archive <span class="arrow">→</span></a>
+        <a class="btn-ghost" href="/topics">Browse by topic</a>
+      </div>
+    </header>
 
-  <section class="section wrap">
-    <div class="section-head">
-      <h2 class="section-title">Most recent</h2>
-      <a class="section-link" href="/blog">Archive →</a>
-    </div>
-    <div class="list">
-      {recent.map((post) => <ArticleRow post={post} />)}
+    <div class="library-list">
+      {recent.map((post, i) => <ArticleRow post={post} index={i + 1} />)}
     </div>
   </section>
 </Base>

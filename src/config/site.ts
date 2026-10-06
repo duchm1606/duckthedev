@@ -7,6 +7,7 @@ export const site = {
   mark: 'D.',
   tagline: 'notes & essays of a working engineer',
   author: 'Duc Hoang',
+  place: 'Hanoi',
   description:
     'A personal notebook about backends, databases and the tools in between. ' +
     'Written by Duc Hoang. No trackers, no popups, no reading time paywall.',

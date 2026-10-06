@@ -1,7 +1,10 @@
 ---
-// Base shell: masthead + nav, optional reading-progress line, one-row footer.
-// Page content goes into the default slot.
+// Base shell: two-row masthead (brand + nav, then the issue line), optional
+// reading-progress line, three-column footer. Page content goes into the
+// default slot.
 import { site, type NavKey } from '../config/site'
+import { getSiteData } from '../lib/fetcher'
+import { formatLongDate, roman } from '../lib/notion/render'
 import '../styles/fonts.css'
 import '../styles/global.css'
 
@@ -15,7 +18,15 @@ interface Props {
   ogImage?: string
 }
 const { title, description, active, progress = false, ogImage = '/og/default.png' } = Astro.props
-const year = new Date().getFullYear()
+const now = new Date()
+const year = now.getFullYear()
+
+// The site reads like a serial: one volume per year since the first post,
+// the issue number is everything published so far, dated by this build.
+const { posts } = await getSiteData()
+const volume = roman(year - site.copyrightFrom + 1).toUpperCase()
+const issue = posts.filter((p) => p.published).length
+const issueDate = formatLongDate(now)
 const canonical = new URL(Astro.url.pathname, Astro.site)
 const ogImageUrl = new URL(ogImage, Astro.site)
 ---
@@ -37,12 +48,19 @@ const ogImageUrl = new URL(ogImage, Astro.site)
     <meta property="og:image" content={ogImageUrl} />
     <meta property="og:type" content="website" />
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="theme-color" content="#f3ebd9" />
     <script is:inline>
-      // apply the saved theme before first paint to avoid a light-theme flash
-      document.documentElement.setAttribute(
-        'data-theme',
-        localStorage.getItem('dtd-theme') || 'light',
-      )
+      // apply the theme before first paint to avoid a flash: a saved choice
+      // wins, otherwise follow the OS setting
+      ;(function () {
+        var t =
+          localStorage.getItem('dtd-theme') ||
+          (matchMedia('(prefers-color-scheme: dark)').matches ? 'dim' : 'light')
+        document.documentElement.setAttribute('data-theme', t)
+        document
+          .querySelector('meta[name="theme-color"]')
+          .setAttribute('content', t === 'dim' ? '#181410' : '#f3ebd9')
+      })()
     </script>
   </head>
   <body>
@@ -52,6 +70,7 @@ const ogImageUrl = new URL(ogImage, Astro.site)
           <a class="brand" href="/" aria-label={`${site.name} — home`}>
             <span class="brand-mark">{site.mark}</span>
             <span class="brand-name">{site.name}</span>
+            <span class="brand-tag">{site.tagline}</span>
           </a>
           <nav class="primary-nav" aria-label="Primary">
             {
@@ -61,10 +80,19 @@ const ogImageUrl = new URL(ogImage, Astro.site)
                 </a>
               ))
             }
-            <button class="theme-toggle" aria-label="Toggle theme"
-              ><span data-theme-label>dim</span></button
-            >
+            <button class="theme-toggle" aria-label="Switch to dark theme">
+              <span class="to-dim">dim</span><span class="to-light">light</span>
+            </button>
           </nav>
+        </div>
+        <div class="masthead-meta">
+          <span>Vol. {volume}</span>
+          <span class="ornament">§</span>
+          <span>No. {issue}</span>
+          <span class="ornament">§</span>
+          <span>{issueDate}</span>
+          <span class="spacer"></span>
+          <span class="byline">Written by {site.author}, {site.place}</span>
         </div>
       </div>
       {progress && <div class="progress-line" id="progress-line" />}
@@ -74,19 +102,35 @@ const ogImageUrl = new URL(ogImage, Astro.site)
 
     <footer class="colophon">
       <div class="wrap">
-        <div class="colo-row">
-          <a class="colo-brand" href="/">{site.name}<span>.</span></a>
-          <nav class="colo-links" aria-label="Footer">
-            <a href="/series">Series</a>
-            <a href="/blog">Blog</a>
-            <a href="/topics">Topics</a>
-            <a href="/about">About</a>
-            <a href="/rss.xml">RSS</a>
-            <a href={site.social.github}>GitHub</a>
-            <a href={site.social.email}>Email</a>
-          </nav>
+        <div class="colophon-grid">
+          <div class="col-block">
+            <h4>Read</h4>
+            <ul>
+              <li><a href="/series">Series</a></li>
+              <li><a href="/blog">All writing</a></li>
+              <li><a href="/topics">Topics</a></li>
+              <li><a href="/rss.xml">RSS feed</a></li>
+            </ul>
+          </div>
+          <div class="col-block">
+            <h4>Elsewhere</h4>
+            <ul>
+              <li><a href="/about">About / CV</a></li>
+              <li><a href={site.social.github}>GitHub</a></li>
+              <li><a href={site.social.linkedin}>LinkedIn</a></li>
+              <li><a href={site.social.email}>Email</a></li>
+            </ul>
+          </div>
+          <div class="col-block">
+            <h4>Errata</h4>
+            <p>Found a mistake? <a href={site.social.email}>Send a correction.</a> {site.footerNote}</p>
+          </div>
         </div>
-        <p class="colo-note">© {site.copyrightFrom}–{year} {site.author} · {site.footerNote}</p>
+        <div class="colophon-foot">
+          <span>{site.name} · Vol. {volume} · No. {issue}</span>
+          <span class="colophon-mark">— set in {site.place} —</span>
+          <span>© {site.copyrightFrom}–{year} {site.author}</span>
+        </div>
       </div>
     </footer>
 

@@ -1,22 +1,46 @@
 ---
-// One series row. Same anatomy as a post row: title and description on
-// the left, one mono fact (progress instead of a date) on the right.
+// One series in a library list: roman numeral, title and description, a
+// small-caps fact line, and a progress bar of chapters published so far.
+import { roman } from '../lib/notion/render'
 import type { Series } from '../lib/types'
 
 interface Props {
   series: Series
+  /** position in the list, shown as a roman numeral */
+  index: number
 }
-const { series: s } = Astro.props
+const { series: s, index } = Astro.props
 
 const total = s.chapterCount || s.plannedChapters || 0
-const progress =
-  s.publishedCount > 0 ? `${s.publishedCount} of ${total} out` : total > 0 ? 'planned' : 'outline'
+const pct = total > 0 ? Math.round((s.publishedCount / total) * 100) : 0
+const complete = s.state === 'complete' || (total > 0 && s.publishedCount === total)
+const state = complete ? 'Complete' : s.state === 'planned' ? 'Planned' : 'Ongoing'
 ---
 
-<article class="row">
-  <div>
-    <h3 class="row-title"><a href={`/series/${s.slug}`}>{s.name}</a></h3>
-    <p class="row-desc">{s.description}</p>
+<article class="library-item">
+  <div class="lib-num">{roman(index)}.</div>
+  <div class="lib-body">
+    <h3 class="lib-title"><a href={`/series/${s.slug}`}>{s.name}</a></h3>
+    <p class="lib-desc">{s.description}</p>
+    <div class="lib-meta">
+      <span>{state}</span>
+      {total > 0 && <><span class="dot">·</span><span>{total} chapters</span></>}
+      {s.level && <><span class="dot">·</span><span>{s.level}</span></>}
+      {s.cadence && !complete && <><span class="dot">·</span><span>{s.cadence}</span></>}
+    </div>
   </div>
-  <div class="row-side">{progress}</div>
+  <div class="lib-progress">
+    <div class="progress-bar"><div class:list={['progress-fill', { done: complete }]} style={`width: ${pct}%`} /></div>
+    <div class="progress-label">
+      {
+        total === 0 ? (
+          <em>outline only</em>
+        ) : complete ? (
+          <><strong>{s.publishedCount}</strong> / {total} out · <em>complete</em></>
+        ) : (
+          <><strong>{s.publishedCount}</strong> / {total} out · {pct}%</>
+        )
+      }
+    </div>
+  </div>
 </article>
