@@ -1,8 +1,8 @@
 ---
-// Chapter reader — a full-width chapter head, then two columns: a sticky
-// aside (this page's TOC, then the series outline) and the chapter. On
-// narrow screens the aside folds into two <details> above the body. A
-// "next up" band closes the page.
+// Chapter reader — a full-width chapter head, then three columns: the
+// series outline (sticky, left), the chapter, and this page's TOC (sticky,
+// right). Below 1200px the TOC folds into a <details> above the body; on
+// narrow screens the outline does too. A "next up" band closes the page.
 import Block from '../../../components/blocks/Block.astro'
 import SeriesOutline from '../../../components/SeriesOutline.astro'
 import Base from '../../../layouts/Base.astro'
@@ -81,20 +81,8 @@ const nextMinutes = next?.published ? (await getPostStats(next.id)).minutes : 0
       </p>
     </header>
 
-    <div class="reader-layout">
-      <aside class="reader-aside" aria-label="On this page and series outline">
-        {
-          headings.length > 0 && (
-            <div class="toc-section">
-              <div class="toc-label">On this page</div>
-              <nav class="toc">
-                {headings.map((h) => (
-                  <a href={`#${h.id}`} class:list={[{ sub: h.level === 3 }]}>{h.text}</a>
-                ))}
-              </nav>
-            </div>
-          )
-        }
+    <div class:list={['reader-layout', { 'reader-wide': headings.length > 0 }]}>
+      <aside class="reader-aside" aria-label="Series outline">
         <div class="toc-section outline">
           <div class="toc-label">In this series</div>
           <SeriesOutline series={s} currentId={post.id} currentPartOrder={currentPartOrder} />
@@ -139,6 +127,21 @@ const nextMinutes = next?.published ? (await getPostStats(next.id)).minutes : 0
           )
         }
       </div>
+
+      {
+        headings.length > 0 && (
+          <aside class="reader-aside reader-toc" aria-label="On this page">
+            <div class="toc-section">
+              <div class="toc-label">On this page</div>
+              <nav class="toc">
+                {headings.map((h) => (
+                  <a href={`#${h.id}`} class:list={[{ sub: h.level === 3 }]}>{h.text}</a>
+                ))}
+              </nav>
+            </div>
+          </aside>
+        )
+      }
     </div>
   </article>
 

@@ -603,6 +603,12 @@ a.map-node:hover { border-color: var(--accent); outline: 1px solid var(--accent)
   align-items: start;
   padding-bottom: 80px;
 }
+/* chapters: series outline left, this page's TOC right */
+.reader-wide { grid-template-columns: 200px minmax(0, 1fr) 200px; }
+@media (max-width: 1200px) {
+  .reader-wide { grid-template-columns: 220px minmax(0, 1fr); }
+  .reader-wide > .reader-toc { display: none; }
+}
 @media (max-width: 900px) {
   .reader-layout { grid-template-columns: minmax(0, 1fr); gap: 0; padding-bottom: 56px; }
   .reader-aside { display: none; }
@@ -676,6 +682,8 @@ a.chap-link:hover { color: var(--accent); }
   .outline-sheet, .toc-inline { display: block; margin-bottom: 12px; }
   .reader-main > .toc-inline:last-of-type, .reader-main > .outline-sheet:last-of-type { margin-bottom: 32px; }
 }
+/* the chapter TOC column drops out first, so its <details> shows earlier */
+@media (max-width: 1200px) { .reader-wide .toc-inline { display: block; margin-bottom: 32px; } }
 .outline-sheet > summary, .toc-inline > summary {
   list-style: none;
   cursor: pointer;
