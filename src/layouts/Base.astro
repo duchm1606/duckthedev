@@ -16,8 +16,10 @@ interface Props {
   progress?: boolean
   /** path to the OG image; post pages pass their own card */
   ogImage?: string
+  /** language of the page's main content (a post's `Lang`) */
+  lang?: 'en' | 'vi'
 }
-const { title, description, active, progress = false, ogImage = '/og/default.png' } = Astro.props
+const { title, description, active, progress = false, ogImage = '/og/default.png', lang = 'en' } = Astro.props
 const now = new Date()
 const year = now.getFullYear()
 
@@ -32,7 +34,7 @@ const ogImageUrl = new URL(ogImage, Astro.site)
 ---
 
 <!doctype html>
-<html lang="en" data-theme="light">
+<html lang={lang} data-theme="light">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />

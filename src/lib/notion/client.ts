@@ -22,15 +22,13 @@ const THROTTLE_MS = Number(env('NOTION_THROTTLE_MS') ?? 340)
 const RETRYABLE = new Set([408, 429, 500, 502, 503, 504])
 const MAX_RETRIES = 5
 
-export type DbKey = 'posts' | 'series' | 'parts' | 'topics' | 'cv' | 'skills' | 'site'
+export type DbKey = 'posts' | 'series' | 'parts' | 'topics' | 'site'
 
 const DB_ENV: Record<DbKey, string> = {
   posts: 'NOTION_DB_POSTS',
   series: 'NOTION_DB_SERIES',
   parts: 'NOTION_DB_PARTS',
   topics: 'NOTION_DB_TOPICS',
-  cv: 'NOTION_DB_CV',
-  skills: 'NOTION_DB_SKILLS',
   site: 'NOTION_DB_SITE',
 }
 

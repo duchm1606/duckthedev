@@ -32,9 +32,9 @@ const pad = (n?: number) => String(n ?? 0).padStart(2, '0')
 const reachable = (c: Post) => c.published || !isProd()
 const stateOf = (c: Post) => (c.published ? 'done' : c.id === nextUp?.id ? 'next' : 'locked')
 
-const total = s.chapterCount || s.plannedChapters || 0
-const complete = s.state === 'complete' || (total > 0 && s.publishedCount === total)
-const state = complete ? 'Complete' : s.state === 'planned' ? 'Planned' : 'Ongoing'
+const total = s.total
+const complete = s.state === 'complete'
+const state = s.state[0].toUpperCase() + s.state.slice(1)
 ---
 
 <Base title={`${s.name} — duckthedev`} description={s.description} active="series">

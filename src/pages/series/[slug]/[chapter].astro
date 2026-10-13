@@ -65,6 +65,7 @@ const nextMinutes = next?.published ? (await getPostStats(next.id)).minutes : 0
   active="series"
   progress
   ogImage={`/og/${post.slug}.png`}
+  lang={post.lang}
 >
   <article class="wrap">
     <header class="page-head">

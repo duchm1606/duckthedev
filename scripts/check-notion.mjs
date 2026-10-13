@@ -25,7 +25,7 @@ if (!TOKEN || TOKEN.includes('xxx')) {
   process.exit(1)
 }
 
-const DBS = ['POSTS', 'SERIES', 'PARTS', 'TOPICS', 'CV', 'SKILLS', 'SITE']
+const DBS = ['POSTS', 'SERIES', 'PARTS', 'TOPICS', 'SITE']
 
 async function notion(path, body) {
   const res = await fetch(`https://api.notion.com/v1${path}`, {
@@ -76,7 +76,7 @@ if (!failed && dataSources.POSTS) {
   if (ok) {
     const p = json.results?.[0]
     const t = p?.properties?.Title?.title?.map((x) => x.plain_text).join('')
-    console.log(`✓ latest post: "${t}" (${p?.properties?.Date?.date?.start})`)
+    console.log(p ? `✓ latest post: "${t}" (${p.properties?.Date?.date?.start})` : '✓ no published posts yet')
   } else {
     console.log(`✗ ${status} — ${json.message?.slice(0, 120)}`)
     failed = true

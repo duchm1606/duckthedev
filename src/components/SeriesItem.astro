@@ -11,10 +11,10 @@ interface Props {
 }
 const { series: s, index } = Astro.props
 
-const total = s.chapterCount || s.plannedChapters || 0
+const total = s.total
 const pct = total > 0 ? Math.round((s.publishedCount / total) * 100) : 0
-const complete = s.state === 'complete' || (total > 0 && s.publishedCount === total)
-const state = complete ? 'Complete' : s.state === 'planned' ? 'Planned' : 'Ongoing'
+const complete = s.state === 'complete'
+const state = s.state[0].toUpperCase() + s.state.slice(1)
 ---
 
 <article class="library-item">

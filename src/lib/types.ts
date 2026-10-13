@@ -5,11 +5,7 @@ export type Topic = {
   id: string
   slug: string
   name: string
-  glyph: string
-  icon?: string
-  iconClass?: 'invert' | 'wide'
   description?: string
-  group?: 'lang' | 'data' | 'infra' | 'practice'
   pinned: boolean
   order?: number
   // derived
@@ -18,7 +14,7 @@ export type Topic = {
   updated?: string
 }
 
-export type PartRef = { order: number; name: string; note?: string }
+export type PartRef = { order: number; name: string }
 
 export type Post = {
   id: string
@@ -35,10 +31,8 @@ export type Post = {
   part?: PartRef
   order?: number // chapter number within the series
   pinned: boolean
-  featuredOrder?: number
   relatedIds: string[]
-  lang?: string
-  cover?: string
+  lang: 'en' | 'vi'
   // derived
   url: string
 }
@@ -51,48 +45,24 @@ export type Series = {
   name: string
   description: string
   topics: Topic[]
-  state: 'planned' | 'ongoing' | 'complete'
   level?: 'beginner' | 'intermediate' | 'advanced'
   order?: number
   cadence?: string
   plannedChapters?: number
-  cover?: string
   // derived
   parts: SeriesPart[]
   chapterCount: number
   publishedCount: number
+  /** chapters written or planned, whichever is larger */
+  total: number
+  state: 'planned' | 'ongoing' | 'complete'
   latestDate?: string
   nextDate?: string
-}
-
-export type Skill = {
-  id: string
-  name: string
-  group?: string
-  order?: number
-  showInSkills: boolean
-  note?: string
-}
-
-export type CvEntry = {
-  id: string
-  role: string
-  kind: 'experience' | 'education' | 'project'
-  org: string
-  orgUrl?: string
-  location?: string
-  logo: string
-  start?: string
-  end?: string
-  order?: number
-  tech: Skill[]
 }
 
 export type SiteData = {
   posts: Post[]
   series: Series[]
   topics: Topic[]
-  skills: Skill[]
-  cv: CvEntry[]
   site: Record<string, string> // `Site` database key/value pairs
 }

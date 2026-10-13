@@ -21,12 +21,10 @@ Topics ──┬──< Posts >──── Series ──< Parts
          │      │            │         │
          └──────┴────────────┘         │
                 └── Part (relation) ───┘
-
-Skills ──< CV entries          Skills ──< (skill groups on /about)
 ```
 
-5 DB bắt buộc: `Posts`, `Series`, `Parts`, `Topics`, `CV entries`.
-2 DB tuỳ chọn: `Skills`, `Site` (key/value).
+4 DB bắt buộc: `Posts`, `Series`, `Parts`, `Topics`.
+1 DB tuỳ chọn: `Site` (key/value).
 
 ---
 
@@ -47,14 +45,13 @@ Body bài viết = chính nội dung page Notion. Các property chỉ là metada
 | `Series` | Relation → `Series` (single) | | có = chapter → route `/series/...`, render cột outline trái |
 | `Part` | Relation → `Parts` (single) | | nhóm trong `series-map` và trong `<details>` của outline |
 | `Order` | Number | | số chapter (`chap-no` 01…12). Chỉ cần khi có `Series` |
-| `Pinned` | Checkbox | | badge `pinned` + section `I. FEATURED` ở home |
-| `Featured order` | Number | | thứ tự trong 4 ô featured; trống = không lên featured |
-| `Cover` | Files | | ảnh OG. Nếu trống → generate OG bằng title |
-| `Related` | Relation → `Posts` (self) | | khối "Elsewhere" ở sidebar phải. Bỏ trống thì fallback theo topic chung |
-| `Lang` | Select: `en` \| `vi` | | nếu sau này viết hai thứ tiếng |
+| `Pinned` | Checkbox | | lên mục featured ở home (tối đa 4 bài lẻ, mới nhất trước) |
+| `Related` | Relation → `Posts` (self, **một chiều**) | | khối "Elsewhere" ở cuối bài lẻ. Bỏ trống thì fallback theo topic chung |
+| `Lang` | Select: `en` \| `vi` | | `<html lang>` của trang bài (screen reader, ngắt chữ, SEO). Trống = `en` |
 
 **Không nên thêm:** `Reading time`, `Word count`, `TOC`, `Year`, `Author`. Ba cái đầu derive được,
-cái cuối luôn là bạn.
+cái cuối luôn là bạn. **Đã bỏ (2026-10-13):** `Featured order` (featured lấy theo `Pinned` + ngày),
+`Cover` (OG image luôn tự vẽ, `src/lib/og.ts`), và cột ngược `Referenced by` của `Related`.
 
 **Về `Type` cho chapter:** chapter vẫn là `article`. Việc nó là chapter do `Series` quyết định,
 không phải một giá trị select thứ ba — nếu không bạn sẽ có trạng thái vô nghĩa
@@ -74,17 +71,23 @@ không phải một giá trị select thứ ba — nếu không bạn sẽ có t
 | `Name` | Title | `ser-title`, `page-title`, `outline-title` |
 | `Slug` | Rich text | `/series/<slug>` |
 | `Description` | Rich text | `ser-desc` trên `/series`, `page-deck` trên trang series |
-| `Topics` | Relation → `Topics` | `ser-tags`. **Chọn tay 3–5 cái**, đừng rollup từ chapter — rollup sẽ ra 15 tag và vô nghĩa |
-| `State` | Select: `planned` \| `ongoing` \| `complete` | `state-tag` (`publishing weekly` / `ongoing` / `complete`) |
-| `Level` | Select: `beginner` \| `intermediate` \| `advanced` | `post-meta`, `page-stats` |
+| `Topics` | Relation → `Topics` | 3 topic đầu cạnh tiêu đề trang series. **Chọn tay 3–5 cái**, đừng rollup từ chapter — rollup sẽ ra 15 tag và vô nghĩa |
+| `Level` | Select: `beginner` \| `intermediate` \| `advanced` | dòng meta trên `/series`, bảng facts trên trang series |
 | `Order` | Number | số La Mã `i. ii. iii.` trên `/series` |
-| `Cadence` | Rich text | "publishing weekly", "starts September 2026" — câu tự do dưới `state-tag` |
-| `Planned chapters` | Number | chỉ cho series `planned`: "7 chapters planned" khi chưa có post nào |
-| `Status` | Select: `draft` \| `published` | series đang phác thảo thì ẩn |
-| `Cover` | Files | OG image |
+| `Cadence` | Rich text | "publishing weekly", "starts September 2026" — câu tự do, ẩn khi series complete |
+| `Planned chapters` | Number | **tổng số chương dự kiến.** Chapter được tạo lúc bắt tay viết, nên đây mới là độ dài thật của series |
+| `Status` | Select: `draft` \| `published` | series đang phác thảo thì ẩn ở prod |
+| `Chapters`, `Parts` | (cột ngược của relation) | không đọc lúc build, chỉ để xem trong Notion |
 
-Derive lúc build: `12 chapters`, `3 parts`, `9 published`, `≈ 5 h`, `latest 24 Jul`,
-`Next out 07 Aug` (= `Date` nhỏ nhất trong các chapter chưa published).
+Derive lúc build:
+- **Tổng chương** = `max(số chapter đã tạo, Planned chapters)` → "0 / 19 out".
+- **State** — không còn là property gõ tay (bỏ 2026-10-13): chưa có chapter published → `planned`;
+  số published ≥ `Planned chapters` → `complete`; còn lại → `ongoing`. Không điền `Planned chapters`
+  thì series không bao giờ tự `complete`.
+- `3 parts`, `9 published`, `≈ 5 h`, `latest 24 Jul`, `Next 07 Aug` (= `Date` nhỏ nhất trong các
+  chapter chưa published).
+
+`Cover` cũng đã bỏ — OG image tự vẽ.
 
 ---
 
@@ -98,7 +101,7 @@ Nhỏ, nhưng đáng có một DB riêng: tên part xuất hiện ở 2 chỗ (`
 | `Name` | Title | `part-name` — "One box, and what breaks it" |
 | `Series` | Relation → `Series` | |
 | `Order` | Number | `part-kicker` → Part I / II / III |
-| `Note` | Rich text | phần đuôi của `part-meta`, ví dụ "publishing" |
+| `Chapters` | (cột ngược của `Posts.Part`) | chỉ để xem trong Notion |
 
 Chỉ 2 cấp: Series → Part → Chapter. Part **không có trang riêng, không có nội dung** — nó là
 nhóm, không phải bài viết. Thêm cấp thứ ba là bạn tự tạo ra loạt trang rỗng.
@@ -112,98 +115,45 @@ nhóm, không phải bài viết. Thêm cấp thứ ba là bạn tự tạo ra l
 
 | Property | Notion type | Hiển thị |
 |---|---|---|
-| `Name` | Title | `chip`, `topic-card h3`, `topic-pill .name` |
+| `Name` | Title | dòng trên `/topics`, tiêu đề `/topics/<slug>`, "Filed under" cuối bài |
 | `Slug` | Rich text | `/topics/<slug>` |
-| `Icon` | URL | logo SVG. **Ưu tiên 1** cho `topic-card-glyph` / `topic-pill .glyph` |
-| `Icon class` | Select: `invert` \| `wide` | `invert` = logo đen, cần `filter:invert(1)` ở dark theme. `wide` = wordmark, không vuông |
-| `Glyph` | Rich text (2 ký tự) | **fallback** khi `Icon` trống — `Ar`, `Op`, `In` |
-| `Description` | Rich text | đoạn mô tả trong `topic-card` |
-| `Group` | Select: `lang` \| `data` \| `infra` \| `practice` | filter chip trên `/topics` (`data-tags`) |
-| `Pinned` | Checkbox | section `I. Pinned` (9 cái) |
-| `Order` | Number | thứ tự trong lưới pinned |
+| `Description` | Rich text | `page-deck` + meta description của trang topic |
+| `Pinned` | Checkbox | in đậm, xếp đầu danh sách `/topics` |
+| `Order` | Number | thứ tự giữa các topic pinned (phần còn lại xếp A–Z) |
 
-### Icon: link công khai, không upload
+Derive: số bài mỗi topic (`18 articles · 13 notes`), ngày cập nhật gần nhất. Topic 0 bài vẫn
+hiện nhưng mờ đi.
 
-Giống DB `dat.com-topics-db-ex` cũ (dùng Cloudinary), nhưng ở đây không cần tự host:
-
-- **[Simple Icons](https://simpleicons.org)** — `https://cdn.simpleicons.org/<slug>`. SVG một màu, trả về đúng brand color. Hợp với letterpress hơn logo nhiều màu.
-- Hai ngoại lệ phải lấy từ **devicon**: **AWS** (Simple Icons gỡ vì trademark) và **gRPC** (không có).
-  AWS dùng bản `plain-wordmark` — một màu cam `#f90`, nhìn được ở cả hai theme. Bản
-  `original-wordmark` có chữ navy `#252f3e`, chìm nghỉm ở dark.
-- Notion page icon set luôn cùng URL đó, nên trong Notion nhìn cũng ra logo chứ không chỉ là một ô text URL.
-
-`Icon class = invert` cho 6 topic có logo đen tuyền — OpenTelemetry, Kafka (`#231F20`), Next.js,
-Notion, Rust, và gRPC. Không có nó thì ở dark theme logo biến mất.
-
-> gRPC là ca dễ sót: SVG của devicon **không có attribute `fill` nào cả**, nên trong `<img>` nó
-> mặc định về đen. Grep `fill=` ra rỗng không có nghĩa là icon an toàn — nó nghĩa là icon màu đen.
-
-```css
-.topic-glyph img { width: 22px; height: 22px; object-fit: contain; }
-[data-theme="dim"] .topic-glyph img.invert { filter: invert(1); }
-.topic-glyph img.wide { width: auto; height: 16px; }   /* AWS wordmark */
-```
-
-13 topic không có brand (Architecture, Ops, Interviews, Debugging, Career & craft…) để `Icon` trống và rơi về `Glyph`. Đừng cố tìm logo cho chúng — icon chung chung nhìn tệ hơn hai chữ cái.
-
-Derive: `31 entries`, `18 articles · 13 notes`, `Updated 28 Jul`, alpha index A–Z (chữ nào không
-có topic thì `.off`).
+**Đã bỏ (2026-10-13):** `Icon`, `Icon class`, `Glyph`, `Group` — thuộc lưới topic-card/filter chip
+của bản UI đầu, giao diện Forge hiện tại chỉ là một danh sách chữ.
 
 Đừng dùng Notion rollup để đếm — rollup không filter được `Status = published`, nên nó sẽ đếm cả
 draft. Đếm lúc build.
 
 ---
 
-## 6. DB `CV entries`
+## 6. CV — nằm trong repo, không ở Notion
 
-Một DB cho cả Experience / Education / Projects. Chúng cùng một hình dạng
-(`cv-logo` + role + org + date + bullets + tech), tách ba DB là tách ba lần cùng một schema.
-
-| Property | Notion type | Hiển thị |
-|---|---|---|
-| `Role` | Title | `cv-role` — "Senior Backend Engineer", "outboxd" |
-| `Kind` | Select: `experience` \| `education` \| `project` | quyết định nó nằm ở nhóm I, II hay IV |
-| `Org` | Rich text | `cv-where` — "Axiom Pay", "University of Technology" |
-| `Org URL` | URL | link trong `cv-where` |
-| `Location` | Rich text | phần sau dấu `·` — "Singapore / remote" |
-| `Logo` | Rich text (2 ký tự) | `cv-logo` — `Ax`, `Lm`, `ob`. Ký tự lạ như `§`, `✎` cũng được |
-| `Start` / `End` | Date | `cv-date` — "2023 — present" (End trống = present) |
-| `Order` | Number | fallback khi hai mục cùng ngày |
-| `Tech` | Relation → `Skills` | `tech-row` |
-| `Visible` | Checkbox | ẩn mục cũ mà không xoá |
-
-Bullets (`cv-activity`) = **nội dung page**, không phải property. Gõ bullet list trong page,
-build đọc block children. Property rich text sẽ chật và không xuống dòng đẹp.
+`/about` đọc `src/config/cv.ts`. DB `CV entries` đã xoá (2026-10-13): nó chỉ chứa seed giả,
+và một CV sửa vài lần một năm không đáng một request Notion mỗi build.
 
 ---
 
-## 7. DB `Skills` (tuỳ chọn nhưng nên có)
+## 7. Skills — đã bỏ
 
-Một từ vựng dùng chung cho `tech-row` ở CV lẫn lưới `III. Skills`.
-
-| Property | Notion type | Hiển thị |
-|---|---|---|
-| `Name` | Title | `tech` badge — viết thường: `go`, `postgres`, `github-actions` |
-| `Group` | Select: `Languages` \| `Data` \| `Infrastructure` \| `Observability` \| `Practices` \| `Front-end` | tiêu đề `skill-block h4` |
-| `Order` | Number | thứ tự trong nhóm |
-| `Show in skills` | Checkbox | có cái chỉ dùng ở CV (`debezium`) mà không cần lên lưới skills |
-| `Note` | Rich text | "(learning)" sau `rust` |
-
-Không có DB này thì `Tech` trên CV thành multi-select và lưới Skills phải gõ tay trong repo.
-Chấp nhận được nếu bạn không định sửa CV thường xuyên.
+Từng là từ vựng chung cho `tech-row` ở CV và lưới Skills. Cả hai đã bị gỡ khỏi `/about`, nên
+DB `Skills` cũng xoá theo (2026-10-13).
 
 ---
 
 ## 8. `Site` — mấy chuỗi lẻ
 
 Không cần DB. Những thứ này thay đổi vài lần một năm, để trong `config/site.ts` của repo
-là đủ và nhanh hơn một request Notion:
+là đủ và nhanh hơn một request Notion: tagline, các `page-deck`, footer, nav, socials, email.
 
-`brand-tag`, `colo-note`, các `page-deck`, `colo-foot`, danh sách nav, socials.
-
-Riêng hai thứ **nên** để Notion vì bạn sẽ đổi khi đang không mở laptop dev:
-`availability` ("Open to interesting problems") và link `CV PDF`. Một DB `Site` kiểu
-`Key` (title) / `Value` (rich text) là đủ, hoặc một page Notion duy nhất parse ra.
+Thứ duy nhất **nên** để Notion vì bạn sẽ đổi khi đang không mở laptop dev: dòng `availability`
+("Open to interesting problems") dưới desk log ở home. DB `Site` kiểu `Key` (title) / `Value`
+(rich text), hiện chỉ có đúng key đó.
 
 ---
 
@@ -272,8 +222,8 @@ CSS của nó không rò rỉ ra layout letterpress và ngược lại.
 - **Sandbox không có `allow-same-origin`** → `localStorage`, cookie và fetch cùng origin
   đều không dùng được trong demo. Cố tình như vậy: nội dung từ Notion là code chạy được.
 
-`scripts/seed-showcase.mjs` chứa hai demo mẫu (ring consistent hashing, reconcile loop)
-dùng đúng bộ token màu của site.
+Hai demo mẫu dùng đúng bộ token màu của site (ring consistent hashing, reconcile loop) nằm
+trong `scripts/seed-showcase.mjs` ở lịch sử git (`git show 8566fb1:scripts/seed-showcase.mjs`).
 
 ---
 
@@ -302,6 +252,7 @@ type Post = {
   title: string
   slug: string
   type: 'article' | 'note'
+  status: 'idea' | 'draft' | 'review' | 'published'
   date: string            // ISO; là ngày dự kiến nếu chưa published
   updated?: string
   description: string
@@ -310,43 +261,42 @@ type Post = {
   part?: { order: number; name: string }
   order?: number          // số chapter
   pinned: boolean
-  featuredOrder?: number
+  relatedIds: string[]
+  lang: 'en' | 'vi'
   published: boolean
   // derived
   url: string
-  readingMinutes: number
-  headings: { id: string; text: string; level: 2 | 3 }[]
 }
 
 type Series = {
   slug: string; name: string; description: string
   topics: Topic[]
-  state: 'planned' | 'ongoing' | 'complete'
-  level: 'beginner' | 'intermediate' | 'advanced'
-  order: number; cadence?: string
+  level?: 'beginner' | 'intermediate' | 'advanced'
+  order?: number; cadence?: string; plannedChapters?: number
   // derived
-  parts: { order: number; name: string; note?: string; chapters: Post[] }[]
+  parts: { order: number; name: string; chapters: Post[] }[]
   chapterCount: number; publishedCount: number
-  totalMinutes: number; latestDate?: string; nextDate?: string
+  total: number                                  // max(chapterCount, plannedChapters)
+  state: 'planned' | 'ongoing' | 'complete'
+  latestDate?: string; nextDate?: string
 }
 
 type Topic = {
-  slug: string; name: string; glyph: string
+  slug: string; name: string
   description?: string
-  group?: 'lang' | 'data' | 'infra' | 'practice'
-  pinned: boolean
+  pinned: boolean; order?: number
   // derived
-  articleCount: number; noteCount: number; updated: string
+  articleCount: number; noteCount: number; updated?: string
 }
 ```
+
+Reading time và heading TOC tính riêng theo từng bài (`src/lib/stats.ts`, `render.ts`).
 
 ---
 
 ## 13. Thứ tự dựng
 
-1. `Topics` + `Skills` — không phụ thuộc ai, tạo trước.
+1. `Topics` — không phụ thuộc ai, tạo trước.
 2. `Posts` với `Type`/`Status`/`Date`/`Description`/`Topics`. Đủ chạy `/`, `/blog`, `/topics`.
-3. `Series` + `Parts`, thêm `Series`/`Part`/`Order` vào `Posts`. Mở khoá `/series` và reader 3 cột.
-4. `CV entries`. `/about` là trang tĩnh nhất, làm cuối cũng được.
-
-Đừng tạo cả 7 DB rồi mới code. Bước 2 xong là đã có site chạy được.
+3. `Series` + `Parts`, thêm `Series`/`Part`/`Order` vào `Posts`. Mở khoá `/series` và reader.
+4. `Site` với key `availability` — tuỳ chọn.

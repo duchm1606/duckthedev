@@ -3,7 +3,7 @@
 
 import { isProd } from './env'
 import { queryAll } from './notion/client'
-import type { CvEntry, Post, Series, SeriesPart, SiteData, Skill, Topic } from './types'
+import type { Post, Series, SeriesPart, SiteData, Topic } from './types'
 
 // ── property pickers (official API, addressed by real property names) ──
 const text = (p: any): string =>
@@ -12,12 +12,7 @@ const sel = (p: any): string | undefined => p?.select?.name
 const num = (p: any): number | undefined => p?.number ?? undefined
 const date = (p: any): string | undefined => p?.date?.start ?? undefined
 const check = (p: any): boolean => !!p?.checkbox
-const urlOf = (p: any): string | undefined => p?.url ?? undefined
 const relIds = (p: any): string[] => ((p?.relation ?? []) as any[]).map((r) => r.id)
-const fileUrl = (p: any): string | undefined => {
-  const f = p?.files?.[0]
-  return f?.file?.url ?? f?.external?.url ?? undefined
-}
 
 export function postUrl(p: { slug: string; order?: number; series?: { slug: string } }): string {
   return p.series
@@ -33,13 +28,11 @@ function assertUniqueSlugs(items: { slug: string }[], label: string) {
 }
 
 async function load(): Promise<SiteData> {
-  const [rawTopics, rawSkills, rawSeries, rawParts, rawPosts, rawCv, rawSite] = await Promise.all([
+  const [rawTopics, rawSeries, rawParts, rawPosts, rawSite] = await Promise.all([
     queryAll('topics'),
-    queryAll('skills'),
     queryAll('series'),
     queryAll('parts'),
     queryAll('posts'),
-    queryAll('cv'),
     queryAll('site'),
   ])
 
@@ -50,11 +43,7 @@ async function load(): Promise<SiteData> {
         id: r.id,
         name: text(p.Name),
         slug: text(p.Slug),
-        glyph: text(p.Glyph),
-        icon: urlOf(p.Icon),
-        iconClass: sel(p['Icon class']) as Topic['iconClass'],
         description: text(p.Description) || undefined,
-        group: sel(p.Group) as Topic['group'],
         pinned: check(p.Pinned),
         order: num(p.Order),
         articleCount: 0,
@@ -64,28 +53,12 @@ async function load(): Promise<SiteData> {
     .sort((a, b) => (a.order ?? 99) - (b.order ?? 99) || a.name.localeCompare(b.name))
   const topicById = new Map(topics.map((t) => [t.id, t]))
 
-  const skills: Skill[] = rawSkills
-    .map((r) => {
-      const p = r.properties
-      return {
-        id: r.id,
-        name: text(p.Name),
-        group: sel(p.Group),
-        order: num(p.Order),
-        showInSkills: check(p['Show in skills']),
-        note: text(p.Note) || undefined,
-      }
-    })
-    .sort((a, b) => (a.order ?? 99) - (b.order ?? 99))
-  const skillById = new Map(skills.map((s) => [s.id, s]))
-
-  type RawPart = { id: string; name: string; note?: string; order: number; seriesId?: string }
+  type RawPart = { id: string; name: string; order: number; seriesId?: string }
   const parts: RawPart[] = rawParts.map((r) => {
     const p = r.properties
     return {
       id: r.id,
       name: text(p.Name),
-      note: text(p.Note) || undefined,
       order: num(p.Order) ?? 0,
       seriesId: relIds(p.Series)[0],
     }
@@ -103,16 +76,16 @@ async function load(): Promise<SiteData> {
         description: text(p.Description),
         topicIds: relIds(p.Topics),
         topics: [] as Topic[],
-        state: (sel(p.State) ?? 'planned') as Series['state'],
         level: sel(p.Level) as Series['level'],
         order: num(p.Order),
         cadence: text(p.Cadence) || undefined,
         plannedChapters: num(p['Planned chapters']),
-        cover: fileUrl(p.Cover),
         status: sel(p.Status),
         parts: [] as SeriesPart[],
         chapterCount: 0,
         publishedCount: 0,
+        total: 0,
+        state: 'planned' as Series['state'],
       }
     })
     .filter((s) => !isProd() || s.status === 'published')
@@ -139,13 +112,11 @@ async function load(): Promise<SiteData> {
           .map((id) => topicById.get(id))
           .filter((t): t is Topic => !!t),
         series: seriesRel ? { slug: seriesRel.slug, name: seriesRel.name } : undefined,
-        part: partRel ? { order: partRel.order, name: partRel.name, note: partRel.note } : undefined,
+        part: partRel ? { order: partRel.order, name: partRel.name } : undefined,
         order: num(p.Order),
         pinned: check(p.Pinned),
-        featuredOrder: num(p['Featured order']),
         relatedIds: relIds(p.Related),
-        lang: sel(p.Lang),
-        cover: fileUrl(p.Cover),
+        lang: sel(p.Lang) === 'vi' ? 'vi' : 'en',
         url: '',
       }
       post.url = postUrl(post)
@@ -174,6 +145,15 @@ async function load(): Promise<SiteData> {
       .sort((a, b) => (a.order ?? 99) - (b.order ?? 99))
     s.chapterCount = chapters.length
     s.publishedCount = chapters.filter((c) => c.published).length
+    // chapters are created as they get written, so `Planned chapters` is the
+    // real length of a series; a series only completes against that number
+    s.total = Math.max(s.chapterCount, s.plannedChapters ?? 0)
+    s.state =
+      s.publishedCount === 0
+        ? 'planned'
+        : s.plannedChapters && s.publishedCount >= s.plannedChapters
+          ? 'complete'
+          : 'ongoing'
     s.latestDate = chapters.filter((c) => c.published).map((c) => c.date).sort().at(-1)
     s.nextDate = chapters.filter((c) => !c.published).map((c) => c.date).sort()[0]
     const partsOfSeries = parts
@@ -182,7 +162,6 @@ async function load(): Promise<SiteData> {
     s.parts = partsOfSeries.map((part) => ({
       order: part.order,
       name: part.name,
-      note: part.note,
       chapters: chapters.filter((c) => c.part?.order === part.order && c.part?.name === part.name),
     }))
     // chapters without a part (series not split into parts) go into one anonymous group
@@ -191,32 +170,10 @@ async function load(): Promise<SiteData> {
   }
   assertUniqueSlugs(seriesList, 'Series')
 
-  const cv: CvEntry[] = rawCv
-    .filter((r) => check(r.properties.Visible))
-    .map((r) => {
-      const p = r.properties
-      return {
-        id: r.id,
-        role: text(p.Role),
-        kind: (sel(p.Kind) ?? 'experience') as CvEntry['kind'],
-        org: text(p.Org),
-        orgUrl: urlOf(p['Org URL']),
-        location: text(p.Location) || undefined,
-        logo: text(p.Logo),
-        start: date(p.Start),
-        end: date(p.End),
-        order: num(p.Order),
-        tech: relIds(p.Tech)
-          .map((id) => skillById.get(id))
-          .filter((s): s is Skill => !!s),
-      }
-    })
-    .sort((a, b) => (b.start ?? '').localeCompare(a.start ?? '') || (a.order ?? 99) - (b.order ?? 99))
-
   const site: Record<string, string> = {}
   for (const r of rawSite) site[text(r.properties.Key)] = text(r.properties.Value)
 
-  return { posts, series: seriesList, topics, skills, cv, site }
+  return { posts, series: seriesList, topics, site }
 }
 
 // One fetch per build — every page shares the same getSiteData() promise.
