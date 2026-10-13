@@ -29,3 +29,7 @@ docs/ux-research/
 
 # vercel
 .vercel/
+
+# local Claude Code settings & MCP config
+.claude/
+.mcp.json
